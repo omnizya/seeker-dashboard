@@ -1,12 +1,10 @@
 "use client";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Loader from "~/components/common/Loader";
 import { useState, useEffect } from "react";
 import { classNames } from "~/utils";
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/next"
-const inter = Inter({ subsets: ["latin"] });
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
@@ -21,17 +19,13 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body
         suppressHydrationWarning={true}
-        className={classNames([
-          inter.className,
-          "dark:bg-boxdark-2",
-          "dark:text-bodydark",
-        ])}
+        className={classNames(["dark:bg-boxdark-2", "dark:text-bodydark"])}
       >
         <main className="flex justify-center align-middle max-h-screen">
           {loading ? <Loader /> : children}
         </main>
-        <Analytics/>
-        <SpeedInsights/>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
