@@ -26,7 +26,9 @@ export default function RootLayout({
           "dark:text-bodydark",
         ])}
       >
-        <main>{loading ? <Loader /> : children}</main>
+        <main className="flex justify-center align-middle max-h-screen">
+          {loading ? <Loader /> : children}
+        </main>
       </body>
     </html>
   );
