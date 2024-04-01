@@ -5,6 +5,7 @@ import Loader from "~/components/common/Loader";
 import { useState, useEffect } from "react";
 import { classNames } from "~/utils";
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -30,6 +31,7 @@ export default function RootLayout({
           {loading ? <Loader /> : children}
         </main>
         <Analytics/>
+        <SpeedInsights/>
       </body>
     </html>
   );
