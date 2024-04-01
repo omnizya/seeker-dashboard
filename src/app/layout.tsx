@@ -4,7 +4,7 @@ import "./globals.css";
 import Loader from "~/components/common/Loader";
 import { useState, useEffect } from "react";
 import { classNames } from "~/utils";
-
+import { Analytics } from "@vercel/analytics/react"
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -29,6 +29,7 @@ export default function RootLayout({
         <main className="flex justify-center align-middle max-h-screen">
           {loading ? <Loader /> : children}
         </main>
+        <Analytics/>
       </body>
     </html>
   );
