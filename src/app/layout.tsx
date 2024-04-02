@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { classNames } from "~/utils";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Providers } from "./providers";
 
 export default function RootLayout({
   children,
@@ -16,14 +17,16 @@ export default function RootLayout({
     setTimeout(() => setLoading(false), 666);
   }, []);
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" className="dark">
       <body
         suppressHydrationWarning={true}
         className={classNames(["dark:bg-boxdark-2", "dark:text-bodydark"])}
       >
+        <Providers>
         <main className="flex justify-center align-middle max-h-screen">
           {loading ? <Loader /> : children}
         </main>
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>
