@@ -30,7 +30,7 @@ export default function JummalCard() {
     setJomalValues(CalcJomal(event.target.value));
   };
   return (
-    <article className="border  relative rounded-sm p-2 shadow-sm drop-shadow-2 w-1/2">
+    <article className="border  relative rounded-sm p-2 shadow-sm drop-shadow-2 lg:w-1/2 w-full">
       <Card className="w-full p-4">
         <CardHeader className="flex gap-3 p-2">
           <Image
@@ -52,14 +52,11 @@ export default function JummalCard() {
             onChange={submitContact}
           />
         </CardBody>
-        <Divider />
-        <CardFooter className="mt-2">
-          {/*       <Button size="lg">
-          احسب
-    </Button>   */}
-        </CardFooter>
+   
       </Card>
-      <div className=" min-w-full bg-zinc-400 text-black text-center">
+      <Divider />
+
+      <div className=" mt-4 min-w-full bg-zinc-400 text-black text-center rounded-md border-transparent">
         <h2 className="w-full bg-zinc-700 text-zinc-50 text-title-xl">
           الحصيلة
         </h2>
@@ -73,10 +70,10 @@ export default function JummalCard() {
           <tbody>
             <tr>
               <td className="border border-slate-700">
-                {jomalValues.east.base} | {jomalValues.east.reduced}
+                {jomalValues.east.base}  <Divider /> {jomalValues.east.reduced}
               </td>
               <td className="border border-slate-700">
-                {jomalValues.west.base} | {jomalValues.east.reduced}
+                {jomalValues.west.base}  <Divider /> {jomalValues.east.reduced}
               </td>
             </tr>
           </tbody>

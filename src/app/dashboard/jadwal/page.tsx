@@ -1,3 +1,3 @@
 export default function DashboardPage() {
-  return <h1>Quran</h1>;
+  return <h1>قيد التطوير</h1>;
 }
