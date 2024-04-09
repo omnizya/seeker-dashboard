@@ -1,6 +1,6 @@
 export const siteConfig = {
-  name: "Next.js + NextUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Seeker",
+  description: "Light Seeker",
   navItems: [
     {
       label: "Home",
@@ -11,8 +11,8 @@ export const siteConfig = {
       href: "/dashboard",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
+      label: "Settings",
+      href: "/dashboard/settings",
     },
     {
       label: "Blog",
