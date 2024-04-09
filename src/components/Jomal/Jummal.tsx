@@ -41,14 +41,14 @@ export default function JummalCard() {
             width={40}
           />
           <div className="flex flex-col m-2 p-2">
-            <p className=" text-title-md">حساب الجُمَّل</p>
+            <p className=" text-title-xxl2">حساب الجُمَّل</p>
           </div>
         </CardHeader>
         <Divider />
         <CardBody>
           <Textarea
             placeholder="المرجو إدخال النص"
-            className="w-full p-2 h-20"
+            className="w-full p-2 h-20 text-title-md"
             onChange={submitContact}
           />
         </CardBody>
