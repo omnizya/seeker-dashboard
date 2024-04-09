@@ -30,7 +30,7 @@ export default function JummalCard() {
     setJomalValues(CalcJomal(event.target.value));
   };
   return (
-    <article className="border  relative rounded-sm p-2 shadow-sm drop-shadow-2 lg:w-1/2 w-full">
+    <article className="border  relative rounded-sm p-2 shadow-sm drop-shadow-2  w-full font-uthman">
       <Card className="w-full p-4">
         <CardHeader className="flex gap-3 p-2">
           <Image
@@ -48,7 +48,7 @@ export default function JummalCard() {
         <CardBody>
           <Textarea
             placeholder="المرجو إدخال النص"
-            className="w-full p-2 "
+            className="w-full p-2 h-20"
             onChange={submitContact}
           />
         </CardBody>
@@ -57,22 +57,22 @@ export default function JummalCard() {
       <Divider />
 
       <div className=" mt-4 min-w-full bg-zinc-400 text-black text-center rounded-md border-transparent">
-        <h2 className="w-full bg-zinc-700 text-zinc-50 text-title-xl">
+        <h2 className="w-full bg-zinc-700 text-zinc-50 text-title-xxl2 p-4">
           الحصيلة
         </h2>
         <table className=" border-collapse border border-slate-500 table-auto w-full">
           <thead className=" table-header-group">
             <tr>
-              <td className="border border-slate-600">مشرقي</td>
-              <td className="border border-slate-600">مغربي</td>
+              <td className="border border-slate-600 p-2 text-title-md">مشرقي</td>
+              <td className="border border-slate-600  p-2 text-title-md">مغربي</td>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="border border-slate-700">
+              <td className="border border-slate-700 text-2xl text-blue-700 font-semibold">
                 {jomalValues.east.base}  <Divider /> {jomalValues.east.reduced}
               </td>
-              <td className="border border-slate-700">
+              <td className="border border-slate-700 text-2xl text-rose-900 font-semibold">
                 {jomalValues.west.base}  <Divider /> {jomalValues.east.reduced}
               </td>
             </tr>

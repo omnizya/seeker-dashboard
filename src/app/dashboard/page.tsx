@@ -12,8 +12,8 @@ export default async function DashboardPage() {
   }
   return (
     <section className=" p-4">
-      <header className="h-40 w-full">
-        <h1>Dashboard</h1>
+      <header className="h-50 w-full bg-slate-400">
+  
       </header>
       <aside>
       </aside>
