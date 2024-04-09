@@ -26,7 +26,8 @@ export default function JummalCard() {
   });
   const submitContact = async (event: any) => {
     event.preventDefault();
-    setJomalValues(CalcJomal(event.target.name.value));
+    console.log(event.target.value)
+    setJomalValues(CalcJomal(event.target.value));
   };
   return (
     <article className="border  relative rounded-sm p-2 shadow-sm drop-shadow-2 w-1/2">
