@@ -1,4 +1,12 @@
 import { CalcJomalT } from "~/types";
+import {
+  GrandEast,
+  SmallEast,
+  GrandWest,
+  SmallWest,
+  Nafsy,
+  LettersGemtariaTable,
+} from "./gemtaria";
 
 const classNames = (classes: string[]): string => classes.join(" ");
 const reducedJomal = (params: number): number =>
@@ -38,102 +46,25 @@ for (let i = 0; i < base.length; i++) {
 // }
 
 function CalcJomal(input: string): CalcJomalT {
-  let jomal = [0, 0];
-  const East: [string, number][] = [
-    ["ا", 1],
-    ["أ", 1],
-    ["إ", 1],
-    ["ء", 1],
-    ["آ", 2],
-    ["ئ", 1],
-    ["ؤ", 1],
-    ["ٱ", 1],
-    ["ب", 2],
-    ["ج", 3],
-    ["د", 4],
-    ["ه", 5],
-    ["ة", 5],
-    ["و", 6],
-    ["ز", 7],
-    ["ح", 8],
-    ["ط", 9],
-    ["ي", 10],
-    ["ى", 10],
-    ["ك", 20],
-    ["ل", 30],
-    ["م", 40],
-    ["ن", 50],
-    ["س", 60],
-    ["ع", 70],
-    ["ف", 80],
-    ["ص", 90],
-    ["ق", 100],
-    ["ر", 200],
-    ["ش", 300],
-    ["ت", 400],
-    ["ث", 500],
-    ["خ", 600],
-    ["ذ", 700],
-    ["ض", 800],
-    ["ظ", 900],
-    ["غ", 1000],
-  ];
-  const West: [string, number][] = [
-    ["ا", 1],
-    ["أ", 1],
-    ["إ", 1],
-    ["ء", 1],
-    ["آ", 2],
-    ["ئ", 1],
-    ["ؤ", 1],
-    ["ٱ", 1],
-    ["ب", 2],
-    ["ج", 3],
-    ["د", 4],
-    ["ه", 5],
-    ["ة", 5],
-    ["و", 6],
-    ["ز", 7],
-    ["ح", 8],
-    ["ط", 9],
-    ["ي", 10],
-    ["ى", 10],
-    ["ك", 20],
-    ["ل", 30],
-    ["م", 40],
-    ["ن", 50],
-    ["س", 300],
-    ["ع", 70],
-    ["ف", 80],
-    ["ص", 60],
-    ["ق", 100],
-    ["ر", 200],
-    ["ش", 300],
-    ["ت", 400],
-    ["ث", 500],
-    ["خ", 600],
-    ["ذ", 700],
-    ["ض", 90],
-    ["ظ", 800],
-    ["غ", 900],
-  ];
+  let jomal = [0, 0, 0, 0, 0];
+
   for (var i = 0, len = input.length; i < len; i++) {
-    for (var j = 0; j < East.length; j++) {
-      if (input[i] == East[j][0]) {
-        jomal[0] = jomal[0] + East[j][1];
-        jomal[1] = jomal[1] + West[j][1];
+    for (var j = 0; j < GrandEast.length; j++) {
+      if (input[i] == GrandEast[j][0]) {
+        jomal[0] = jomal[0] + LettersGemtariaTable[0][j][1];
+        jomal[1] = jomal[1] + LettersGemtariaTable[1][j][1];
+        jomal[2] = jomal[2] + LettersGemtariaTable[2][j][1];
+        jomal[3] = jomal[3] + LettersGemtariaTable[3][j][1];
+        jomal[4] = jomal[4] + LettersGemtariaTable[4][j][1];
       }
     }
   }
   return {
-    east: {
-      base: jomal[0],
-      reduced: reducedJomal(jomal[0]),
-    },
-    west: {
-      base: jomal[1],
-      reduced: reducedJomal(jomal[1]),
-    },
+    ge: jomal[0],
+    gw: jomal[1],
+    se: jomal[2],
+    sw: jomal[3],
+    n: jomal[4],
   };
 }
 

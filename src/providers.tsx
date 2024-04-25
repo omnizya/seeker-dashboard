@@ -1,22 +1,17 @@
+// app/providers.tsx
 "use client";
 
-import * as React from "react";
-import { NextUIProvider } from "@nextui-org/system";
-import { useRouter } from 'next/navigation'
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { ThemeProviderProps } from "next-themes/dist/types";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ChakraProvider } from "@chakra-ui/react";
+import { theme } from "./styles/theme";
 
-export interface ProvidersProps {
-	themeProps?: ThemeProviderProps
-	children: React.ReactNode
-}
-
-export function Providers({ children, themeProps }: ProvidersProps) {
-  const router = useRouter();
-
-	return (
-		<NextUIProvider navigate={router.push}>
-			<NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
-		</NextUIProvider>
-	);
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <ChakraProvider theme={theme}>
+      {children}
+      <Analytics />
+      <SpeedInsights />
+    </ChakraProvider>
+  );
 }

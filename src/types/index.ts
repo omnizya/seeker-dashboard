@@ -5,12 +5,27 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 };
 
 export type CalcJomalT = {
-  east: {
-    base: number;
-    reduced: number;
-  };
-  west: {
-    base: number;
-    reduced: number;
-  };
+  ge: number;
+  gw: number;
+  se: number;
+  sw: number;
+  n: number;
 };
+
+export interface Category {
+  name: string;
+  subLabel: string;
+  id: string;
+  children?: SubCategory[];
+}
+export interface SubCategory {
+  name: string;
+  id: string;
+  description?: string;
+  children?: Template[];
+}
+export interface Template {
+  name: string;
+  filename: string;
+  tags?: string[];
+}

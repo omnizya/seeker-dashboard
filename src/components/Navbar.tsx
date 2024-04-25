@@ -1,15 +1,5 @@
 "use client";
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  NavbarMenuToggle,
-  NavbarMenu,
-  NavbarMenuItem,
-  Link,
-  Button,
-} from "@nextui-org/react";
+
 import { useState } from "react";
 
 export default function NavigationBar() {
@@ -29,53 +19,43 @@ export default function NavigationBar() {
   ];
 
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen} isBordered isBlurred>
-      <NavbarContent>
-        <NavbarMenuToggle
+    <nav>
+      <div>
+        <span
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           className="sm:hidden"
         />
-        <NavbarBrand>
+        <span>
           <p className="font-bold text-inherit">الباحث</p>
-        </NavbarBrand>
-      </NavbarContent>
+        </span>
+      </div>
 
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <NavbarItem>
-          <Link color="primary" href="/dashboard">
+      <ul className="hidden sm:flex gap-4">
+        <li>
+          <a color="primary" href="/dashboard">
             حساب الجمل
-          </Link>
-        </NavbarItem>
-        <NavbarItem isActive>
-          <Link href="/dashboard/quran" aria-current="page">
+          </a>
+        </li>
+        <li>
+          <a href="/dashboard/holy-names" aria-current="page">
             القرآن الكريم
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="primary" href="#">
-            الساعات
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="primary" href="/dashboard/jadwal">
-            الجدول
-          </Link>
-        </NavbarItem>
-      </NavbarContent>
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link href="#">Login</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} color="primary" className="hidden" href="#" variant="flat">
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li className="hidden lg:flex">
+          <a href="#">Login</a>
+        </li>
+        <li>
+          <a color="primary" className="hidden" href="#">
             Sign Up
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-      <NavbarMenu>
+          </a>
+        </li>
+      </ul>
+      <ul>
         {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
-            <Link
+          <li key={`${item}-${index}`}>
+            <a
               color={
                 index === 2
                   ? "primary"
@@ -85,13 +65,12 @@ export default function NavigationBar() {
               }
               className="w-full"
               href="#"
-              size="lg"
             >
               {item}
-            </Link>
-          </NavbarMenuItem>
+            </a>
+          </li>
         ))}
-      </NavbarMenu>
-    </Navbar>
+      </ul>
+    </nav>
   );
 }
