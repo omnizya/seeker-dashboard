@@ -43,22 +43,24 @@ function splitFile(filePath: string, outputDir: string) {
   const inputData = fs.readFileSync(filePath, "utf-8");
   const chunks = inputData.split(/\r?\n/);
   chunks.forEach((chunk, index) => {
-    const fileName = `${index + 1}.txt`;
+    const fileName = `${index + 1}.json`;
     fs.writeFileSync(
       path.join(outputDir, fileName),
-      chunk +
-        ";" +
-        CalcJomal(chunk).ge +
-        ";" +
-        CalcJomal(chunk).gw +
-        ";" +
-        CalcJomal(chunk).se +
-        ";" +
-        CalcJomal(chunk).sw +
-        ";" +
-        CalcJomal(chunk).n
+      JSON.stringify(
+        {
+          id: index + 1,
+          ayah: chunk,
+          grand_east: CalcJomal(chunk).ge,
+          grand_west: CalcJomal(chunk).gw,
+          small_east: CalcJomal(chunk).se,
+          small_west: CalcJomal(chunk).sw,
+          nafsy: CalcJomal(chunk).n,
+        },
+        null,
+        2
+      )
     );
-    InsertData(index + 1, chunk, CalcJomal, "quran_revelation");
+    // InsertData(index + 1, chunk, CalcJomal, "quran_revelation");
   });
 }
 

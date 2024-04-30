@@ -18,10 +18,10 @@ type ExploreTemplatesProps = {
 export const TEMPLATES_LINK: string = "/alef";
 export const ExploreTemplates = ({ templatesCount }: ExploreTemplatesProps) => {
   return (
-    <Box bg={useColorModeValue("green.50", "gray.800")}>
+    <Box bg={useColorModeValue("orange.50", "gray.800")} dir="rtl">
       <Container maxW={"7xl"} py={{ base: 14, sm: 20, md: 32 }}>
         <Box
-          bg={useColorModeValue("green.400", "green.500")}
+          bg={useColorModeValue("orange.400", "orange.500")}
           rounded={"xl"}
           color={useColorModeValue("white", "gray.100")}
           px={{ base: 4, md: 10 }}
@@ -30,7 +30,7 @@ export const ExploreTemplates = ({ templatesCount }: ExploreTemplatesProps) => {
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8}>
             <Box>
               <Heading as={"h3"} mb={2}>
-                Explore {templatesCount - 1}+ production-ready Templates
+                Explore {templatesCount - 1}+ Services
               </Heading>
               <Text fontSize={"lg"}>
                 and start building beautiful websites & webapps today!
@@ -40,7 +40,7 @@ export const ExploreTemplates = ({ templatesCount }: ExploreTemplatesProps) => {
               <Button
                 as={Link}
                 href={TEMPLATES_LINK}
-                bg="green.600"
+                bg="orange.600"
                 color={"white"}
                 px={8}
                 size="lg"
@@ -48,10 +48,10 @@ export const ExploreTemplates = ({ templatesCount }: ExploreTemplatesProps) => {
                 rounded="md"
                 rightIcon={<ArrowForwardIcon />}
                 _hover={{
-                  bg: "green.700",
+                  bg: "orange.700",
                 }}
               >
-                Browse Templates
+                Browse Apps
               </Button>
             </Flex>
           </SimpleGrid>

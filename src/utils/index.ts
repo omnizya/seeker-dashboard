@@ -67,5 +67,7 @@ function CalcJomal(input: string): CalcJomalT {
     n: jomal[4],
   };
 }
-
+export function paginate(array, pageSize: number, pageNumber: number) {
+  return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+}
 export { classNames, CalcJomal };

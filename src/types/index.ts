@@ -5,6 +5,8 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 };
 
 export type CalcJomalT = {
+  id?: number;
+  ayah?: string;
   ge: number;
   gw: number;
   se: number;

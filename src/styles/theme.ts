@@ -1,14 +1,17 @@
 import { extendTheme } from "@chakra-ui/react";
 
 export const theme = extendTheme({
-styles: {
+  fonts: {
+    heading: "Uthman",
+  },
+  styles: {
     global: {
-        html: {
-            scrollBehavior: 'smooth'
-        },
-        body: {
-            minHeight: "100vh"
-        }
-    }
-}
-})
+      html: {
+        scrollBehavior: "smooth",
+      },
+      body: {
+        minHeight: "100vh",
+      },
+    },
+  },
+});

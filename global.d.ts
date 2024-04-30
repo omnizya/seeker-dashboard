@@ -1,1 +1,2 @@
-declare module 'rtl-arabic';
+declare module "rtl-arabic";
+
