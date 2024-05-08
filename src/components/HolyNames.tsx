@@ -27,6 +27,7 @@ export const HolyNames = () => {
   const [names, setNames] = useState<HolyNames[]>([]);
   const getNames = async () => {
     const { data, error } = await supabase.from("holy_names").select();
+    if (error) throw error;
     setNames(data);
   };
   useEffect(() => {

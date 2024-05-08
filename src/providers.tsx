@@ -1,4 +1,3 @@
-// app/providers.tsx
 "use client";
 
 import { Analytics } from "@vercel/analytics/react";
@@ -12,7 +11,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ChakraProvider theme={theme}>
       <Fonts />
       {children}
-      <Analytics />
+      <Analytics framework="nextjs" disableAutoTrack={false} />
       <SpeedInsights />
     </ChakraProvider>
   );

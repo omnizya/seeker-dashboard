@@ -1,4 +1,4 @@
-import { CalcJomalT } from "~/types";
+import { CalcJomalT } from "../../types";
 import {
   GrandEast,
   SmallEast,

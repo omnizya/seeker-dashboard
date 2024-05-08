@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Textarea } from "@chakra-ui/react";
-import { CalcJomalT } from "~/types";
+import { CalcJomalT } from "../../../types";
 import { CalcJomal } from "~/utils";
 import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
 export default function JummalCard() {
