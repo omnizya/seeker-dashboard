@@ -6,6 +6,7 @@ import { CalcJomalT } from "../../../types";
 import { CalcJomal } from "~/utils";
 import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
 import { track } from "@vercel/analytics/react";
+import { DefaultText } from "../../../texts";
 export default function JummalCard() {
   const [jomalValues, setJomalValues] = useState<CalcJomalT>({
     ge: 0,
@@ -25,13 +26,15 @@ export default function JummalCard() {
       <Card className="w-full p-4">
         <CardHeader className="flex gap-3 p-2">
           <div className="flex flex-col m-2 p-2">
-            <p className=" text-title-xxl2">حساب الجُمَّل</p>
+            <p className=" text-title-xxl2">
+              {DefaultText.JummalCard.cardTitle}
+            </p>
           </div>
         </CardHeader>
         <hr />
         <CardBody>
           <Textarea
-            placeholder="المرجو إدخال النص"
+            placeholder={DefaultText.JummalCard.textAreaPlaceholder}
             className="w-full p-2 h-20 text-title-md"
             isRequired
             onChange={submitContact}
@@ -42,19 +45,19 @@ export default function JummalCard() {
 
       <div className=" mt-4 min-w-full bg-zinc-400 text-black text-center rounded-md border-transparent">
         <h2 className="w-full bg-zinc-700 text-zinc-50 text-title-xxl2 p-4">
-          الحصيلة
+          {DefaultText.JummalCard.outputTable.title}
         </h2>
         <table className=" border-collapse border border-slate-500 table-auto w-full">
           <thead className=" table-header-group">
             <tr>
               <td className="border border-slate-600 p-2 text-title-md">
-                مشرقي
+                {DefaultText.JummalCard.outputTable.tableHeader.east}
               </td>
               <td className="border border-slate-600  p-2 text-title-md">
-                مغربي
+                {DefaultText.JummalCard.outputTable.tableHeader.west}
               </td>
               <td className="border border-slate-600  p-2 text-title-md">
-                نفسي
+                {DefaultText.JummalCard.outputTable.tableHeader.nafsy}
               </td>
             </tr>
           </thead>
