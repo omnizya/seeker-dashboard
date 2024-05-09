@@ -5,21 +5,20 @@ import { Textarea } from "@chakra-ui/react";
 import { CalcJomalT } from "../../../types";
 import { CalcJomal } from "~/utils";
 import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
+import { track } from "@vercel/analytics/react";
 export default function JummalCard() {
   const [jomalValues, setJomalValues] = useState<CalcJomalT>({
-    east: {
-      base: 0,
-      reduced: 0,
-    },
-    west: {
-      base: 0,
-      reduced: 0,
-    },
+    ge: 0,
+    gw: 0,
+    se: 0,
+    sw: 0,
+    n: 0,
   });
   const submitContact = async (event: any) => {
+    let inputValue = event.target.value;
     event.preventDefault();
-    console.log(event.target.value);
-    setJomalValues(CalcJomal(event.target.value));
+    track("CalcJummal", { input: inputValue });
+    setJomalValues(CalcJomal(inputValue));
   };
   return (
     <article className="border  relative rounded-sm p-2 shadow-sm drop-shadow-2  w-full font-uthman">
@@ -54,15 +53,21 @@ export default function JummalCard() {
               <td className="border border-slate-600  p-2 text-title-md">
                 مغربي
               </td>
+              <td className="border border-slate-600  p-2 text-title-md">
+                نفسي
+              </td>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td className="border border-slate-700 text-2xl text-blue-700 font-semibold">
-                {jomalValues.east.base} <hr /> {jomalValues.east.reduced}
+                {jomalValues.ge} <hr /> {jomalValues.se}
               </td>
               <td className="border border-slate-700 text-2xl text-rose-900 font-semibold">
-                {jomalValues.west.base} <hr /> {jomalValues.east.reduced}
+                {jomalValues.gw} <hr /> {jomalValues.sw}
+              </td>
+              <td className="border border-slate-700 text-2xl text-rose-900 font-semibold">
+                {jomalValues.n}
               </td>
             </tr>
           </tbody>
