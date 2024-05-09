@@ -21,7 +21,6 @@ import Footer from "~/components/Footer";
 import Illustration from "~/components/Illustration";
 import Features from "~/components/AlefpageSection/Features";
 
-
 export default function Home() {
   return (
     <>
@@ -100,8 +99,7 @@ export default function Home() {
           </Stack>
         </VStack>
       </Flex>
-
-<Features />
+      <Features />
       <Footer />
     </>
   );
