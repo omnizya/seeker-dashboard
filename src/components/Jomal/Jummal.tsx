@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Textarea } from "@chakra-ui/react";
-import { CalcJomalT } from "../../../types";
+import { CalcJomalT } from "../../types";
 import { CalcJomal } from "~/utils";
 import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
 import { track } from "@vercel/analytics/react";
-import { DefaultText } from "../../../texts";
+import { DefaultText } from "../../texts";
 export default function JummalCard() {
   const [jomalValues, setJomalValues] = useState<CalcJomalT>({
     ge: 0,

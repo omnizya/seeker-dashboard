@@ -1,4 +1,4 @@
-import { Category } from "../../types";
+import { Category } from "../types";
 import { JummalApp } from "./jummalApp";
 import { blog } from "./blog";
 

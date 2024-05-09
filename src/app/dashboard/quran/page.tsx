@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import useSWR from "swr";
-import { Ayah } from "../../../../types/app";
+import { Ayah } from "../../../types/app";
 import { Badge, Divider } from "@chakra-ui/react";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());

@@ -1,8 +1,9 @@
 import fs from "node:fs";
-import { CalcJomal } from "..";
 import { createClient } from "@supabase/supabase-js";
 import path from "node:path";
-import { CalcJomalT } from "../../../types";
+import { CalcJomalT } from "~/types";
+import { CalcJomal } from "..";
+
 const supabase = createClient("https://.supabase.co", "..");
 
 const QuranByRevelation = "./src/data/tanzil-clean.txt";

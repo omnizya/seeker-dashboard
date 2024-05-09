@@ -1,6 +1,6 @@
-import { Ayah } from "../../../types/app";
+import { Ayah } from "../../types/app";
 
-const Ayats:Ayah[] = [
+const Ayats: Ayah[] = [
   {
     id: 1,
     ayah: "اقرأ باسم ربك الذي خلق",

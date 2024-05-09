@@ -1,4 +1,12 @@
 export const DefaultText = {
+  app: {
+    title: "الباحث",
+    description: "المنصة الخاصة بالعلوم الروحانية",
+  },
+  landingPage: {
+    title: "",
+    leadingText: "",
+  },
   JummalCard: {
     cardTitle: "حساب الجُمَّل",
     textAreaPlaceholder: "المرجو إدخال النص",
@@ -12,3 +20,5 @@ export const DefaultText = {
     },
   },
 };
+
+export type DefaultTextT = typeof DefaultText;

@@ -1,16 +1,11 @@
 "use client";
-
 import {
-  Box,
   Container,
   Flex,
   Text,
   Stack,
   Heading,
-  useColorModeValue,
   Button,
-  Icon,
-  createIcon,
   VStack,
   IconProps,
   useBreakpointValue,

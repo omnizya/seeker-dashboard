@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { CalcJomalT } from "../../../types";
+import { CalcJomalT } from "../../types";
 import { CalcJomal } from "~/utils";
 
 export default function Jomal() {

@@ -1,6 +1,8 @@
+import { DefaultText } from "~/texts";
+
 export const siteConfig = {
-  name: "Seeker",
-  description: "Light Seeker",
+  name: DefaultText.app.title,
+  description: DefaultText.app.description,
   navItems: [
     {
       label: "Home",

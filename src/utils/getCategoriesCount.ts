@@ -1,4 +1,4 @@
-import { Category } from "../../types";
+import { Category } from "~/types";
 
 export const getCategoriesCount = (data: Category[]) => {
   const mainCategoriesCount = data.length;

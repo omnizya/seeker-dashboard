@@ -1,12 +1,5 @@
-import { CalcJomalT } from "../../types";
-import {
-  GrandEast,
-  SmallEast,
-  GrandWest,
-  SmallWest,
-  Nafsy,
-  LettersGemtariaTable,
-} from "./gemtaria";
+import { CalcJomalT } from "~/types";
+import { GrandEast, LettersGemtariaTable } from "./gemtaria";
 
 const classNames = (classes: string[]): string => classes.join(" ");
 const reducedJomal = (params: number): number =>
@@ -67,7 +60,11 @@ function CalcJomal(input: string): CalcJomalT {
     n: jomal[4],
   };
 }
-export function paginate(array, pageSize: number, pageNumber: number) {
+export function paginate(
+  array: string | any[],
+  pageSize: number,
+  pageNumber: number
+) {
   return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
 }
 export { classNames, CalcJomal };
