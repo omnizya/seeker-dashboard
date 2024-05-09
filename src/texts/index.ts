@@ -6,6 +6,10 @@ export const DefaultText = {
   landingPage: {
     title: "",
     leadingText: "",
+    callToActions: {
+      learnMore: "التعرف على المزيد",
+      getStarted: " بدء الاستخدام"
+    },
   },
   JummalCard: {
     cardTitle: "حساب الجُمَّل",

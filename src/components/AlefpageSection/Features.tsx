@@ -9,6 +9,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { ExploreTemplates } from "~/components/AlefpageSection/ExploreTemplates";
+import Illustration from "../Illustration";
 export default function Features() {
   const STEPS = [
     {
@@ -25,8 +26,20 @@ export default function Features() {
     },
   ];
   return (
-    <Box bg={useColorModeValue("gray.50", "gray.900")}>
-      <Container maxW={"7xl"} py={{ base: 14, sm: 20, md: 32 }}>
+    <Box
+      bg={useColorModeValue("gray.50", "gray.900")}
+      h={"full"}
+      bgGradient={"linear(to-t, blackAlpha.900, purple)"}
+    >
+      <Container maxW={"8xl"} py={{ sm: "8px", md: "12px", lg: "16px" }}>
+        <Flex
+          w={"full"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          p={"2em"}
+        >
+          <Illustration height={{ sm: "20rem", lg: "24rem" }} />
+        </Flex>
         <Heading
           as={"h3"}
           textAlign={"center"}

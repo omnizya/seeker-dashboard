@@ -6,20 +6,20 @@ import { Badge, Divider } from "@chakra-ui/react";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function AyahComponent({ ayah }: Partial<Ayah>) {
+function AyahComponent({ inputData }: Partial<Ayah>) {
   return (
     <li className=" min-h-8 bg-slate-600 p-4 m-2 text-right ">
-      <Link href="/quran/[id]" as={`/quran/${ayah?.id}`}>
+      <Link href="/quran/[id]" as={`/quran/${inputData?.id}`}>
         <Badge variant="outline" colorScheme="green">
-          {ayah.id}
+          {inputData?.id}
         </Badge>
 
-        <span className=" mr-4 font-uthman text-4xl">{ayah?.ayah}</span>
-        <Badge colorScheme="green">{ayah.grand_east}</Badge>
-        <Badge colorScheme="red">{ayah.grand_west}</Badge>
-        <Badge>{ayah.small_east}</Badge>
-        <Badge>{ayah.small_west}</Badge>
-        <Badge colorScheme="yellow">{ayah.nafsy}</Badge>
+        <span className=" mr-4 font-uthman text-4xl">{inputData?.ayah}</span>
+        <Badge colorScheme="green">{inputData?.grand_east}</Badge>
+        <Badge colorScheme="red">{inputData?.grand_west}</Badge>
+        <Badge>{inputData?.small_east}</Badge>
+        <Badge>{inputData?.small_west}</Badge>
+        <Badge colorScheme="yellow">{inputData?.nafsy}</Badge>
       </Link>
     </li>
   );
@@ -35,7 +35,7 @@ export default function Index() {
   return (
     <ul className="min-h-10 max-h-300 overflow-y-auto max-w-[100ch] text-warning  bg-black">
       {data.map((p: Ayah) => (
-        <AyahComponent key={p.id} ayah={p} />
+        <AyahComponent key={p.id} inputData={p} />
       ))}
     </ul>
   );

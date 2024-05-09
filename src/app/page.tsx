@@ -11,20 +11,21 @@ import {
   useBreakpointValue,
 } from "@chakra-ui/react";
 
-import { TextUnderline } from "~/components/TextUnderLine";
 import Footer from "~/components/Footer";
-import Illustration from "~/components/Illustration";
-import Features from "~/components/AlefpageSection/Features";
 
+import Features from "~/components/AlefpageSection/Features";
+import { DefaultText } from "~/texts";
+import { track } from "@vercel/analytics/react";
+import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 export default function Home() {
+  const router = useRouter();
   return (
     <>
       <Flex
         w={"full"}
         h={"100vh"}
-        backgroundImage={
-          "url(https://r4.wallpaperflare.com/wallpaper/205/702/475/digital-art-fantasy-art-books-candles-wallpaper-99e0384d212a6d8b56b7b87fc05106fd.jpg)"
-        }
+        backgroundImage={"url(/cube.jpg)"}
         backgroundSize={"cover"}
         backgroundPosition={"center center"}
         backgroundAttachment={"fixed"}
@@ -33,7 +34,7 @@ export default function Home() {
           w={"full"}
           justify={"center"}
           px={useBreakpointValue({ base: 4, md: 8 })}
-          bgGradient={"linear(to-r, blackAlpha.600, transparent)"}
+          bgGradient={"linear(to-b, blackAlpha.600, purple)"}
         >
           <Stack align={"flex-start"} spacing={6}>
             <Container maxW={"6xl"}>
@@ -44,37 +45,15 @@ export default function Home() {
                 py={{ base: 20, md: 28 }}
               >
                 <Heading
-                  fontWeight={600}
                   fontSize={{ base: "2xl", sm: "4xl", md: "6xl" }}
-                  lineHeight={"110%"}
-                  className="font-uthman"
+                  lineHeight={"150%"}
+                  className="font-uthman text-whiten shadow-purple-600 drop-shadow-lg"
                 >
-                  <TextUnderline>
-                    وَلِلَّهِ الْأَسْمَاءُ الْحُسْنَىٰ
-                  </TextUnderline>
-                  <br />
-                  <Text
-                    as={"span"}
-                    color={"orange.400"}
-                    fontSize={{ base: "xl" }}
-                  >
-                    فَادْعُوهُ بِهَا ۖ
-                  </Text>
-                  <Text color={"white"} maxW={"2xl"} fontSize={{ base: "xl" }}>
-                    وَذَرُوا الَّذِينَ يُلْحِدُونَ فِي أَسْمَائِهِ ۚ
-                    سَيُجْزَوْنَ مَا كَانُوا يَعْمَلُونَ
-                  </Text>
+                  وَلِلَّهِ الْأَسْمَاءُ الْحُسْنَىٰ فَادْعُوهُ بِهَا ۖ وَذَرُوا
+                  الَّذِينَ يُلْحِدُونَ فِي أَسْمَائِهِ ۚ سَيُجْزَوْنَ مَا
+                  كَانُوا يَعْمَلُونَ
                 </Heading>
 
-                <Flex
-                  w={"full"}
-                  backgroundColor={"red.600"}
-                  justifyContent={"center"}
-                  alignItems={"center"}
-                  p={"2em"}
-                >
-                  <Illustration height={{ sm: "20rem", lg: "24rem" }} />
-                </Flex>
                 <Stack spacing={6} direction={"row"}>
                   <Button
                     rounded={"full"}
@@ -82,11 +61,22 @@ export default function Home() {
                     colorScheme={"orange"}
                     bg={"orange.400"}
                     _hover={{ bg: "orange.500" }}
+                    onClick={() => {
+                      track("Get Started");
+                      router.push("/dashboard");
+                    }}
                   >
-                    Get started
+                    {DefaultText.landingPage.callToActions.getStarted}
                   </Button>
-                  <Button rounded={"full"} px={6}>
-                    Learn more
+                  <Button
+                    rounded={"full"}
+                    px={6}
+                    onClick={() => {
+                      track("Pressed Learn More");
+                      router.push("/learn");
+                    }}
+                  >
+                    {DefaultText.landingPage.callToActions.learnMore}
                   </Button>
                 </Stack>
               </Stack>
@@ -94,8 +84,9 @@ export default function Home() {
           </Stack>
         </VStack>
       </Flex>
-      <Features />
-      <Footer />
+
+      {/*   <Features />
+      <Footer /> */}
     </>
   );
 }
