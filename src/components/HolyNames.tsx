@@ -25,6 +25,7 @@ export type HolyNames = {
 export const HolyNames = () => {
   const supabase = createClientComponentClient<Database>();
   const [names, setNames] = useState<HolyNames[]>([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getNames = async () => {
     const { data, error } = await supabase.from("holy_names").select();
     if (error) throw error;
@@ -32,7 +33,7 @@ export const HolyNames = () => {
   };
   useEffect(() => {
     getNames();
-  }, []);
+  }, [getNames]);
   return (
     <TableContainer dir="rtl">
       <Table size={"md"} className="lg:w-1/3">
