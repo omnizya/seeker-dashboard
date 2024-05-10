@@ -8,7 +8,7 @@ export const DefaultText = {
     leadingText: "",
     callToActions: {
       learnMore: "التعرف على المزيد",
-      getStarted: " بدء الاستخدام"
+      getStarted: " بدء الاستخدام",
     },
   },
   JummalCard: {
@@ -20,6 +20,28 @@ export const DefaultText = {
         east: "مشرقي",
         west: "مغربي",
         nafsy: "نفسي",
+      },
+    },
+  },
+  dashboard: {
+    navbar: {
+      links: {
+        a: {
+          label: "حساب الجمل",
+          href: "/dashboard",
+        },
+        b: {
+          label: "القرءان الكريم",
+          href: "/dashboard/quran",
+        },
+        c: {
+          label: "الأسماء الحسنى",
+          href: "/dashboard/holy-names",
+        },
+        d: {
+          label: "الأوفاق",
+          href: "/dashboard/squares",
+        },
       },
     },
   },

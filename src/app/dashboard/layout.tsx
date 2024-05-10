@@ -1,3 +1,4 @@
+import { Box, Center, Container } from "@chakra-ui/react";
 import NavigationBar from "~/components/Navbar";
 
 export default function DashboardLayout({
@@ -6,9 +7,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className=" text-black-2 h-full text-center rounded-md bg-slate-300">
+    <Box as={"main"} h={"100vh"}>
       <NavigationBar />
-      {children}
-    </main>
+      <Center height={"90vh"}>
+        <Container maxW={"8xl"}>{children}</Container>
+      </Center>
+    </Box>
   );
 }

@@ -1,76 +1,130 @@
 "use client";
 
-import { useState } from "react";
+import {
+  Box,
+  Flex,
+  Avatar,
+  HStack,
+  Text,
+  IconButton,
+  Button,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+  useDisclosure,
+  useColorModeValue,
+  Stack,
+  AvatarBadge,
+  Center,
+} from "@chakra-ui/react";
+import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
+import { DefaultText } from "~/texts";
+import Link from "next/link";
+import Image from "next/image";
 
-export default function NavigationBar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+interface Props {
+  children: React.ReactNode;
+  to: string;
+}
 
-  const menuItems = [
-    "Profile",
-    "Dashboard",
-    "Activity",
-    "Analytics",
-    "System",
-    "Deployments",
-    "My Settings",
-    "Team Settings",
-    "Help & Feedback",
-    "Log Out",
-  ];
+const Links = [
+  DefaultText.dashboard.navbar.links.a,
+  DefaultText.dashboard.navbar.links.b,
+  DefaultText.dashboard.navbar.links.c,
+  DefaultText.dashboard.navbar.links.d,
+];
+
+const NavLink = (props: Props) => {
+  const { children, to } = props;
 
   return (
-    <nav>
-      <div>
-        <span
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="sm:hidden"
-        />
-        <span>
-          <p className="font-bold text-inherit">الباحث</p>
-        </span>
-      </div>
+    <Box
+      as="a"
+      px={2}
+      py={1}
+      rounded={"md"}
+      _hover={{
+        textDecoration: "none",
+        bg: useColorModeValue("purpke.200", "purple.700"),
+      }}
+    >
+      <Link href={to}>{children}</Link>
+    </Box>
+  );
+};
 
-      <ul className="hidden sm:flex gap-4">
-        <li>
-          <a color="primary" href="/dashboard">
-            حساب الجمل
-          </a>
-        </li>
-        <li>
-          <a href="/dashboard/holy-names" aria-current="page">
-            القرآن الكريم
-          </a>
-        </li>
-      </ul>
-      <ul>
-        <li className="hidden lg:flex">
-          <a href="#">Login</a>
-        </li>
-        <li>
-          <a color="primary" className="hidden" href="#">
-            Sign Up
-          </a>
-        </li>
-      </ul>
-      <ul>
-        {menuItems.map((item, index) => (
-          <li key={`${item}-${index}`}>
-            <a
-              color={
-                index === 2
-                  ? "primary"
-                  : index === menuItems.length - 1
-                  ? "danger"
-                  : "primary"
-              }
-              className="w-full"
-              href="#"
+export default function Simple() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <>
+      <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
+        <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
+          <IconButton
+            size={"md"}
+            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+            aria-label={"Open Menu"}
+            display={{ md: "none" }}
+            onClick={isOpen ? onClose : onOpen}
+          />
+          <HStack spacing={8} alignItems={"center"}>
+            <Box>
+              <Image src={"/favico.svg"} alt="logo" height={44} width={44} />
+            </Box>
+
+            <HStack
+              as={"nav"}
+              spacing={4}
+              display={{ base: "none", md: "flex" }}
             >
-              {item}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+              {Links.map((link, i) => (
+                <NavLink key={i} to={link.href}>
+                  {link.label}
+                </NavLink>
+              ))}
+            </HStack>
+          </HStack>
+          <Flex alignItems={"center"}>
+            <Menu>
+              <MenuButton
+                as={Button}
+                rounded={"full"}
+                variant={"link"}
+                cursor={"pointer"}
+                minW={0}
+              >
+                <Avatar size={"md"} bg={"purple"}>
+                  <AvatarBadge
+                    borderColor="papayawhip"
+                    bg="tomato"
+                    boxSize="1.25em"
+                  />
+                </Avatar>
+              </MenuButton>
+              <MenuList>
+                <MenuItem>TBD</MenuItem>
+                <MenuItem>TBD</MenuItem>
+                <MenuDivider />
+                <MenuItem>TBD</MenuItem>
+              </MenuList>
+            </Menu>
+          </Flex>
+        </Flex>
+
+        {isOpen ? (
+          <Box pb={4} display={{ md: "none" }}>
+            <Stack as={"nav"} spacing={4}>
+              {Links.map((link, i) => (
+                <NavLink key={link.href + i} to={link.href}>
+                  {link.label}
+                </NavLink>
+              ))}
+            </Stack>
+          </Box>
+        ) : null}
+      </Box>
+    </>
   );
 }

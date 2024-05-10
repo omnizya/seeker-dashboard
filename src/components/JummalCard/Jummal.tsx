@@ -1,7 +1,23 @@
 "use client";
-
 import { useState } from "react";
-import { Textarea } from "@chakra-ui/react";
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+  TableContainer,
+  Textarea,
+  Container,
+  Heading,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatGroup,
+} from "@chakra-ui/react";
 
 import { CalcJomal } from "~/utils";
 import { Card, CardHeader, CardBody } from "@chakra-ui/react";
@@ -24,16 +40,13 @@ export default function JummalCard() {
     setJomalValues(CalcJomal(inputValue));
   };
   return (
-    <article className="border  relative rounded-sm p-2 shadow-sm drop-shadow-2  w-full font-uthman">
+    <Container maxW={"4xl"} centerContent>
       <Card className="w-full p-4">
         <CardHeader className="flex gap-3 p-2">
-          <div className="flex flex-col m-2 p-2">
-            <p className=" text-title-xxl2">
-              {DefaultText.JummalCard.cardTitle}
-            </p>
-          </div>
+          <Heading textAlign={"center"} w="full">
+            {DefaultText.JummalCard.cardTitle}
+          </Heading>
         </CardHeader>
-        <hr />
         <CardBody>
           <Textarea
             placeholder={DefaultText.JummalCard.textAreaPlaceholder}
@@ -43,41 +56,70 @@ export default function JummalCard() {
           />
         </CardBody>
       </Card>
-      <hr />
 
-      <div className=" mt-4 min-w-full bg-zinc-400 text-black text-center rounded-md border-transparent">
-        <h2 className="w-full bg-zinc-700 text-zinc-50 text-title-xxl2 p-4">
-          {DefaultText.JummalCard.outputTable.title}
-        </h2>
-        <table className=" border-collapse border border-slate-500 table-auto w-full">
-          <thead className=" table-header-group">
-            <tr>
-              <td className="border border-slate-600 p-2 text-title-md">
+      <TableContainer w={"full"}>
+        <Table
+          size={"lg"}
+          variant={"striped"}
+          colorScheme="purple"
+          layout={"number"}
+        >
+          <TableCaption
+            placement="top"
+            fontSize={"xx-large"}
+            color={"orange"}
+            bg={"purple"}
+          >
+            {DefaultText.JummalCard.outputTable.title}
+          </TableCaption>
+          <Thead>
+            <Tr>
+              <Th textAlign={"center"} fontSize={"large"}>
                 {DefaultText.JummalCard.outputTable.tableHeader.east}
-              </td>
-              <td className="border border-slate-600  p-2 text-title-md">
+              </Th>
+              <Th textAlign={"center"} fontSize={"large"}>
                 {DefaultText.JummalCard.outputTable.tableHeader.west}
-              </td>
-              <td className="border border-slate-600  p-2 text-title-md">
+              </Th>
+              <Th textAlign={"center"} fontSize={"large"}>
                 {DefaultText.JummalCard.outputTable.tableHeader.nafsy}
-              </td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border border-slate-700 text-2xl text-blue-700 font-semibold">
-                {jomalValues.ge} <hr /> {jomalValues.se}
-              </td>
-              <td className="border border-slate-700 text-2xl text-rose-900 font-semibold">
-                {jomalValues.gw} <hr /> {jomalValues.sw}
-              </td>
-              <td className="border border-slate-700 text-2xl text-rose-900 font-semibold">
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td isNumeric textAlign={"center"} fontSize={"x-large"}>
+                <StatGroup>
+                  <Stat>
+                    <StatLabel>الكبير</StatLabel>
+
+                    <StatNumber>{jomalValues.ge}</StatNumber>
+                  </Stat>
+                  <Stat>
+                    <StatLabel>الصغير</StatLabel>
+
+                    <StatNumber>{jomalValues.se}</StatNumber>
+                  </Stat>
+                </StatGroup>
+              </Td>
+              <Td isNumeric textAlign={"center"} fontSize={"x-large"}>
+                <StatGroup>
+                  <Stat>
+                    <StatLabel>الكبير</StatLabel>
+                    <StatNumber>{jomalValues.gw}</StatNumber>
+                  </Stat>
+                  <Stat>
+                    <StatLabel>الصغير</StatLabel>
+                    <StatNumber>{jomalValues.sw}</StatNumber>
+                  </Stat>
+                </StatGroup>
+              </Td>
+              <Td isNumeric textAlign={"center"} fontSize={"x-large"}>
                 {jomalValues.n}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </article>
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </Container>
   );
 }
