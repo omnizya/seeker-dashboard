@@ -24,8 +24,7 @@ export type HolyNames = {
 };
 export const HolyNames = () => {
   const supabase = createClientComponentClient<Database>();
-  const [names, setNames] = useState<HolyNames[]>([]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const [names, setNames] = useState<any>([]);
   const getNames = async () => {
     const { data, error } = await supabase.from("holy_names").select();
     if (error) throw error;
@@ -33,7 +32,8 @@ export const HolyNames = () => {
   };
   useEffect(() => {
     getNames();
-  }, [getNames]);
+  });
+
   return (
     <TableContainer dir="rtl">
       <Table size={"md"} className="lg:w-1/3">
@@ -48,27 +48,25 @@ export const HolyNames = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {names
-            ?.sort((t, k) => t.east + k.west)
-            .map((i, j) => (
-              <Tr key={i.id + j} className="">
-                <Td width={"min-content"} className="bg-zinc-500">
-                  <Tag size="lg" color={"teal"}>
-                    {i.holy_name}
-                  </Tag>
-                </Td>
-                <Td width={"min-content"} fontSize={"x-large"}>
-                  {i.holy_name.length}
-                </Td>
-                <Td isNumeric>
-                  <Stat>
-                    <StatNumber width={"3ch"} fontSize={"larger"}>
-                      {i.east}
-                    </StatNumber>
-                  </Stat>
-                </Td>
-              </Tr>
-            ))}
+          {names.map((i: HolyNames, j: number) => (
+            <Tr key={i.id + j} className="">
+              <Td width={"min-content"} className="bg-zinc-500">
+                <Tag size="lg" color={"teal"}>
+                  {i.holy_name}
+                </Tag>
+              </Td>
+              <Td width={"min-content"} fontSize={"x-large"}>
+                {i.holy_name.length}
+              </Td>
+              <Td isNumeric>
+                <Stat>
+                  <StatNumber width={"3ch"} fontSize={"larger"}>
+                    {i.east}
+                  </StatNumber>
+                </Stat>
+              </Td>
+            </Tr>
+          ))}
         </Tbody>
       </Table>
     </TableContainer>

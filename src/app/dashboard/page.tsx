@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import JummalCard from "~/components/Jomal/Jummal";
+import JummalCard from "~/components/JummalCard/Jummal";
 
 import { createClient } from "~/utils/supabase/server";
 
