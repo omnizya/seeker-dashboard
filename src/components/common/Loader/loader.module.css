@@ -1,6 +1,0 @@
-.container{
-  @apply flex h-screen items-center w-screen flex-col justify-center bg-white dark:bg-black;
-} 
-.loader {
-  @apply h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent;
-}

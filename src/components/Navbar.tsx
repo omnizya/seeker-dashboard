@@ -5,7 +5,6 @@ import {
   Flex,
   Avatar,
   HStack,
-  Text,
   IconButton,
   Button,
   Menu,
@@ -17,7 +16,6 @@ import {
   useColorModeValue,
   Stack,
   AvatarBadge,
-  Center,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { DefaultText } from "~/texts";
