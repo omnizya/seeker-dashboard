@@ -75,7 +75,7 @@ export type CalcJomalOutput = {
   };
 };
 
-export default function CalcJomal(input: string): CalcJomalOutput {
+export function CalcJomal(input: string): CalcJomalOutput {
   let jomal = {
     ge: 0,
     gw: 0,
