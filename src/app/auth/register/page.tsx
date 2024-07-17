@@ -20,7 +20,7 @@ import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { signup } from "../actions";
 
-export const SignupCardText = {
+const SignupCardText: { [x: string]: any } = {
   heading: "Sign up",
   description: "to enjoy all of our cool features ✌️",
   form: {

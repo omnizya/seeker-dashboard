@@ -1,21 +1,21 @@
 "use client";
 
 import {
-  Flex,
   Box,
+  Button,
+  Checkbox,
+  Flex,
   FormControl,
   FormLabel,
-  Input,
-  Checkbox,
-  Stack,
-  Button,
   Heading,
+  Input,
+  Stack,
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { login } from "../actions";
 
-export const LoginPageText = {
+const LoginPageText: { [x: string]: any } = {
   heading: "Sign in to your account",
   description: "to enjoy all of our cool features ✌️",
   form: {
