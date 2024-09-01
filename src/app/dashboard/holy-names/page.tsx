@@ -1,3 +1,4 @@
+"use client";
 import { Box } from "@chakra-ui/react";
 import { HolyNames } from "~/components/HolyNames";
 
