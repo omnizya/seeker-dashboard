@@ -25,14 +25,14 @@ export type HolyNames = {
 export const HolyNames = () => {
   const supabase = createClientComponentClient<Database>();
   const [names, setNames] = useState<any>([]);
-  const getNames = async () => {
-    const { data, error } = await supabase.from("holy_names").select();
-    if (error) throw error;
-    setNames(data);
-  };
   useEffect(() => {
+    const getNames = async () => {
+      const { data, error } = await supabase.from("holy_names").select();
+      if (error) throw error;
+      setNames(data);
+    };
     getNames();
-  });
+  }, [supabase]);
 
   return (
     <TableContainer dir="rtl">

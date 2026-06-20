@@ -19,14 +19,13 @@ type JummalApiResponse =
 
 export async function GET(
   req: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       text: string;
-    };
+    }>;
   }
 ) {
+  const params = await props.params;
   let { text } = params;
   text = String(text);
   const result: CalcJomalOutput = CalcJomal(text);

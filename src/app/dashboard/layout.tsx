@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Box, Center, Container } from "@chakra-ui/react";
 import GeoDataCard from "~/components/GeoDataCard";
 import NavigationBar from "~/components/Navbar";

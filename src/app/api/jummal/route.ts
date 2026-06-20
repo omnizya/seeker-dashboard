@@ -17,17 +17,8 @@ type JummalApiResponse =
     }
   | undefined;
 
-export async function GET(
-  req: NextRequest,
-  {
-    params,
-  }: {
-    params: {
-      text: string;
-    };
-  }
-) {
-  let { text } = params;
+export async function GET(req: NextRequest) {
+  let text = req.nextUrl.searchParams.get("text") ?? "";
   text = String(text);
   const result: CalcJomalOutput = CalcJomal(text);
 
