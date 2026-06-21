@@ -1,81 +1,36 @@
 "use client";
 
 import {
-  Box,
-  Center,
-  useColorModeValue,
-  Heading,
-  Text,
-  Stack,
-  Image,
-} from "@chakra-ui/react";
+  Card,
+  CardContent,
+} from "~/components/ui/card";
 
 const IMAGE =
   "https://images.unsplash.com/photo-1518051870910-a46e30d9db16?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=1350&q=80";
 
 export default function ProductSimple() {
   return (
-    <Center py={12}>
-      <Box
-        role={"group"}
-        p={6}
-        maxW={"330px"}
-        w={"full"}
-        bg={useColorModeValue("white", "gray.800")}
-        boxShadow={"2xl"}
-        rounded={"lg"}
-        pos={"relative"}
-        zIndex={1}
+    <div className="flex items-center justify-center py-12">
+      <Card
+        role="group"
+        className="relative z-10 max-w-[330px] w-full bg-white dark:bg-gray-800 shadow-2xl hover:scale-105 transition-transform"
       >
-        <Box
-          rounded={"lg"}
-          mt={-12}
-          pos={"relative"}
-          height={"230px"}
-          _after={{
-            transition: "all .3s ease",
-            content: '""',
-            w: "full",
-            h: "full",
-            pos: "absolute",
-            top: 5,
-            left: 0,
-            backgroundImage: `url(${IMAGE})`,
-            filter: "blur(15px)",
-            zIndex: -1,
-          }}
-          _groupHover={{
-            _after: {
-              filter: "blur(20px)",
-            },
-          }}
-        >
-          <Image
-            rounded={"lg"}
-            height={230}
-            width={282}
-            objectFit={"cover"}
+        <div className="relative mt-[-3rem] h-[230px] rounded-lg group-hover:after:blur-[20px] after:transition-all after:duration-300 after:content-[''] after:absolute after:inset-0 after:top-5 after:left-0 after:w-full after:h-full after:bg-cover after:bg-no-repeat after:blur-[15px] after:-z-10">
+          <img
+            className="rounded-lg h-[230px] w-[282px] object-cover"
             src={IMAGE}
             alt="#"
           />
-        </Box>
-        <Stack pt={10} align={"center"}>
-          <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
-            Brand
-          </Text>
-          <Heading fontSize={"2xl"} fontFamily={"body"} fontWeight={500}>
-            Nice Chair, pink
-          </Heading>
-          <Stack direction={"row"} align={"center"}>
-            <Text fontWeight={800} fontSize={"xl"}>
-              $57
-            </Text>
-            <Text textDecoration={"line-through"} color={"gray.600"}>
-              $199
-            </Text>
-          </Stack>
-        </Stack>
-      </Box>
-    </Center>
+        </div>
+        <CardContent className="pt-10 flex flex-col items-center">
+          <span className="text-sm text-gray-500 uppercase">Brand</span>
+          <h2 className="text-2xl font-medium">Nice Chair, pink</h2>
+          <div className="flex items-center">
+            <span className="text-xl font-extrabold">$57</span>
+            <span className="line-through text-gray-600 ml-2">$199</span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
