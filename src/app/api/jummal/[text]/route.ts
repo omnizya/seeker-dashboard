@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CalcJomal, CalcJomalOutput } from "~/utils";
+import { CalcJomal } from "~/utils";
+import { CalcJomalT } from "~/types";
 
 type JummalApiResponse =
   | {
@@ -28,7 +29,7 @@ export async function GET(
   const params = await props.params;
   let { text } = params;
   text = String(text);
-  const result: CalcJomalOutput = CalcJomal(text);
+  const result: CalcJomalT = CalcJomal(text);
 
   const output: JummalApiResponse = {
     text: text,

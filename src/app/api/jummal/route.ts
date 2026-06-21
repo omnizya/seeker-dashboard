@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CalcJomal, CalcJomalOutput } from "~/utils";
+import { CalcJomal } from "~/utils";
+import { CalcJomalT } from "~/types";
 
 type JummalApiResponse =
   | {
@@ -20,7 +21,7 @@ type JummalApiResponse =
 export async function GET(req: NextRequest) {
   let text = req.nextUrl.searchParams.get("text") ?? "";
   text = String(text);
-  const result: CalcJomalOutput = CalcJomal(text);
+  const result: CalcJomalT = CalcJomal(text);
 
   const output: JummalApiResponse = {
     text: text,
