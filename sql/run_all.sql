@@ -25,3 +25,15 @@
 
 \echo '--- 05_magick ---'
 \i sql/05_magick.sql
+
+\echo '--- 07_prayer ---'
+\i sql/07_prayer.sql
+
+\echo '--- 08_planetary ---'
+\i sql/08_planetary.sql
+
+\echo '--- 09_astro ---'
+\i sql/09_astro.sql
+
+\echo '--- 10_features ---'
+\i sql/10_features.sql
