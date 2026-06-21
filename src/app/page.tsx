@@ -11,7 +11,7 @@ import {
   useBreakpointValue,
 } from "@chakra-ui/react";
 
-import Footer from "~/components/Footer";
+import Footer from "~/components/Footer/appFooter";
 
 import Features from "~/components/AlefpageSection/Features";
 import { DefaultText } from "~/texts";
@@ -85,8 +85,8 @@ export default function Home() {
         </VStack>
       </Flex>
 
-      {/*   <Features />
-      <Footer /> */}
+      {/*   <Features /> */}
+      <Footer />
     </>
   );
 }
