@@ -1,21 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GeolocationState, useGeolocation } from "@uidotdev/usehooks";
+import { useGeolocation } from "@uidotdev/usehooks";
 import {
   Card,
+  CardContent,
   CardHeader,
-  CardBody,
-  Heading,
-  SimpleGrid,
-  Stat,
-  StatLabel,
-  StatNumber,
-  Container,
-  Spinner,
-  Center,
-  Text,
-} from "@chakra-ui/react";
+  CardTitle,
+} from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 
 type SunriseResult = {
   sunrise: string;
@@ -77,137 +70,121 @@ export default function GeoDataCard() {
 
   if (geo.loading) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              أوقات الشمس
-            </Heading>
+            <CardTitle className="text-center">أوقات الشمس</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Center>
-              <Spinner />
-              <Text mr={2}>جمع الموقع…</Text>
-            </Center>
-          </CardBody>
+          <CardContent>
+            <div className="flex items-center justify-center">
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   if (geo.error) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              أوقات الشمس
-            </Heading>
+            <CardTitle className="text-center">أوقات الشمس</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Center>
-              <Text>يرجى تفعيل صلاحية الموقع لعرض أوقات الشمس</Text>
-            </Center>
-          </CardBody>
+          <CardContent>
+            <p className="text-center">يرجى تفعيل صلاحية الموقع لعرض أوقات الشمس</p>
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   if (isFetching) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              أوقات الشمس
-            </Heading>
+            <CardTitle className="text-center">أوقات الشمس</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Center>
-              <Spinner />
-              <Text mr={2}>جاري التحميل…</Text>
-            </Center>
-          </CardBody>
+          <CardContent>
+            <div className="flex items-center justify-center">
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              أوقات الشمس
-            </Heading>
+            <CardTitle className="text-center">أوقات الشمس</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Text textAlign="center" color="red.500">
-              {error}
-            </Text>
-          </CardBody>
+          <CardContent>
+            <p className="text-center text-red-500">{error}</p>
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   if (!data) return null;
 
   return (
-    <Container maxW="4xl" centerContent>
+    <div className="mx-auto max-w-2xl">
       <Card className="w-full p-4">
         <CardHeader>
-          <Heading textAlign="center" w="full" size="md">
-            أوقات الشمس
-          </Heading>
+          <CardTitle className="text-center">أوقات الشمس</CardTitle>
         </CardHeader>
-        <CardBody>
-          <SimpleGrid columns={{ base: 2, md: 3 }} spacing={4}>
-            <Stat>
-              <StatLabel>الشروق</StatLabel>
-              <StatNumber>{toLocalTime(data.sunrise)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>الغروب</StatLabel>
-              <StatNumber>{toLocalTime(data.sunset)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>منتصف النهار</StatLabel>
-              <StatNumber>{toLocalTime(data.solar_noon)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>طول النهار</StatLabel>
-              <StatNumber>{formatDuration(data.day_length)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>بداية الشفق المدني</StatLabel>
-              <StatNumber>{toLocalTime(data.civil_twilight_begin)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>نهاية الشفق المدني</StatLabel>
-              <StatNumber>{toLocalTime(data.civil_twilight_end)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>بداية الشفق البحري</StatLabel>
-              <StatNumber>{toLocalTime(data.nautical_twilight_begin)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>نهاية الشفق البحري</StatLabel>
-              <StatNumber>{toLocalTime(data.nautical_twilight_end)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>بداية الشفق الفلكي</StatLabel>
-              <StatNumber>{toLocalTime(data.astronomical_twilight_begin)}</StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>نهاية الشفق الفلكي</StatLabel>
-              <StatNumber>{toLocalTime(data.astronomical_twilight_end)}</StatNumber>
-            </Stat>
-          </SimpleGrid>
-        </CardBody>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div>
+              <p className="text-sm text-muted-foreground">الشروق</p>
+              <p className="text-lg font-bold">{toLocalTime(data.sunrise)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">الغروب</p>
+              <p className="text-lg font-bold">{toLocalTime(data.sunset)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">منتصف النهار</p>
+              <p className="text-lg font-bold">{toLocalTime(data.solar_noon)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">طول النهار</p>
+              <p className="text-lg font-bold">{formatDuration(data.day_length)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">بداية الشفق المدني</p>
+              <p className="text-lg font-bold">{toLocalTime(data.civil_twilight_begin)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">نهاية الشفق المدني</p>
+              <p className="text-lg font-bold">{toLocalTime(data.civil_twilight_end)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">بداية الشفق البحري</p>
+              <p className="text-lg font-bold">{toLocalTime(data.nautical_twilight_begin)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">نهاية الشفق البحري</p>
+              <p className="text-lg font-bold">{toLocalTime(data.nautical_twilight_end)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">بداية الشفق الفلكي</p>
+              <p className="text-lg font-bold">{toLocalTime(data.astronomical_twilight_begin)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">نهاية الشفق الفلكي</p>
+              <p className="text-lg font-bold">{toLocalTime(data.astronomical_twilight_end)}</p>
+            </div>
+          </div>
+        </CardContent>
       </Card>
-    </Container>
+    </div>
   );
 }

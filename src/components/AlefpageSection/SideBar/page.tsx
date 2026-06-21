@@ -133,7 +133,7 @@ const SidebarWithHeader = ({ children }: { children?: React.ReactNode }) => {
       </aside>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="end" className="w-60 p-0">
+        <SheetContent side="left" className="w-60 p-0">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SidebarContent />
         </SheetContent>

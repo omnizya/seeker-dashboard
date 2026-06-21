@@ -1,0 +1,416 @@
+"use client";
+
+import { useEffect, useState, useRef, useMemo } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Progress } from "~/components/ui/progress";
+import { toast } from "sonner";
+import { Toaster } from "~/components/ui/sonner";
+
+type DhikrPreset = {
+  id: string;
+  phrase: string;
+  transliteration: string;
+  translation: string;
+  target: number;
+  category: string;
+};
+
+const PRESETS: DhikrPreset[] = [
+  {
+    id: "subhanallah",
+    phrase: "سُبْحَانَ اللَّهِ",
+    transliteration: "Subhanallah",
+    translation: "Glory be to Allah",
+    target: 33,
+    category: "general",
+  },
+  {
+    id: "alhamdulillah",
+    phrase: "الْحَمْدُ لِلَّهِ",
+    transliteration: "Alhamdulillah",
+    translation: "Praise be to Allah",
+    target: 33,
+    category: "general",
+  },
+  {
+    id: "allahu_akbar",
+    phrase: "اللَّهُ أَكْبَرُ",
+    transliteration: "Allahu Akbar",
+    translation: "Allah is the Greatest",
+    target: 34,
+    category: "general",
+  },
+  {
+    id: "la_ilaha_illallah",
+    phrase: "لَا إِلَٰهَ إِلَّا اللَّهُ",
+    transliteration: "La ilaha illallah",
+    translation: "There is no god but Allah",
+    target: 100,
+    category: "general",
+  },
+  {
+    id: "astaghfirullah",
+    phrase: "أَسْتَغْفِرُ اللَّهَ",
+    transliteration: "Astaghfirullah",
+    translation: "I seek forgiveness from Allah",
+    target: 100,
+    category: "general",
+  },
+  {
+    id: "salawat",
+    phrase: "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ",
+    transliteration: "Allahumma salli 'ala Muhammad",
+    translation: "O Allah, send blessings upon Muhammad",
+    target: 33,
+    category: "general",
+  },
+  {
+    id: "lailaha",
+    phrase: "لَا إِلٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
+    transliteration: "La ilaha illallah wahdahu la sharika lah",
+    translation: "There is no god but Allah, alone, without partner",
+    target: 100,
+    category: "general",
+  },
+];
+
+const COMPLETION_STYLES = `
+@keyframes tasbihComplete {
+  0% { transform: scale(1); opacity: 0; }
+  20% { transform: scale(1.2); opacity: 1; }
+  40% { transform: scale(0.95); opacity: 1; }
+  60% { transform: scale(1.05); opacity: 1; }
+  80% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+}
+.tasbih-complete {
+  animation: tasbihComplete 0.8s ease-in-out;
+}
+.confetti-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: confettiFall 1.5s ease-in forwards;
+}
+`;
+
+function Confetti({ count = 20 }: { count?: number }) {
+  const particles = useMemo(() => {
+    const colors = [
+      "#48BB78",
+      "#4299E1",
+      "#ED8936",
+      "#9F7AEA",
+      "#F56565",
+      "#ECC94B",
+      "#38B2AC",
+    ];
+    return Array.from({ length: count }, (_, i) => {
+      const left = ((i * 37 + 13) % 100);
+      const delay = ((i * 7) % 10) / 20;
+      const color = colors[i % colors.length];
+      const size = 4 + ((i * 3) % 7);
+      return (
+        <div
+          key={i}
+          className="confetti-particle"
+          style={{
+            left: `${left}%`,
+            top: 0,
+            width: `${size}px`,
+            height: `${size}px`,
+            backgroundColor: color,
+            animationDelay: `${delay}s`,
+          }}
+        />
+      );
+    });
+  }, [count]);
+
+  return (
+    <div className="relative h-[120px] w-full overflow-hidden">
+      {particles}
+    </div>
+  );
+}
+
+export default function TasbihPage() {
+  const [activePreset, setActivePreset] = useState<DhikrPreset | null>(null);
+  const [count, setCount] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [todayTotal, setTodayTotal] = useState<number>(0);
+  const [todayError, setTodayError] = useState<string | null>(null);
+  const [todayLoading, setTodayLoading] = useState(true);
+  const [sessionTick, setSessionTick] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
+  const activePresetRef = useRef<DhikrPreset | null>(null);
+
+  useEffect(() => {
+    activePresetRef.current = activePreset;
+    if (activePreset) {
+      startTimeRef.current = Date.now();
+    }
+  }, [activePreset, sessionTick]);
+
+  useEffect(() => {
+    fetch("/api/tasbih")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.error) {
+          setTodayError(json.error);
+        } else {
+          setTodayTotal(json.total_count ?? 0);
+        }
+      })
+      .catch((e) => setTodayError(e.message))
+      .finally(() => setTodayLoading(false));
+  }, []);
+
+  const startDhikr = (preset: DhikrPreset) => {
+    setActivePreset(preset);
+    setCount(0);
+    setIsCompleted(false);
+    setShowConfetti(false);
+  };
+
+  const saveSession = () => {
+    const preset = activePresetRef.current;
+    if (!preset || !startTimeRef.current) return;
+    const duration = Math.floor((new Date().getTime() - startTimeRef.current) / 1000);
+    setSaving(true);
+    fetch("/api/tasbih", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        preset_id: preset.id,
+        completed_count: preset.target,
+        duration_seconds: duration,
+        category: preset.category,
+      }),
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (!json.error) {
+          toast.success("تم الحفظ", { duration: 2000 });
+          fetch("/api/tasbih")
+            .then((r) => r.json())
+            .then((j) => {
+              if (!j.error) setTodayTotal(j.total_count ?? 0);
+            })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSaving(false));
+  }
+
+  function increment() {
+    if (isCompleted) return;
+    setCount((prev) => {
+      const next = prev + 1;
+      if (activePreset && next >= activePreset.target) {
+        setTimeout(() => {
+          setIsCompleted(true);
+          setShowConfetti(true);
+          saveSession();
+        }, 50);
+      }
+      return next;
+    });
+  }
+
+  function resetCount() {
+    setCount(0);
+    setIsCompleted(false);
+    setShowConfetti(false);
+    setSessionTick((t) => t + 1);
+  }
+
+  function backToPresets() {
+    setActivePreset(null);
+    setCount(0);
+    setIsCompleted(false);
+    setShowConfetti(false);
+    startTimeRef.current = null;
+  }
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (activePreset && !saving && !isCompleted && (e.code === "Space" || e.code === "Enter")) {
+        e.preventDefault();
+        increment();
+      }
+    }
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
+
+  return (
+    <div className="mx-auto max-w-xl py-4">
+      <style>{COMPLETION_STYLES}</style>
+      <Toaster />
+      <div className="space-y-4">
+        <Card className="w-full p-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-center">المسبحة</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-center">
+              <div className="flex flex-col items-center gap-1">
+                <p className="text-sm text-muted-foreground">
+                  مجموع التسبيح اليوم
+                </p>
+                {todayLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : todayError ? (
+                  <p className="text-lg font-bold text-red-500">0</p>
+                ) : (
+                  <p className="text-3xl font-bold text-green-500">
+                    {todayTotal.toLocaleString("ar")}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {!activePreset ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {PRESETS.map((preset) => (
+              <Card
+                key={preset.id}
+                className="cursor-pointer p-3 transition-all hover:shadow-md hover:-translate-y-0.5"
+                onClick={() => startDhikr(preset)}
+              >
+                <CardContent>
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <p className="text-2xl font-bold">{preset.phrase}</p>
+                    <p className="text-sm italic text-muted-foreground">
+                      {preset.transliteration}
+                    </p>
+                    <p className="text-xs text-muted-foreground/60">
+                      {preset.translation}
+                    </p>
+                    <Badge className="bg-purple-500 text-white text-xs">
+                      {preset.target}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="w-full p-4">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={backToPresets}
+                >
+                  ✕
+                </Button>
+                <CardTitle className="text-center flex-1">
+                  {activePreset.phrase}
+                </CardTitle>
+                <div className="w-10" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center gap-6">
+                <p className="text-sm italic text-muted-foreground">
+                  {activePreset.transliteration}
+                </p>
+
+                <div className="w-full">
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="text-sm">{count}</p>
+                    <p className="text-sm">{activePreset.target}</p>
+                  </div>
+                  <Progress
+                    value={(count / activePreset.target) * 100}
+                    className="h-3"
+                  />
+                </div>
+
+                <div className={`text-center ${isCompleted ? "tasbih-complete" : ""}`}>
+                  <p
+                    className={`text-7xl font-bold ${isCompleted ? "text-green-500" : ""}`}
+                    dir="ltr"
+                    style={{ fontFamily: "monospace" }}
+                  >
+                    {count.toLocaleString("ar")}
+                  </p>
+                </div>
+
+                {showConfetti && <Confetti />}
+
+                {isCompleted && (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-lg font-bold text-green-500">
+                      تم التسبيح
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {activePreset.phrase}
+                    </p>
+                    <p className="text-xs text-muted-foreground/60">
+                      {activePreset.target} مرة
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex w-full max-w-xs flex-col gap-3">
+                  <Button
+                    className="w-full h-20 text-3xl font-bold rounded-2xl bg-green-500 hover:bg-green-600 text-white shadow-lg"
+                    onClick={increment}
+                    disabled={isCompleted}
+                  >
+                    {isCompleted ? "✓" : count + 1}
+                  </Button>
+
+                  <div className="flex gap-3 w-full">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={resetCount}
+                    >
+                      إعادة
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="flex-1"
+                      onClick={backToPresets}
+                    >
+                      اختيار ذكر آخر
+                    </Button>
+                  </div>
+                </div>
+
+                {!isCompleted && (
+                  <p className="text-xs text-muted-foreground/60">
+                    اضغط مسافة أو Enter للعد
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -4,28 +4,21 @@ import { useEffect, useState } from "react";
 import { useGeolocation } from "@uidotdev/usehooks";
 import {
   Card,
+  CardContent,
   CardHeader,
-  CardBody,
-  CardFooter,
-  Heading,
+  CardTitle,
+} from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
+import {
   Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  Container,
-  Spinner,
-  Center,
-  Text,
-  Badge,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-} from "@chakra-ui/react";
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Badge } from "~/components/ui/badge";
 
 import { computePlanetaryHours, PlanetaryHour } from "~/utils/planetary-hours";
 import { DefaultText } from "~/texts";
@@ -38,7 +31,6 @@ function toLocalTime(d: Date) {
   });
 }
 
-/** Build date string in YYYY-MM-DD for the sunrise-sunset API */
 function dateParam(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -83,7 +75,6 @@ export default function PlanetaryHoursCard() {
           return;
         }
         if (tomorrowData.error) {
-          // Fallback: approximate night with same day length
           const sunrise = new Date(todayData.results.sunrise);
           const sunset = new Date(todayData.results.sunset);
           const dayLen = todayData.results.day_length * 1000;
@@ -110,79 +101,61 @@ export default function PlanetaryHoursCard() {
 
   if (geo.loading) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              {T.cardTitle}
-            </Heading>
+            <CardTitle className="text-center">{T.cardTitle}</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Center>
-              <Spinner />
-              <Text mr={2}>جمع الموقع…</Text>
-            </Center>
-          </CardBody>
+          <CardContent>
+            <Skeleton className="h-4 w-32" />
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   if (geo.error) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              {T.cardTitle}
-            </Heading>
+            <CardTitle className="text-center">{T.cardTitle}</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Center>
-              <Text>يرجى تفعيل صلاحية الموقع لعرض الساعات الكوكبية</Text>
-            </Center>
-          </CardBody>
+          <CardContent>
+            <p className="text-center">يرجى تفعيل صلاحية الموقع لعرض الساعات الكوكبية</p>
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   if (isFetching) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              {T.cardTitle}
-            </Heading>
+            <CardTitle className="text-center">{T.cardTitle}</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Center>
-              <Spinner />
-              <Text mr={2}>جاري التحميل…</Text>
-            </Center>
-          </CardBody>
+          <CardContent>
+            <Skeleton className="h-4 w-32" />
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container maxW="4xl" centerContent>
+      <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
           <CardHeader>
-            <Heading textAlign="center" w="full" size="md">
-              {T.cardTitle}
-            </Heading>
+            <CardTitle className="text-center">{T.cardTitle}</CardTitle>
           </CardHeader>
-          <CardBody>
-            <Text textAlign="center" color="red.500">
-              {error}
-            </Text>
-          </CardBody>
+          <CardContent>
+            <p className="text-center text-red-500">{error}</p>
+          </CardContent>
         </Card>
-      </Container>
+      </div>
     );
   }
 
@@ -192,65 +165,59 @@ export default function PlanetaryHoursCard() {
   const nightHours = hours.filter((h) => !h.isDaytime);
 
   const planetColors: Record<string, string> = {
-    Saturn: "gray",
-    Jupiter: "blue",
-    Mars: "red",
-    Sun: "orange",
-    Venus: "green",
-    Mercury: "yellow",
-    Moon: "teal",
+    Saturn: "bg-gray-500",
+    Jupiter: "bg-blue-500",
+    Mars: "bg-red-500",
+    Sun: "bg-orange-500",
+    Venus: "bg-green-500",
+    Mercury: "bg-yellow-500",
+    Moon: "bg-teal-500",
   };
 
   function renderTable(data: PlanetaryHour[]) {
     return (
-      <TableContainer>
-        <Table size="sm" variant="striped" colorScheme="purple">
-          <Thead>
-            <Tr>
-              <Th textAlign="center">الكوكب</Th>
-              <Th textAlign="center">البداية</Th>
-              <Th textAlign="center">النهاية</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {data.map((h) => (
-              <Tr key={h.hourIndex}>
-                <Td textAlign="center">
-                  <Badge colorScheme={planetColors[h.planet] || "gray"}>
-                    {T.planets[h.planet]}
-                  </Badge>
-                </Td>
-                <Td textAlign="center">{toLocalTime(h.start)}</Td>
-                <Td textAlign="center">{toLocalTime(h.end)}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-center">الكوكب</TableHead>
+            <TableHead className="text-center">البداية</TableHead>
+            <TableHead className="text-center">النهاية</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((h) => (
+            <TableRow key={h.hourIndex}>
+              <TableCell className="text-center">
+                <Badge className={`${planetColors[h.planet] || "bg-gray-500"} text-white`}>
+                  {T.planets[h.planet]}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-center">{toLocalTime(h.start)}</TableCell>
+              <TableCell className="text-center">{toLocalTime(h.end)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     );
   }
 
   return (
-    <Container maxW="4xl" centerContent>
+    <div className="mx-auto max-w-2xl">
       <Card className="w-full p-4">
         <CardHeader>
-          <Heading textAlign="center" w="full" size="md">
-            {T.cardTitle}
-          </Heading>
+          <CardTitle className="text-center">{T.cardTitle}</CardTitle>
         </CardHeader>
-        <CardBody>
-          <Tabs isFitted variant="enclosed" colorScheme="purple">
-            <TabList mb="1em">
-              <Tab>{T.dayLabel}</Tab>
-              <Tab>{T.nightLabel}</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel p={0}>{renderTable(dayHours)}</TabPanel>
-              <TabPanel p={0}>{renderTable(nightHours)}</TabPanel>
-            </TabPanels>
+        <CardContent>
+          <Tabs defaultValue="day">
+            <TabsList className="w-full">
+              <TabsTrigger value="day" className="flex-1">{T.dayLabel}</TabsTrigger>
+              <TabsTrigger value="night" className="flex-1">{T.nightLabel}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="day">{renderTable(dayHours)}</TabsContent>
+            <TabsContent value="night">{renderTable(nightHours)}</TabsContent>
           </Tabs>
-        </CardBody>
+        </CardContent>
       </Card>
-    </Container>
+    </div>
   );
 }
