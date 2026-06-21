@@ -1,30 +1,15 @@
 "use client";
 
-import { Box, useColorModeValue } from "@chakra-ui/react";
+import { type ReactNode } from "react";
 
 interface TextUnderlineProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const TextUnderline = ({ children }: TextUnderlineProps) => {
   return (
-    <Box
-      as={"span"}
-      color={useColorModeValue("orange.400", "orange.300")}
-      position={"relative"}
-      zIndex={10}
-      _after={{
-        content: '""',
-        position: "absolute",
-        left: 0,
-        bottom: 0,
-        w: "full",
-        h: "10%",
-        bg: useColorModeValue("orange.100", "orange.900"),
-        zIndex: -1,
-      }}
-    >
+    <span className="relative z-10 text-orange-400 dark:text-orange-300 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[10%] after:bg-orange-100 dark:after:bg-orange-900 after:-z-10">
       {children}
-    </Box>
+    </span>
   );
 };

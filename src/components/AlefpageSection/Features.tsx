@@ -1,15 +1,6 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import {
-  useColorModeValue,
-  Container,
-  Heading,
-  Flex,
-  Stack,
-  Box,
-  Text,
-} from "@chakra-ui/react";
 import { ExploreTemplates } from "~/components/AlefpageSection/ExploreTemplates";
 import Illustration from "../Illustration";
+
 export default function Features() {
   const STEPS = [
     {
@@ -25,74 +16,37 @@ export default function Features() {
       text: "You've just saved yourself a bunch of time not building the same stuff over and over again. Enjoy your free time, and build business features",
     },
   ];
-  return (
-    <Box
-      bg={useColorModeValue("gray.50", "gray.900")}
-      h={"full"}
-      bgGradient={"linear(to-t, blackAlpha.900, purple)"}
-    >
-      <Container maxW={"8xl"} py={{ sm: "8px", md: "12px", lg: "16px" }}>
-        <Flex
-          w={"full"}
-          justifyContent={"center"}
-          alignItems={"center"}
-          p={"2em"}
-        >
-          <Illustration height={{ sm: "20rem", lg: "24rem" }} />
-        </Flex>
-        <Heading
-          as={"h3"}
-          textAlign={"center"}
-          mb={{ base: 14, sm: 16 }}
-          color={"orange"}
-        >
-          Features
-        </Heading>
 
-        <Flex
-          direction={{ base: "column", md: "row" }}
-          justify={"space-between"}
-          align={{ base: "center", md: "flex-start" }}
-        >
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 h-full bg-gradient-to-t from-black/90 to-purple-600">
+      <div className="max-w-8xl mx-auto py-2 sm:py-3 lg:py-4">
+        <div className="w-full flex justify-center items-center p-8">
+          <Illustration className="h-80 lg:h-96" />
+        </div>
+
+        <h3 className="text-2xl font-bold text-center mb-14 sm:mb-16 text-orange-500">
+          Features
+        </h3>
+
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-start">
           {STEPS.map((step, index) => (
-            <Stack
-              textAlign={{ base: "left", md: "center" }}
-              align={{ base: "flex-start", md: "center" }}
-              spacing={4}
+            <div
               key={step.title}
-              maxW={{ base: "full", md: "xs" }}
-              mt={{ base: 10, md: 0 }}
-              _first={{
-                mt: 0,
-              }}
-              px={4}
+              className="text-left md:text-center items-start md:items-center flex flex-col gap-4 max-w-full md:max-w-xs mt-10 md:mt-0 first:mt-0 px-4"
             >
-              <Flex
-                w={10}
-                h={10}
-                bg={useColorModeValue("orange.100", "orange.900")}
-                color={useColorModeValue("orange.700", "orange.300")}
-                fontWeight={700}
-                align={"center"}
-                justify={"center"}
-                fontSize={"sm"}
-                rounded={"md"}
-              >
+              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 font-bold flex items-center justify-center text-sm rounded-md">
                 0{index + 1}
-              </Flex>
-              <Text
-                fontFamily={"heading"}
-                fontSize={"xl"}
-                color={useColorModeValue("gray.700", "white")}
-              >
+              </div>
+              <p className="font-heading text-xl text-gray-700 dark:text-white">
                 {step.title}
-              </Text>
-              <Text color={"gray.500"}>{step.text}</Text>
-            </Stack>
+              </p>
+              <p className="text-gray-500">{step.text}</p>
+            </div>
           ))}
-        </Flex>
-        <ExploreTemplates templatesCount={3!} />
-      </Container>
-    </Box>
+        </div>
+
+        <ExploreTemplates templatesCount={3} />
+      </div>
+    </div>
   );
 }
