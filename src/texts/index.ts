@@ -45,6 +45,20 @@ export const DefaultText = {
       },
     },
   },
+  PlanetaryHours: {
+    cardTitle: "الساعات الكوكبية",
+    dayLabel: "النهار",
+    nightLabel: "الليل",
+    planets: {
+      Saturn: "زحل",
+      Jupiter: "المشتري",
+      Mars: "المريخ",
+      Sun: "الشمس",
+      Venus: "الزهرة",
+      Mercury: "عطارد",
+      Moon: "القمر",
+    },
+  },
 };
 
 export type DefaultTextT = typeof DefaultText;

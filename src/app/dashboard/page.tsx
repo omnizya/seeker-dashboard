@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import JummalCard from "~/components/JummalCard/Jummal";
+import GeoDataCard from "~/components/GeoDataCard";
+import PlanetaryHoursCard from "~/components/PlanetaryHoursCard";
 
 import { createClient } from "~/utils/supabase/server";
 
@@ -11,7 +13,9 @@ export default async function DashboardPage() {
     redirect("/login");
   }
   return (
-    <section className=" p-4">
+    <section className="p-4 space-y-4">
+      <GeoDataCard />
+      <PlanetaryHoursCard />
       <JummalCard />
     </section>
   );
