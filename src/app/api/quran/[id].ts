@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import Ayats from "~/data/ayats";
+import getAyats from "~/data/ayats";
 type ResponseData =
   | {
       id?: number;
@@ -21,7 +21,7 @@ export default function handler(
   const { query } = req;
   const { id } = query;
 
-  const result = Ayats.find(({ id }) => id === id);
+  const result = getAyats().find(({ id: _id }) => _id === Number(id));
   return result
     ? res.status(200).send(result)
     : res.status(404).json({ error: `Ayah with id: ${id} not found.` });

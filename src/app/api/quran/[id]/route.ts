@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Ayats from "~/data/ayats";
+import getAyats from "~/data/ayats";
 export async function GET(
   request: NextRequest,
   props: {
@@ -9,6 +9,6 @@ export async function GET(
   const params = await props.params;
   const requestUrl = request.url;
   const idx = params.id;
-  const result = Ayats.find(({ id }) => id === parseInt(idx));
+  const result = getAyats().find(({ id }) => id === parseInt(idx));
   return NextResponse.json(result);
 }

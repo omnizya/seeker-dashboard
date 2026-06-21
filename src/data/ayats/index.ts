@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import zlib from 'zlib';
 
-export const DATA_PATH = path.join(process.cwd(), 'src/data/ayats/data.jsonl');
+export const DATA_PATH = path.join(process.cwd(), 'src/data/ayats/data.jsonl.gz');
 
 export type AyahVector = [number, string, number, number, number, number, number];
 
@@ -19,7 +20,8 @@ export function parseAyahVector(vector: AyahVector) {
 
 // Read all into an array of vectors
 export function getAyatsVectors(): AyahVector[] {
-  const content = fs.readFileSync(DATA_PATH, 'utf8');
+  const compressed = fs.readFileSync(DATA_PATH);
+  const content = zlib.gunzipSync(compressed).toString('utf8');
   return content.trim().split('\n').map(line => JSON.parse(line));
 }
 
