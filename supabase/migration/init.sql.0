@@ -1,0 +1,301 @@
+-- identity for next_auth schema
+-- profile layer
+CREATE SCHEMA identity;
+
+CREATE TABLE identity.profiles (
+    id uuid PRIMARY KEY
+        REFERENCES next_auth.users(id)
+        ON DELETE CASCADE,
+
+    display_name text,
+    avatar_url text,
+
+    status public.user_status
+        DEFAULT 'OFFLINE',
+
+    created_at timestamptz
+        DEFAULT now(),
+
+    updated_at timestamptz
+        DEFAULT now()
+);
+
+-- RBAC
+CREATE SCHEMA rbac;
+
+-- Enums
+CREATE TYPE rbac.app_role AS ENUM (
+    'master',
+    'teacher',
+    'student',
+    'user'
+);
+
+CREATE TYPE rbac.app_permission AS ENUM (
+    'holy_names.read',
+    'holy_names.create',
+    'holy_names.update',
+    'holy_names.delete',
+
+    'abjad.read',
+    'abjad.create',
+    'abjad.delete',
+
+    'users.manage',
+
+    'audit.read'
+);
+
+-- User Roles
+CREATE TABLE rbac.user_roles (
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id uuid NOT NULL
+        REFERENCES identity.profiles(id)
+        ON DELETE CASCADE,
+
+    role rbac.app_role NOT NULL,
+
+    assigned_at timestamptz
+        DEFAULT now(),
+
+    UNIQUE(user_id, role)
+);
+
+-- Role Permissions
+CREATE TABLE rbac.role_permissions (
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    role rbac.app_role NOT NULL,
+
+    permission rbac.app_permission NOT NULL,
+
+    UNIQUE(role, permission)
+);
+
+-- Authorization Function
+-- 
+CREATE OR REPLACE FUNCTION rbac.authorize(
+    requested_permission rbac.app_permission
+)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+
+    RETURN EXISTS (
+        SELECT 1
+        FROM rbac.user_roles ur
+        JOIN rbac.role_permissions rp
+            ON rp.role = ur.role
+        WHERE ur.user_id = auth.uid()
+          AND rp.permission = requested_permission
+    );
+
+END;
+$$;
+
+-- Spiritual Schema
+CREATE SCHEMA spiritual;
+-- Holy Names
+CREATE TABLE spiritual.holy_names (
+
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    holy_name text NOT NULL UNIQUE,
+
+    base_value integer,
+
+    submitted_by uuid NOT NULL
+        REFERENCES identity.profiles(id),
+
+    created_at timestamptz
+        DEFAULT now(),
+
+    updated_at timestamptz
+        DEFAULT now()
+);
+-- Abjad Calculations
+-- Instead of one value per name:
+CREATE TABLE spiritual.abjad_calculations (
+
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    holy_name_id bigint NOT NULL
+        REFERENCES spiritual.holy_names(id)
+        ON DELETE CASCADE,
+
+    calculated_value integer NOT NULL,
+
+    calculated_by uuid NOT NULL
+        REFERENCES identity.profiles(id),
+
+    notes text,
+
+    created_at timestamptz
+        DEFAULT now()
+);
+-- Audit Schema
+CREATE SCHEMA audit;
+CREATE TABLE audit.events (
+
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    actor_id uuid,
+
+    table_name text,
+
+    operation text,
+
+    record_id text,
+
+    payload jsonb,
+
+    created_at timestamptz
+        DEFAULT now()
+);
+-- Generic Audit Trigger
+CREATE OR REPLACE FUNCTION audit.log_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+
+    INSERT INTO audit.events (
+        actor_id,
+        table_name,
+        operation,
+        record_id,
+        payload
+    )
+    VALUES (
+        auth.uid(),
+        TG_TABLE_NAME,
+        TG_OP,
+        COALESCE(NEW.id, OLD.id)::text,
+        CASE
+            WHEN TG_OP = 'DELETE'
+            THEN to_jsonb(OLD)
+            ELSE to_jsonb(NEW)
+        END
+    );
+
+    RETURN COALESCE(NEW, OLD);
+
+END;
+$$;
+-- Attach Audit
+CREATE TRIGGER holy_names_audit
+AFTER INSERT OR UPDATE OR DELETE
+ON spiritual.holy_names
+FOR EACH ROW
+EXECUTE FUNCTION audit.log_change();
+-- Updated_at Trigger
+CREATE OR REPLACE FUNCTION internal.touch_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+    NEW.updated_at := now();
+
+    RETURN NEW;
+
+END;
+$$;
+-- Attach Trigger
+CREATE TRIGGER holy_names_updated
+BEFORE UPDATE
+ON spiritual.holy_names
+FOR EACH ROW
+EXECUTE FUNCTION internal.touch_updated_at();
+-- Automatic Profile Creation
+CREATE OR REPLACE FUNCTION identity.create_profile()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+    INSERT INTO identity.profiles(
+        id,
+        display_name
+    )
+    VALUES(
+        NEW.id,
+        NEW.name
+    );
+
+    RETURN NEW;
+
+END;
+$$;
+-- Trigger Profile
+CREATE TRIGGER create_profile_trigger
+AFTER INSERT
+ON next_auth.users
+FOR EACH ROW
+EXECUTE FUNCTION identity.create_profile();
+-- Default User Role
+CREATE OR REPLACE FUNCTION rbac.assign_default_role()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+    INSERT INTO rbac.user_roles(
+        user_id,
+        role
+    )
+    VALUES(
+        NEW.id,
+        'user'
+    );
+
+    RETURN NEW;
+
+END;
+$$;
+-- 
+CREATE TRIGGER assign_default_role_trigger
+AFTER INSERT
+ON identity.profiles
+FOR EACH ROW
+EXECUTE FUNCTION rbac.assign_default_role();
+-- API Schema
+-- The frontend should never touch raw tables
+CREATE SCHEMA api;
+-- Api View
+CREATE VIEW api.holy_names AS
+
+SELECT
+    hn.id,
+    hn.holy_name,
+    hn.base_value,
+    p.display_name AS submitted_by
+FROM spiritual.holy_names hn
+JOIN identity.profiles p
+    ON p.id = hn.submitted_by;
+-- The frontend query examples
+-- SELECT * FROM api.holy_names;
+--
+-- RLS Example
+ALTER TABLE spiritual.holy_names
+ENABLE ROW LEVEL SECURITY;
+CREATE POLICY holy_names_read
+ON spiritual.holy_names
+FOR SELECT
+TO authenticated
+USING (
+    rbac.authorize('holy_names.read')
+);
+CREATE POLICY holy_names_create
+ON spiritual.holy_names
+FOR INSERT
+TO authenticated
+WITH CHECK (
+    rbac.authorize('holy_names.create')
+);
+
