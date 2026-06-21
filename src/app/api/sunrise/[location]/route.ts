@@ -1,30 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-
-type GeocodingResult = {
-  lat: string;
-  lon: string;
-  display_name: string;
-  type: string;
-};
-
-type SunriseSunsetResult = {
-  sunrise: string;
-  sunset: string;
-  solar_noon: string;
-  day_length: number;
-  civil_twilight_begin: string;
-  civil_twilight_end: string;
-  nautical_twilight_begin: string;
-  nautical_twilight_end: string;
-  astronomical_twilight_begin: string;
-  astronomical_twilight_end: string;
-};
-
-type SunriseSunsetApiResponse = {
-  results: SunriseSunsetResult;
-  status: "OK";
-  tzid: string;
-};
+import {
+  fetchSunriseSunset,
+  type GeocodingResult,
+} from "~/utils/sunrise";
 
 export async function GET(
   _request: NextRequest,
@@ -79,26 +57,7 @@ export async function GET(
       );
     }
 
-    // Fetch sunrise/sunset data
-    const sunRes = await fetch(
-      `https://api.sunrise-sunset.org/json?lat=${latNum}&lng=${lngNum}&formatted=0`,
-    );
-
-    if (!sunRes.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch sunrise/sunset data" },
-        { status: 502 },
-      );
-    }
-
-    const sunData: SunriseSunsetApiResponse = await sunRes.json();
-
-    if (sunData.status !== "OK") {
-      return NextResponse.json(
-        { error: "External API returned non-OK status" },
-        { status: 502 },
-      );
-    }
+    const sunData = await fetchSunriseSunset(latNum, lngNum);
 
     return NextResponse.json({
       location: display_name,
