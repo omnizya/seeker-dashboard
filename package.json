@@ -9,8 +9,8 @@
     "lint": "eslint .",
     "find:unused": "next-unused",
     "check:unused": "next-unused --error-on-unused-files",
-    "parse:csv": "ts-node src/utils/parser/index.js",
-    "parse:txt": "ts-node src/utils/parser/parseText.ts"
+    "parse:csv": "bun --bun src/utils/parser/index.js",
+    "parse:txt": "bun --bun src/utils/parser/parseText.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",

@@ -1,4 +1,4 @@
-import { SubCategory } from "../types";
+import { SubCategory } from "~/types";
 
 export const JummalApp: SubCategory = {
   name: "Jummal",

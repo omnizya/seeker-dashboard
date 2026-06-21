@@ -38,12 +38,21 @@ function positionOf(packed: bigint, k: number): number {
   return Number((packed >> (BigInt(k - 1) * 4n)) & NIBBLE_MASK);
 }
 
+const squareCache = new Map<string, number[]>();
+
 export function fillSquare(input: number, elemental: Elementals): number[] {
+  const cacheKey = `${input}:${elemental}`;
+  if (squareCache.has(cacheKey)) {
+    return squareCache.get(cacheKey)!;
+  }
+
   const packed = ELEMENT_PACKED[elemental];
   const out = new Array<number>(9).fill(0);
   for (let k = 1; k <= 9; k++) {
-    out[positionOf(packed, k)] = input + (k - 1);
+    out[positionOf(packed, k)] = (input + (k - 1)) | 0; // bitwise OR 0 for integer coercion
   }
+  
+  squareCache.set(cacheKey, out);
   return out;
 }
 
@@ -51,10 +60,8 @@ export const Square = (elemental: Elementals, input: number): number[] =>
   fillSquare(input, elemental);
 
 /** Sum of any row/column/diagonal for a given starting input. */
-export const magicConstant = (input: number): number => input * 3 + 12;
+export const magicConstant = (input: number): number => (input * 3 + 12) | 0;
 
-console.log(Square(Elementals.Igni, 1111));
-// [1116, 1111, 1118, 1117, 1115, 1113, 1112, 1119, 1114]
 
 // ---------------------------------------------------------------------------
 // Derivation (not used at runtime) — kept for traceability. Run this if you

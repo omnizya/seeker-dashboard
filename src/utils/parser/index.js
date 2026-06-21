@@ -3,7 +3,10 @@ import * as path from "path";
 import * as csv from "fast-csv";
 import { CalcJomal } from "..";
 import { createClient } from "@supabase/supabase-js";
-const supabase = createClient("https://.supabase.co", "..");
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+);
 
 const parseInsert = () =>
   new Promise((resolve, reject) => {
@@ -26,7 +29,7 @@ async function InsertData(row, method, table) {
   const j = method(row.holy_name);
   const { data, error } = await supabase
     .from(table)
-    .insert({ name: row.holy_name, east: j.east.base, west: j.west.base })
+    .insert({ name: row.holy_name, east: j.ge, west: j.gw })
     .select();
   console.log(data);
   console.error(error);
