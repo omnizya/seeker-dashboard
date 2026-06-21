@@ -1,221 +1,151 @@
-'use client'
+"use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import {
-  IconButton,
-  Avatar,
-  Box,
-  CloseButton,
-  Flex,
-  HStack,
-  VStack,
-  Icon,
-  useColorModeValue,
-  Text,
-  Drawer,
-  DrawerContent,
-  useDisclosure,
-  BoxProps,
-  FlexProps,
+  Home,
+  TrendingUp,
+  Compass,
+  Star,
+  Settings,
   Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
-} from '@chakra-ui/react'
+  Bell,
+  ChevronDown,
+  User,
+  LogOut,
+  CreditCard,
+} from "lucide-react";
 import {
-  FiHome,
-  FiTrendingUp,
-  FiCompass,
-  FiStar,
-  FiSettings,
-  FiMenu,
-  FiBell,
-  FiChevronDown,
-} from 'react-icons/fi'
-import { IconType } from 'react-icons'
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from "~/components/ui/sheet";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "~/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
-interface LinkItemProps {
-  name: string
-  icon: IconType
-}
+const navItems = [
+  { name: "Home", icon: Home, href: "/dashboard" },
+  { name: "Trending", icon: TrendingUp, href: "/dashboard" },
+  { name: "Explore", icon: Compass, href: "/dashboard" },
+  { name: "Favourites", icon: Star, href: "/dashboard" },
+  { name: "Settings", icon: Settings, href: "/dashboard/profile" },
+] as const;
 
-interface NavItemProps extends FlexProps {
-  icon: IconType
-  children: React.ReactNode
-}
-
-interface MobileProps extends FlexProps {
-  onOpen: () => void
-}
-
-interface SidebarProps extends BoxProps {
-  onClose: () => void
-}
-
-const LinkItems: Array<LinkItemProps> = [
-  { name: 'Home', icon: FiHome },
-  { name: 'Trending', icon: FiTrendingUp },
-  { name: 'Explore', icon: FiCompass },
-  { name: 'Favourites', icon: FiStar },
-  { name: 'Settings', icon: FiSettings },
-]
-
-const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+const SidebarContent = ({ className }: { className?: string }) => {
   return (
-    <Box
-      transition="3s ease"
-      bg={useColorModeValue('white', 'gray.900')}
-      borderRight="1px"
-      borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-      w={{ base: 'full', md: 60 }}
-      pos="fixed"
-      h="full"
-      {...rest}>
-      <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-          Logo
-        </Text>
-        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
-      </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
-          {link.name}
-        </NavItem>
+    <nav className={cn("flex h-full flex-col", className)}>
+      <div className="flex h-20 items-center justify-between px-8">
+        <span className="text-2xl font-bold font-mono">Logo</span>
+      </div>
+      {navItems.map((item) => (
+        <Link
+          key={item.name}
+          href={item.href}
+          className="mx-4 flex items-center gap-4 rounded-lg p-4 text-sm transition-colors hover:bg-cyan-400 hover:text-white"
+        >
+          <item.icon className="h-4 w-4" />
+          {item.name}
+        </Link>
       ))}
-    </Box>
-  )
-}
+    </nav>
+  );
+};
 
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const MobileNav = ({ onOpen }: { onOpen: () => void }) => {
   return (
-    <Box
-      as="a"
-      href="#"
-      style={{ textDecoration: 'none' }}
-      _focus={{ boxShadow: 'none' }}>
-      <Flex
-        align="center"
-        p="4"
-        mx="4"
-        borderRadius="lg"
-        role="group"
-        cursor="pointer"
-        _hover={{
-          bg: 'cyan.400',
-          color: 'white',
-        }}
-        {...rest}>
-        {icon && (
-          <Icon
-            mr="4"
-            fontSize="16"
-            _groupHover={{
-              color: 'white',
-            }}
-            as={icon}
-          />
-        )}
-        {children}
-      </Flex>
-    </Box>
-  )
-}
-
-const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
-  return (
-    <Flex
-      ml={{ base: 0, md: 60 }}
-      px={{ base: 4, md: 4 }}
-      height="20"
-      alignItems="center"
-      bg={useColorModeValue('white', 'gray.900')}
-      borderBottomWidth="1px"
-      borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
-      justifyContent={{ base: 'space-between', md: 'flex-end' }}
-      {...rest}>
-      <IconButton
-        display={{ base: 'flex', md: 'none' }}
+    <div className="flex h-20 items-center justify-between border-b px-4 md:ms-60">
+      <button
+        type="button"
+        className="inline-flex items-center justify-center rounded-md p-2 md:hidden"
+        aria-label="Open menu"
         onClick={onOpen}
-        variant="outline"
-        aria-label="open menu"
-        icon={<FiMenu />}
-      />
+      >
+        <Menu className="h-6 w-6" />
+      </button>
 
-      <Text
-        display={{ base: 'flex', md: 'none' }}
-        fontSize="2xl"
-        fontFamily="monospace"
-        fontWeight="bold">
-        Logo
-      </Text>
+      <span className="text-2xl font-bold font-mono md:hidden">Logo</span>
 
-      <HStack spacing={{ base: '0', md: '6' }}>
-        <IconButton size="lg" variant="ghost" aria-label="open menu" icon={<FiBell />} />
-        <Flex alignItems={'center'}>
-          <Menu>
-            <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: 'none' }}>
-              <HStack>
-                <Avatar
-                  size={'sm'}
-                  src={
-                    'https://images.unsplash.com/photo-1619946794135-5bc917a27793?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&s=b616b2c5b373a80ffc9636ba24f7a4a9'
-                  }
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" aria-label="Notifications">
+          <Bell className="h-5 w-5" />
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src="https://images.unsplash.com/photo-1619946794135-5bc917a27793?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&s=b616b2c5b373a80ffc9636ba24f7a4a9"
+                  alt="User avatar"
                 />
-                <VStack
-                  display={{ base: 'none', md: 'flex' }}
-                  alignItems="flex-start"
-                  spacing="1px"
-                  ml="2">
-                  <Text fontSize="sm">Justina Clark</Text>
-                  <Text fontSize="xs" color="gray.600">
-                    Admin
-                  </Text>
-                </VStack>
-                <Box display={{ base: 'none', md: 'flex' }}>
-                  <FiChevronDown />
-                </Box>
-              </HStack>
-            </MenuButton>
-            <MenuList
-              bg={useColorModeValue('white', 'gray.900')}
-              borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <MenuItem>Profile</MenuItem>
-              <MenuItem>Settings</MenuItem>
-              <MenuItem>Billing</MenuItem>
-              <MenuDivider />
-              <MenuItem>Sign out</MenuItem>
-            </MenuList>
-          </Menu>
-        </Flex>
-      </HStack>
-    </Flex>
-  )
-}
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <div className="hidden flex-col items-start text-sm md:flex">
+                <span>Justina Clark</span>
+                <span className="text-xs text-muted-foreground">Admin</span>
+              </div>
+              <ChevronDown className="hidden h-4 w-4 md:block" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-48" align="end">
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <CreditCard className="mr-2 h-4 w-4" />
+              Billing
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+};
 
 const SidebarWithHeader = ({ children }: { children?: React.ReactNode }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   return (
-    <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
-      <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
-      <Drawer
-        isOpen={isOpen}
-        placement="left"
-        onClose={onClose}
-        returnFocusOnClose={false}
-        onOverlayClick={onClose}
-        size="full">
-        <DrawerContent>
-          <SidebarContent onClose={onClose} />
-        </DrawerContent>
-      </Drawer>
-      {/* mobilenav */}
-      <MobileNav onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 60 }} p="4">
-        {children}
-      </Box>
-    </Box>
-  )
-}
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+      <aside className="hidden flex-shrink-0 flex-col border-e bg-white dark:bg-gray-900 md:flex md:w-60">
+        <SidebarContent />
+      </aside>
 
-export default SidebarWithHeader
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="end" className="w-60 p-0">
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SidebarContent />
+        </SheetContent>
+      </Sheet>
+
+      <div className="flex-1">
+        <MobileNav onOpen={() => setSheetOpen(true)} />
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+export default SidebarWithHeader;
