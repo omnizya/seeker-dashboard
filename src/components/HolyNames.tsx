@@ -38,9 +38,9 @@ export const HolyNames = () => {
       </TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>الكلمة</TableHead>
-          <TableHead className="text-left">عدد الحروف</TableHead>
-          <TableHead className="text-left">الرقم</TableHead>
+          <TableHead className="text-start">الكلمة</TableHead>
+          <TableHead className="text-end">عدد الحروف</TableHead>
+          <TableHead className="text-end">الرقم</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -54,7 +54,7 @@ export const HolyNames = () => {
             <TableCell className="w-min text-lg">
               {i.holy_name.length}
             </TableCell>
-            <TableCell className="text-left">
+            <TableCell className="text-end">
               <span className="w-3ch text-lg">{i.east}</span>
             </TableCell>
           </TableRow>
