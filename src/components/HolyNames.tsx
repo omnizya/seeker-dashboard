@@ -1,20 +1,17 @@
 "use client";
-import {
-  Stat,
-  StatNumber,
-  Table,
-  TableCaption,
-  TableContainer,
-  Tag,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import { Database } from "../types/supabase";
+import {
+  Table,
+  TableCaption,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "~/components/ui/table";
+import { Badge } from "~/components/ui/badge";
 
 export type HolyNames = {
   id: number;
@@ -35,40 +32,34 @@ export const HolyNames = () => {
   }, [supabase]);
 
   return (
-    <TableContainer dir="rtl">
-      <Table size={"md"} className="lg:w-1/3">
-        <TableCaption placement="top" fontSize={"xxx-large"}>
-          إحصاء أسماء الله الحسنى
-        </TableCaption>
-        <Thead>
-          <Tr>
-            <Th>الكلمة</Th>
-            <Th isNumeric>عدد الحروف</Th>
-            <Th isNumeric>الرقم</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {names.map((i: HolyNames, j: number) => (
-            <Tr key={i.id + j} className="">
-              <Td width={"min-content"} className="bg-zinc-500">
-                <Tag size="lg" color={"teal"}>
-                  {i.holy_name}
-                </Tag>
-              </Td>
-              <Td width={"min-content"} fontSize={"x-large"}>
-                {i.holy_name.length}
-              </Td>
-              <Td isNumeric>
-                <Stat>
-                  <StatNumber width={"3ch"} fontSize={"larger"}>
-                    {i.east}
-                  </StatNumber>
-                </Stat>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-    </TableContainer>
+    <Table className="lg:w-1/3">
+      <TableCaption className="text-3xl">
+        إحصاء أسماء الله الحسنى
+      </TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>الكلمة</TableHead>
+          <TableHead className="text-left">عدد الحروف</TableHead>
+          <TableHead className="text-left">الرقم</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {names.map((i: HolyNames, j: number) => (
+          <TableRow key={i.id + j}>
+            <TableCell className="w-min bg-zinc-500">
+              <Badge variant="secondary" className="text-base px-3 py-1">
+                {i.holy_name}
+              </Badge>
+            </TableCell>
+            <TableCell className="w-min text-lg">
+              {i.holy_name.length}
+            </TableCell>
+            <TableCell className="text-left">
+              <span className="w-3ch text-lg">{i.east}</span>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };
