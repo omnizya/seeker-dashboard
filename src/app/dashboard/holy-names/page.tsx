@@ -1,11 +1,10 @@
 "use client";
-import { Box } from "@chakra-ui/react";
 import { HolyNames } from "~/components/HolyNames";
 
 export default function HolyNamesPage() {
   return (
-    <Box p={4} maxWidth={"min-content"}>
+    <div className="p-4 max-w-min">
       <HolyNames />
-    </Box>
+    </div>
   );
 }

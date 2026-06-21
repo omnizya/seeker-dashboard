@@ -1,19 +1,10 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Checkbox,
-  Flex,
-  FormControl,
-  FormLabel,
-  Heading,
-  Input,
-  Stack,
-  Text,
-  useColorModeValue,
-} from "@chakra-ui/react";
 import { login } from "../actions";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
 
 const LoginPageText: { [x: string]: any } = {
   heading: "Sign in to your account",
@@ -35,59 +26,39 @@ const LoginPageText: { [x: string]: any } = {
 
 export default function LoginPage() {
   return (
-    <Flex
-      minH={"100vh"}
-      align={"center"}
-      justify={"center"}
-      bg={useColorModeValue("gray.50", "gray.800")}
-    >
-      <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
-        <Stack align={"center"}>
-          <Heading fontSize={"4xl"}>{LoginPageText.heading}</Heading>
-          <Text fontSize={"lg"} color={"gray.600"}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800 px-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="text-4xl">{LoginPageText.heading}</CardTitle>
+          <CardDescription className="text-lg text-gray-600">
             {LoginPageText.description}
-          </Text>
-        </Stack>
-        <Box
-          rounded={"lg"}
-          bg={useColorModeValue("white", "gray.700")}
-          boxShadow={"lg"}
-          p={8}
-        >
-          <Stack spacing={4}>
-            <FormControl id="email">
-              <FormLabel>{LoginPageText.form.email.label}</FormLabel>
-              <Input type="email" />
-            </FormControl>
-            <FormControl id="password">
-              <FormLabel>{LoginPageText.form.password.label}</FormLabel>
-              <Input type="password" />
-            </FormControl>
-            <Stack spacing={10}>
-              <Stack
-                direction={{ base: "column", sm: "row" }}
-                align={"start"}
-                justify={"space-between"}
-              >
-                <Checkbox>{LoginPageText.form.action.checbox}</Checkbox>
-                <Text color={"blue.400"}>
-                  {LoginPageText.form.action.forgotPass}
-                </Text>
-              </Stack>
-              <Button
-                bg={"blue.400"}
-                color={"white"}
-                _hover={{
-                  bg: "blue.500",
-                }}
-                formAction={login}
-              >
-                {LoginPageText.form.action.login}
-              </Button>
-            </Stack>
-          </Stack>
-        </Box>
-      </Stack>
-    </Flex>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">{LoginPageText.form.email.label}</Label>
+              <Input type="email" id="email" name="email" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">{LoginPageText.form.password.label}</Label>
+              <Input type="password" id="password" name="password" />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" className="rounded" />
+                {LoginPageText.form.action.checbox}
+              </label>
+              <span className="text-sm text-blue-500 cursor-pointer">
+                {LoginPageText.form.action.forgotPass}
+              </span>
+            </div>
+            <Button type="submit" formAction={login} className="w-full">
+              {LoginPageText.form.action.login}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

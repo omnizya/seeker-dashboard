@@ -1,24 +1,12 @@
 "use client";
 
-import {
-  Flex,
-  Box,
-  FormControl,
-  FormLabel,
-  Input,
-  InputGroup,
-  HStack,
-  InputRightElement,
-  Stack,
-  Button,
-  Heading,
-  Text,
-  useColorModeValue,
-  Link,
-} from "@chakra-ui/react";
 import { useState } from "react";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { signup } from "../actions";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
+import Link from "next/link";
 
 const SignupCardText: { [x: string]: any } = {
   heading: "Sign up",
@@ -49,87 +37,60 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <Flex
-      minH={"100vh"}
-      align={"center"}
-      justify={"center"}
-      bg={useColorModeValue("gray.50", "gray.800")}
-    >
-      <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
-        <Stack align={"center"}>
-          <Heading fontSize={"4xl"} textAlign={"center"}>
-            {SignupCardText.heading}
-          </Heading>
-          <Text fontSize={"lg"} color={"gray.600"}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800 px-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="text-4xl">{SignupCardText.heading}</CardTitle>
+          <CardDescription className="text-lg text-gray-600">
             {SignupCardText.description}
-          </Text>
-        </Stack>
-        <Box
-          rounded={"lg"}
-          bg={useColorModeValue("white", "gray.700")}
-          boxShadow={"lg"}
-          p={8}
-        >
-          <Stack spacing={4}>
-            <HStack>
-              <Box>
-                <FormControl id="firstName" isRequired>
-                  <FormLabel>{SignupCardText.form.firstName.label}</FormLabel>
-                  <Input type="text" />
-                </FormControl>
-              </Box>
-              <Box>
-                <FormControl id="lastName">
-                  <FormLabel>{SignupCardText.form.lastName.label}</FormLabel>
-                  <Input type="text" />
-                </FormControl>
-              </Box>
-            </HStack>
-            <FormControl id="email" isRequired>
-              <FormLabel>{SignupCardText.form.email.label}</FormLabel>
-              <Input type="email" />
-            </FormControl>
-            <FormControl id="password" isRequired>
-              <FormLabel>{SignupCardText.form.password.label}</FormLabel>
-              <InputGroup>
-                <Input type={showPassword ? "text" : "password"} />
-                <InputRightElement h={"full"}>
-                  <Button
-                    variant={"ghost"}
-                    onClick={() =>
-                      setShowPassword((showPassword) => !showPassword)
-                    }
-                  >
-                    {showPassword ? <ViewIcon /> : <ViewOffIcon />}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
-            <Stack spacing={10} pt={2}>
-              <Button
-                loadingText={SignupCardText.form.action.loadingText}
-                size="lg"
-                bg={"blue.400"}
-                color={"white"}
-                _hover={{
-                  bg: "blue.500",
-                }}
-                formAction={signup}
-              >
-                {SignupCardText.form.action.buttonText}
-              </Button>
-            </Stack>
-            <Stack pt={6}>
-              <Text align={"center"}>
-                {SignupCardText.form.footerText}{" "}
-                <Link color={"blue.400"} href="/login">
-                  {SignupCardText.form.LoginLink}
-                </Link>
-              </Text>
-            </Stack>
-          </Stack>
-        </Box>
-      </Stack>
-    </Flex>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">{SignupCardText.form.firstName.label}</Label>
+                <Input type="text" id="firstName" name="firstName" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">{SignupCardText.form.lastName.label}</Label>
+                <Input type="text" id="lastName" name="lastName" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">{SignupCardText.form.email.label}</Label>
+              <Input type="email" id="email" name="email" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">{SignupCardText.form.password.label}</Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+            <Button type="submit" formAction={signup} className="w-full" size="lg">
+              {SignupCardText.form.action.buttonText}
+            </Button>
+            <p className="text-center text-sm">
+              {SignupCardText.form.footerText}{" "}
+              <Link href="/login" className="text-blue-500 hover:underline">
+                {SignupCardText.form.LoginLink}
+              </Link>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
