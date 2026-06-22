@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,8 @@ import {
 } from "~/components/ui/dialog";
 import { toast } from "sonner";
 import { Toaster } from "~/components/ui/sonner";
+import { useJournalStore } from "~/stores/journalStore";
+import type { JournalEntryCreateInput, JournalEntryUpdateInput } from "~/schemas/journal";
 
 type JournalEntry = {
   id: number;
@@ -85,9 +87,7 @@ const MOOD_EMOJI: Record<string, string> = {
 };
 
 export default function JournalPage() {
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { entries, loading, error, fetchEntries, addEntry, updateEntry, deleteEntry } = useJournalStore();
   const [tabValue, setTabValue] = useState("all");
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -100,27 +100,16 @@ export default function JournalPage() {
   const [formIsPrivate, setFormIsPrivate] = useState(false);
 
   useEffect(() => {
-    fetch("/api/journal")
-      .then((r) => {
-        if (r.status === 401) throw new Error("يرجى تسجيل الدخول أولاً");
-        return r.json();
-      })
-      .then((data) => {
-        setEntries(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
-  }, []);
+    fetchEntries();
+  }, [fetchEntries]);
 
   const typeKeys = Object.keys(ENTRY_TYPES);
   const selectedType = tabValue === "all" ? null : tabValue;
 
+  const storeEntries = entries as unknown as JournalEntry[];
   const filtered = selectedType
-    ? entries.filter((e) => e.entry_type === selectedType)
-    : entries;
+    ? storeEntries.filter((e) => e.entry_type === selectedType)
+    : storeEntries;
 
   function openCreate() {
     setEditingId(null);
@@ -149,61 +138,44 @@ export default function JournalPage() {
       toast.warning("المحتوى مطلوب", { duration: 2000 });
       return;
     }
-    const body = {
-      title: formTitle,
-      content: formContent,
-      entry_type: formType,
-      mood: formMood || null,
-      tags: formTags || null,
-      is_private: formIsPrivate,
-    };
+    const tags = formTags
+      ? formTags.split(",").map((t) => t.trim()).filter(Boolean)
+      : undefined;
 
-    const isEdit = editingId != null;
-    const url = "/api/journal";
-    const method = isEdit ? "PUT" : "POST";
-    const payload = isEdit ? { id: editingId, ...body } : body;
+    const result = editingId != null
+      ? updateEntry({
+          id: String(editingId),
+          title: formTitle || undefined,
+          content: formContent,
+          mood: (formMood || undefined) as JournalEntryUpdateInput["mood"],
+          tags,
+        })
+      : addEntry({
+          title: formTitle || "بدون عنوان",
+          content: formContent,
+          mood: (formMood || undefined) as JournalEntryCreateInput["mood"],
+          tags,
+        });
 
-    fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error("فشل الحفظ");
-        return r.json();
-      })
-      .then((result) => {
-        if (isEdit) {
-          setEntries((prev) =>
-            prev.map((e) => (e.id === editingId ? result : e))
-          );
-          toast.success("تم التحديث", { duration: 2000 });
-        } else {
-          setEntries((prev) => [result, ...prev]);
-          toast.success("تم الحفظ", { duration: 2000 });
-        }
+    result.then((res) => {
+      if (res.success) {
+        toast.success(editingId != null ? "تم التحديث" : "تم الحفظ", { duration: 2000 });
         setIsOpen(false);
-      })
-      .catch(() => {
-        toast.error("فشل الحفظ", { duration: 2000 });
-      });
+      } else {
+        toast.error(res.error || "فشل الحفظ", { duration: 2000 });
+      }
+    });
   }
 
   function handleDelete(id: number) {
     if (!window.confirm("هل أنت متأكد من حذف هذه التدوينة؟")) return;
-    fetch("/api/journal", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error("فشل الحذف");
-        setEntries((prev) => prev.filter((e) => e.id !== id));
+    deleteEntry(String(id)).then((res) => {
+      if (res.success) {
         toast.info("تم الحذف", { duration: 2000 });
-      })
-      .catch(() => {
-        toast.error("فشل الحذف", { duration: 2000 });
-      });
+      } else {
+        toast.error(res.error || "فشل الحذف", { duration: 2000 });
+      }
+    });
   }
 
   function formatDate(iso: string) {
