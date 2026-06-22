@@ -1,1 +1,1 @@
-create or replace function spiritual.solar_noon ( d timestamp, lon numeric ) returns timestamptz language sql immutable as $$ select d::date + interval '12 hours' - (spiritual.equation_of_time(d) / 1440.0)::interval - (lon / 360.0 * 24 * 60 / 1440.0)::interval; $$;
+create or replace function spiritual.solar_noon ( d timestamp, lon numeric ) returns timestamptz language sql immutable as $$ select d::date + interval '12 hours' - make_interval(mins => round(spiritual.equation_of_time(d) + lon / 360.0 * 24 * 60)::int); $$;
