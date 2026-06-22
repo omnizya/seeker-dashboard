@@ -6,7 +6,7 @@ import { CalcJomal } from "..";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
 );
 
 const QuranByRevelation = "./src/data/tanzil-clean.txt";
@@ -15,7 +15,7 @@ async function InsertData(
   id: number,
   row: any,
   method: Function,
-  table: string
+  table: string,
 ) {
   const j: CalcJomalT = method(row);
   const { data, error } = await supabase
@@ -32,7 +32,7 @@ async function InsertData(
       },
       {
         onConflict: "id",
-      }
+      },
     )
     .select();
   if (error) console.error(error);
@@ -57,8 +57,8 @@ function splitFile(filePath: string, outputDir: string) {
           nafsy: CalcJomal(chunk).n,
         },
         null,
-        2
-      )
+        2,
+      ),
     );
     // InsertData(index + 1, chunk, CalcJomal, "quran_revelation");
   });

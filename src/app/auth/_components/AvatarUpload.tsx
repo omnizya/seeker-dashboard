@@ -3,6 +3,9 @@
 import * as React from "react";
 import { cn } from "~/lib/utils";
 import { Camera, X } from "lucide-react";
+import { Image } from "@radix-ui/react-avatar";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 
 interface AvatarUploadProps {
   value: string | null;
@@ -40,12 +43,12 @@ export default function AvatarUpload({
       >
         {value ? (
           <>
-            <img
+            <Image
               src={value}
               alt="الصورة الشخصية"
               className="h-full w-full object-cover"
             />
-            <button
+            <Button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -54,13 +57,13 @@ export default function AvatarUpload({
               className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground"
             >
               <X className="h-3 w-3" />
-            </button>
+            </Button>
           </>
         ) : (
           <Camera className="h-8 w-8 text-muted-foreground/50" />
         )}
       </div>
-      <input
+      <Input
         ref={fileRef}
         type="file"
         accept="image/*"

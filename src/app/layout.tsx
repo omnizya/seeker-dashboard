@@ -25,7 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html
+      lang="ar"
+      dir="rtl"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
       <body>
         <Providers>
           {children}

@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
-    redirect("/login");
+    redirect("/auth/login");
   }
   return (
     <section className="p-4 space-y-4">
