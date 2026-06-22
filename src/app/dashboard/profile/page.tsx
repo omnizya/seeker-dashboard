@@ -1,95 +1,179 @@
 "use client";
 
-import { useState } from "react";
-import { Eye, EyeOff, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
+  CardHeader,
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { createClient } from "~/utils/supabase/client";
 
 export default function UserProfileEdit() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      setUserId(user.id);
+      setEmail(user.email ?? "");
+
+      const { data: profile } = await supabase
+        .schema("identity")
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        setDisplayName(profile.display_name ?? "");
+        setAvatarUrl(profile.avatar_url);
+      }
+
+      setLoading(false);
+    }
+
+    loadProfile();
+  }, []);
+
+  async function handleSave() {
+    if (!userId) return;
+    setSaving(true);
+    setMessage(null);
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .schema("identity")
+      .from("profiles")
+      .upsert({
+        id: userId,
+        display_name: displayName,
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString(),
+      });
+
+    setSaving(false);
+
+    if (error) {
+      setMessage({ type: "error", text: "حدث خطأ أثناء الحفظ" });
+    } else {
+      setMessage({ type: "success", text: "تم حفظ التغييرات بنجاح" });
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl sm:text-3xl">
-            User Profile Edit
+            الملف الشخصي
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Avatar */}
           <div className="space-y-2">
-            <Label>User Icon</Label>
+            <Label>الصورة الشخصية</Label>
             <div className="flex flex-col items-center gap-6 sm:flex-row">
-              <div className="relative">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src="https://bit.ly/sage-adebayo" />
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-                <button
-                  type="button"
-                  className="absolute -right-1 -top-1 rounded-full bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90"
-                  aria-label="remove Image"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-              <Button className="w-full sm:w-auto">Change Icon</Button>
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={avatarUrl ?? undefined} />
+                <AvatarFallback>{initials || "م"}</AvatarFallback>
+              </Avatar>
+              <Input
+                placeholder="رابط الصورة (اختياري)"
+                value={avatarUrl ?? ""}
+                onChange={(e) => setAvatarUrl(e.target.value || null)}
+              />
             </div>
           </div>
 
+          {/* Display Name */}
           <div className="space-y-2">
-            <Label htmlFor="userName">User name</Label>
-            <Input id="userName" placeholder="UserName" type="text" required />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="displayName">اسم العرض</Label>
             <Input
-              id="email"
-              placeholder="your-email@example.com"
-              type="email"
-              required
+              id="displayName"
+              name="displayName"
+              placeholder="اسمك"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
             />
           </div>
 
+          {/* Email (read-only) */}
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                placeholder="password"
-                type={showPassword ? "text" : "password"}
-                required
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
+            <Label htmlFor="email">البريد الإلكتروني</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              disabled
+              className="opacity-60"
+            />
           </div>
 
+          {/* Status message */}
+          {message && (
+            <p
+              className={`text-sm ${
+                message.type === "success" ? "text-green-500" : "text-destructive"
+              }`}
+            >
+              {message.text}
+            </p>
+          )}
+
+          {/* Actions */}
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Button variant="destructive" className="w-full">
-              Cancel
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => window.location.reload()}
+            >
+              إلغاء
             </Button>
-            <Button className="w-full">Submit</Button>
+            <Button
+              className="w-full"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  جاري الحفظ...
+                </span>
+              ) : (
+                "حفظ"
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
