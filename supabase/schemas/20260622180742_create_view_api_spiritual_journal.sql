@@ -1,0 +1,1 @@
+drop view if exists api.spiritual_journal; create view api.spiritual_journal with (security_invoker = true) as select sj.id, sj.entry_date, sj.title, sj.content, sj.entry_type, sj.mood, sj.tags, sj.user_id, sj.created_at, sj.updated_at from spiritual.spiritual_journal sj;

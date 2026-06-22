@@ -1,0 +1,1 @@
+create policy planetary_hours_create on spiritual.planetary_hours for insert to authenticated with check ( tenant_id = (select core.current_tenant()) and (select rbac.authorize('planetary.create')) );

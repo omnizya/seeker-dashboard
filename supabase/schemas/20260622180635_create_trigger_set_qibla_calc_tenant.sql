@@ -1,0 +1,1 @@
+drop trigger if exists set_qibla_calc_tenant on spiritual.qibla_calculations; create trigger set_qibla_calc_tenant before insert on spiritual.qibla_calculations for each row execute function spiritual.inject_tenant ();

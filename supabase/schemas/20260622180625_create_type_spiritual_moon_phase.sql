@@ -1,0 +1,1 @@
+do $$ begin if not exists (select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace where t.typname = 'moon_phase' and n.nspname = 'spiritual') then create type spiritual.moon_phase as enum ('new_moon', 'waxing_crescent', 'first_quarter', 'waxing_gibbous', 'full_moon', 'waning_gibbous', 'third_quarter', 'waning_crescent'); end if; end$$;

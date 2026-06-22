@@ -1,0 +1,1 @@
+alter table magick.square_calculations enable row level security; drop policy if exists square_calc_read on magick.square_calculations; drop policy if exists square_calc_create on magick.square_calculations; drop policy if exists square_calc_delete on magick.square_calculations;

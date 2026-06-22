@@ -1,0 +1,1 @@
+alter table spiritual.planet_positions enable row level security; drop policy if exists planet_positions_read on spiritual.planet_positions; drop policy if exists planet_positions_create on spiritual.planet_positions;

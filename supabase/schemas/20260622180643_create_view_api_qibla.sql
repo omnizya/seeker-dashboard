@@ -1,0 +1,1 @@
+drop view if exists api.qibla; create view api.qibla with (security_invoker = true) as select qc.id, qc.from_lat, qc.from_lng, qc.bearing, qc.distance_km, qc.tenant_id, p.display_name as calculated_by from spiritual.qibla_calculations qc join identity.profiles p on p.id = qc.calculated_by;

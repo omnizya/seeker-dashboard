@@ -1,0 +1,1 @@
+create table if not exists audit.events ( id bigint generated always as identity primary key, tenant_id uuid, actor_id uuid, table_name text, operation text, record_id text, payload jsonb, created_at timestamptz default now() );

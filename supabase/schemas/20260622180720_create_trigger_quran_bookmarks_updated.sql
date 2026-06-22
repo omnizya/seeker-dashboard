@@ -1,0 +1,1 @@
+drop trigger if exists quran_bookmarks_updated on spiritual.quran_bookmarks; create trigger quran_bookmarks_updated before update on spiritual.quran_bookmarks for each row execute function internal.touch_updated_at ();

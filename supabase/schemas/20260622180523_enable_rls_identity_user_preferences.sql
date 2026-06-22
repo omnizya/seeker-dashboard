@@ -1,0 +1,1 @@
+alter table identity.user_preferences enable row level security; drop policy if exists user_preferences_read on identity.user_preferences; drop policy if exists user_preferences_upsert on identity.user_preferences;

@@ -1,0 +1,1 @@
+create or replace function magick.unpack_cells (packed bigint) returns integer[] language sql immutable as $$ select array_agg(((packed >> (4 * (i - 1))) & 15)::int order by i) from generate_series(1, 9) as i; $$;

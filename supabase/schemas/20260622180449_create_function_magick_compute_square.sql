@@ -1,0 +1,1 @@
+create or replace function magick.compute_square () returns trigger language plpgsql as $$ begin new.output_square := magick.fill_square(new.element, new.input_value); new.magic_constant := magick.magic_constant(new.input_value); return new; end; $$;

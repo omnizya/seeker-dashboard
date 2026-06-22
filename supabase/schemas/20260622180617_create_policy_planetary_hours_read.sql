@@ -1,0 +1,1 @@
+create policy planetary_hours_read on spiritual.planetary_hours for select to authenticated using ( (tenant_id = (select core.current_tenant()) or tenant_id is null) and (select rbac.authorize('planetary.read')) );

@@ -1,0 +1,1 @@
+drop trigger if exists set_planetary_hours_tenant on spiritual.planetary_hours; create trigger set_planetary_hours_tenant before insert on spiritual.planetary_hours for each row execute function spiritual.inject_tenant ();

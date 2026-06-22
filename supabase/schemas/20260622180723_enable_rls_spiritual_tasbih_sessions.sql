@@ -1,0 +1,1 @@
+alter table spiritual.tasbih_sessions enable row level security; drop policy if exists tasbih_sessions_read on spiritual.tasbih_sessions; drop policy if exists tasbih_sessions_create on spiritual.tasbih_sessions; drop policy if exists tasbih_sessions_delete on spiritual.tasbih_sessions;

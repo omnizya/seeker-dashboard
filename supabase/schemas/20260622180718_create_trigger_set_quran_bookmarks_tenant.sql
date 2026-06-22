@@ -1,0 +1,1 @@
+drop trigger if exists set_quran_bookmarks_tenant on spiritual.quran_bookmarks; create trigger set_quran_bookmarks_tenant before insert on spiritual.quran_bookmarks for each row execute function spiritual.inject_tenant ();

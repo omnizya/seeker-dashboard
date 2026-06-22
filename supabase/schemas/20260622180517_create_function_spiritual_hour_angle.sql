@@ -1,0 +1,1 @@
+create or replace function spiritual.hour_angle ( latitude numeric, declination numeric, angle numeric ) returns numeric language sql immutable as $$ select degrees(acos( (sin(radians(angle)) - sin(radians(latitude)) * sin(radians(declination))) / (cos(radians(latitude)) * cos(radians(declination))) )); $$;

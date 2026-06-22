@@ -1,0 +1,1 @@
+drop view if exists api.holy_names; create view api.holy_names with (security_invoker = true) as select hn.id, hn.holy_name, hn.base_value, hn.tenant_id, p.display_name as submitted_by from spiritual.holy_names hn join identity.profiles p on p.id = hn.submitted_by;

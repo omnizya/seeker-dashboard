@@ -1,0 +1,1 @@
+drop view if exists api.prayer_times; create view api.prayer_times with (security_invoker = true) as select pt.id, pt.calc_date, pt.latitude, pt.longitude, pt.method, pt.fajr, pt.sunrise, pt.dhuhr, pt.asr, pt.maghrib, pt.isha, pt.tenant_id, p.display_name as calculated_by from spiritual.prayer_times pt join identity.profiles p on p.id = pt.calculated_by;

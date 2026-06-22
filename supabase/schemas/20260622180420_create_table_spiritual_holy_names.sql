@@ -1,0 +1,1 @@
+create table if not exists spiritual.holy_names ( id bigint generated always as identity primary key, holy_name text not null unique, base_value integer, submitted_by uuid not null references identity.profiles (id), tenant_id uuid references core.tenants (id), created_at timestamptz default now(), updated_at timestamptz default now() );

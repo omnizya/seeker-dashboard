@@ -1,0 +1,1 @@
+create or replace function magick.parity_cross (cells integer[]) returns integer[] language sql immutable as $$ select magick.reshape_3x3( (select array_agg(v & 1 order by ord) from unnest(cells) with ordinality as u (v, ord)) ); $$;

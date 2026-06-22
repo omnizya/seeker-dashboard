@@ -1,0 +1,1 @@
+create policy spiritual_journal_update on spiritual.spiritual_journal for update to authenticated using ( user_id = (select auth.uid()) and (select rbac.authorize('journal.update')) ) with check ( user_id = (select auth.uid()) and (select rbac.authorize('journal.update')) );

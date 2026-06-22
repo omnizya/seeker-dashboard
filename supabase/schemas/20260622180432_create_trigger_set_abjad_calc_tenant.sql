@@ -1,0 +1,1 @@
+drop trigger if exists set_abjad_calc_tenant on spiritual.abjad_calculations; create trigger set_abjad_calc_tenant before insert on spiritual.abjad_calculations for each row execute function spiritual.inject_tenant ();

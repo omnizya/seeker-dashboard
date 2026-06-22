@@ -1,0 +1,1 @@
+drop trigger if exists set_spiritual_journal_tenant on spiritual.spiritual_journal; create trigger set_spiritual_journal_tenant before insert on spiritual.spiritual_journal for each row execute function spiritual.inject_tenant ();

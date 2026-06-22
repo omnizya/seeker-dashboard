@@ -1,0 +1,1 @@
+drop view if exists api.square_calculations; create view api.square_calculations with (security_invoker = true) as select sc.id, sc.element, sc.input_value, sc.output_square, sc.magic_constant, sc.tenant_id, p.display_name as calculated_by from magick.square_calculations sc join identity.profiles p on p.id = sc.calculated_by;

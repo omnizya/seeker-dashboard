@@ -1,0 +1,1 @@
+drop trigger if exists set_planet_positions_tenant on spiritual.planet_positions; create trigger set_planet_positions_tenant before insert on spiritual.planet_positions for each row execute function spiritual.inject_tenant ();

@@ -1,0 +1,1 @@
+drop trigger if exists planetary_hours_audit on spiritual.planetary_hours; create trigger planetary_hours_audit after insert or delete on spiritual.planetary_hours for each row execute function audit.log_change ();

@@ -1,0 +1,1 @@
+drop trigger if exists prayer_times_audit on spiritual.prayer_times; create trigger prayer_times_audit after insert or delete on spiritual.prayer_times for each row execute function audit.log_change ();

@@ -1,0 +1,1 @@
+create policy tasbih_sessions_read on spiritual.tasbih_sessions for select to authenticated using ( (user_id = (select auth.uid()) or tenant_id = (select core.current_tenant())) and (select rbac.authorize('tasbih.read')) );

@@ -1,0 +1,1 @@
+alter table spiritual.planetary_hours enable row level security; drop policy if exists planetary_hours_read on spiritual.planetary_hours; drop policy if exists planetary_hours_create on spiritual.planetary_hours; drop policy if exists planetary_hours_delete on spiritual.planetary_hours;

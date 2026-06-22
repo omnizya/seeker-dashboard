@@ -1,39 +1,211 @@
 -- ================================================================
--- RUN ALL — execute in order via \i or psql
+-- RUN ALL — apply all timestamped migration files in order
 -- ================================================================
 -- Usage:
---   psql -d your_db -f sql/run_all.sql
+--   psql -d your_db -f supabase/schemas/run_all.sql
 -- ================================================================
 
-\echo '--- 00_foundation ---'
-\i sql/00_foundation.sql
-
-\echo '--- 01_identity ---'
-\i sql/01_identity.sql
-
-\echo '--- 02_core ---'
-\i sql/02_core.sql
-
-\echo '--- 03_rbac ---'
-\i sql/03_rbac.sql
-
-\echo '--- 06_audit ---'
-\i sql/06_audit.sql
-
-\echo '--- 04_spiritual ---'
-\i sql/04_spiritual.sql
-
-\echo '--- 05_magick ---'
-\i sql/05_magick.sql
-
-\echo '--- 07_prayer ---'
-\i sql/07_prayer.sql
-
-\echo '--- 08_planetary ---'
-\i sql/08_planetary.sql
-
-\echo '--- 09_astro ---'
-\i sql/09_astro.sql
-
-\echo '--- 10_features ---'
-\i sql/10_features.sql
+\i supabase/schemas/20260622174816_extensions.sql
+\i supabase/schemas/20260622174825_schemas.sql
+\i supabase/schemas/20260622174830_enums.sql
+\i supabase/schemas/20260622175201_element_config.sql
+\i supabase/schemas/20260622175306_internal_helper_touch_updated.sql
+\i supabase/schemas/20260622175347_create_identity_profiles.sql
+\i supabase/schemas/20260622175434_create_index_profiles_display_name.sql
+\i supabase/schemas/20260622175512_create_function_identity_handle_new_user.sql
+\i supabase/schemas/20260622175600_create_trigger_on_auth_user_created.sql
+\i supabase/schemas/20260622175641_enable_rls_identity_profiles.sql
+\i supabase/schemas/20260622175747_create_policy_identity_profiles_read.sql
+\i supabase/schemas/20260622175810_create_policy_identity_profiles_self_update.sql
+\i supabase/schemas/20260622175904_create_table_core_tenants.sql
+\i supabase/schemas/20260622175953_create_table_core_tenant_memberships.sql
+\i supabase/schemas/20260622180029_create_index_tenant_memberships.sql
+\i supabase/schemas/20260622180103_create_index_tenant_memberships_tenant_user.sql
+\i supabase/schemas/20260622180157_create_function_core_current_tenant.sql
+\i supabase/schemas/20260622180225_create_function_core_is_tenant_master.sql
+\i supabase/schemas/20260622180307_create_function_core_create_tenant.sql
+\i supabase/schemas/20260622180400_enable_rls_core_tenants.sql
+\i supabase/schemas/20260622180401_create_policy_tenants_member_read.sql
+\i supabase/schemas/20260622180402_create_policy_tenants_insert.sql
+\i supabase/schemas/20260622180403_create_policy_tenants_master_update.sql
+\i supabase/schemas/20260622180404_enable_rls_core_tenant_memberships.sql
+\i supabase/schemas/20260622180405_create_policy_tenant_memberships_read.sql
+\i supabase/schemas/20260622180406_create_policy_tenant_memberships_self_insert.sql
+\i supabase/schemas/20260622180407_create_table_rbac_user_roles.sql
+\i supabase/schemas/20260622180408_create_table_rbac_role_permissions.sql
+\i supabase/schemas/20260622180409_create_index_user_roles_user_role.sql
+\i supabase/schemas/20260622180410_create_function_rbac_authorize.sql
+\i supabase/schemas/20260622180411_create_function_rbac_is_grand_master.sql
+\i supabase/schemas/20260622180412_create_function_rbac_assign_default_role.sql
+\i supabase/schemas/20260622180413_create_trigger_assign_default_role.sql
+\i supabase/schemas/20260622180414_enable_rls_rbac_user_roles.sql
+\i supabase/schemas/20260622180415_create_policy_user_roles_self_read.sql
+\i supabase/schemas/20260622180416_create_policy_user_roles_manage.sql
+\i supabase/schemas/20260622180417_enable_rls_rbac_role_permissions.sql
+\i supabase/schemas/20260622180418_create_policy_role_permissions_read.sql
+\i supabase/schemas/20260622180419_create_policy_role_permissions_manage.sql
+\i supabase/schemas/20260622180420_create_table_spiritual_holy_names.sql
+\i supabase/schemas/20260622180421_create_table_spiritual_abjad_calculations.sql
+\i supabase/schemas/20260622180422_create_index_holy_names_submitted_by.sql
+\i supabase/schemas/20260622180423_create_index_holy_names_tenant_id.sql
+\i supabase/schemas/20260622180424_create_index_abjad_calc_holy_name_id.sql
+\i supabase/schemas/20260622180425_create_index_abjad_calc_tenant_id.sql
+\i supabase/schemas/20260622180426_create_index_abjad_calc_calculated_by.sql
+\i supabase/schemas/20260622180427_create_index_holy_names_tenant_submitted.sql
+\i supabase/schemas/20260622180428_create_function_spiritual_inject_tenant.sql
+\i supabase/schemas/20260622180429_create_trigger_set_holy_names_tenant.sql
+\i supabase/schemas/20260622180430_create_trigger_holy_names_updated.sql
+\i supabase/schemas/20260622180431_create_trigger_holy_names_audit.sql
+\i supabase/schemas/20260622180432_create_trigger_set_abjad_calc_tenant.sql
+\i supabase/schemas/20260622180433_create_trigger_abjad_calc_audit.sql
+\i supabase/schemas/20260622180434_create_view_api_holy_names.sql
+\i supabase/schemas/20260622180435_enable_rls_spiritual_holy_names.sql
+\i supabase/schemas/20260622180436_create_policy_holy_names_read.sql
+\i supabase/schemas/20260622180437_create_policy_holy_names_create.sql
+\i supabase/schemas/20260622180438_create_policy_holy_names_update.sql
+\i supabase/schemas/20260622180439_create_policy_holy_names_delete.sql
+\i supabase/schemas/20260622180440_enable_rls_spiritual_abjad_calculations.sql
+\i supabase/schemas/20260622180441_create_policy_abjad_read.sql
+\i supabase/schemas/20260622180442_create_policy_abjad_create.sql
+\i supabase/schemas/20260622180443_create_policy_abjad_delete.sql
+\i supabase/schemas/20260622180444_create_table_magick_square_calculations.sql
+\i supabase/schemas/20260622180445_create_index_square_calc_tenant_element.sql
+\i supabase/schemas/20260622180446_create_index_square_calc_calculated_by.sql
+\i supabase/schemas/20260622180447_create_function_magick_fill_square.sql
+\i supabase/schemas/20260622180448_create_function_magick_magic_constant.sql
+\i supabase/schemas/20260622180449_create_function_magick_compute_square.sql
+\i supabase/schemas/20260622180450_create_function_magick_unpack_cells.sql
+\i supabase/schemas/20260622180451_create_function_magick_reshape_3x3.sql
+\i supabase/schemas/20260622180452_create_function_magick_presence_mask.sql
+\i supabase/schemas/20260622180453_create_function_magick_is_valid_permutation.sql
+\i supabase/schemas/20260622180454_create_function_magick_parity_cross.sql
+\i supabase/schemas/20260622180455_create_function_magick_is_magic_square.sql
+\i supabase/schemas/20260622180456_create_trigger_set_square_computed.sql
+\i supabase/schemas/20260622180457_create_trigger_set_square_calc_tenant.sql
+\i supabase/schemas/20260622180458_create_trigger_square_calc_audit.sql
+\i supabase/schemas/20260622180459_create_view_api_square_calculations.sql
+\i supabase/schemas/20260622180460_enable_rls_magick_square_calculations.sql
+\i supabase/schemas/20260622180461_create_policy_square_calc_read.sql
+\i supabase/schemas/20260622180462_create_policy_square_calc_create.sql
+\i supabase/schemas/20260622180463_create_policy_square_calc_delete.sql
+\i supabase/schemas/20260622180500_create_table_audit_events.sql
+\i supabase/schemas/20260622180501_create_index_audit_events_tenant_created.sql
+\i supabase/schemas/20260622180502_create_index_audit_events_actor_id.sql
+\i supabase/schemas/20260622180503_create_index_audit_events_recent.sql
+\i supabase/schemas/20260622180504_create_function_audit_log_change.sql
+\i supabase/schemas/20260622180505_enable_rls_audit_events.sql
+\i supabase/schemas/20260622180506_create_policy_audit_events_read.sql
+\i supabase/schemas/20260622180507_extend_enum_prayer_permissions.sql
+\i supabase/schemas/20260622180508_create_table_identity_user_preferences.sql
+\i supabase/schemas/20260622180509_create_table_spiritual_prayer_methods.sql
+\i supabase/schemas/20260622180510_create_table_spiritual_prayer_times.sql
+\i supabase/schemas/20260622180511_create_index_prayer_times_date.sql
+\i supabase/schemas/20260622180512_create_index_prayer_times_coords.sql
+\i supabase/schemas/20260622180513_create_index_prayer_times_tenant.sql
+\i supabase/schemas/20260622180514_create_function_spiritual_sun_declination.sql
+\i supabase/schemas/20260622180515_create_function_spiritual_equation_of_time.sql
+\i supabase/schemas/20260622180516_create_function_spiritual_solar_noon.sql
+\i supabase/schemas/20260622180517_create_function_spiritual_hour_angle.sql
+\i supabase/schemas/20260622180518_create_function_spiritual_compute_prayer_times.sql
+\i supabase/schemas/20260622180519_create_function_spiritual_compute_and_store_prayer_times.sql
+\i supabase/schemas/20260622180520_create_trigger_set_prayer_times_tenant.sql
+\i supabase/schemas/20260622180521_create_trigger_prayer_times_audit.sql
+\i supabase/schemas/20260622180522_create_trigger_user_preferences_updated.sql
+\i supabase/schemas/20260622180523_enable_rls_identity_user_preferences.sql
+\i supabase/schemas/20260622180524_enable_rls_spiritual_prayer_times.sql
+\i supabase/schemas/20260622180525_enable_rls_spiritual_prayer_methods.sql
+\i supabase/schemas/20260622180526_create_policy_user_preferences_read.sql
+\i supabase/schemas/20260622180527_create_policy_user_preferences_upsert.sql
+\i supabase/schemas/20260622180528_create_policy_prayer_times_read.sql
+\i supabase/schemas/20260622180529_create_policy_prayer_times_create.sql
+\i supabase/schemas/20260622180530_create_policy_prayer_times_delete.sql
+\i supabase/schemas/20260622180531_create_policy_prayer_methods_read.sql
+\i supabase/schemas/20260622180532_create_view_api_prayer_times.sql
+\i supabase/schemas/20260622180600_extend_enum_planetary_permissions.sql
+\i supabase/schemas/20260622180601_create_table_spiritual_chaldean_order.sql
+\i supabase/schemas/20260622180602_create_table_spiritual_day_rulers.sql
+\i supabase/schemas/20260622180603_create_function_spiritual_compute_planetary_hours.sql
+\i supabase/schemas/20260622180604_create_table_spiritual_planetary_hours.sql
+\i supabase/schemas/20260622180605_create_index_planetary_hours_date.sql
+\i supabase/schemas/20260622180606_create_index_planetary_hours_tenant.sql
+\i supabase/schemas/20260622180607_create_table_spiritual_planet_positions.sql
+\i supabase/schemas/20260622180608_create_index_planet_positions_date.sql
+\i supabase/schemas/20260622180609_create_index_planet_positions_planet.sql
+\i supabase/schemas/20260622180610_create_index_planet_positions_tenant.sql
+\i supabase/schemas/20260622180611_create_trigger_set_planetary_hours_tenant.sql
+\i supabase/schemas/20260622180612_create_trigger_planetary_hours_audit.sql
+\i supabase/schemas/20260622180613_create_trigger_set_planet_positions_tenant.sql
+\i supabase/schemas/20260622180614_create_trigger_planet_positions_audit.sql
+\i supabase/schemas/20260622180615_enable_rls_spiritual_planetary_hours.sql
+\i supabase/schemas/20260622180616_enable_rls_spiritual_planet_positions.sql
+\i supabase/schemas/20260622180617_create_policy_planetary_hours_read.sql
+\i supabase/schemas/20260622180618_create_policy_planetary_hours_create.sql
+\i supabase/schemas/20260622180619_create_policy_planetary_hours_delete.sql
+\i supabase/schemas/20260622180620_create_policy_planet_positions_read.sql
+\i supabase/schemas/20260622180621_create_policy_planet_positions_create.sql
+\i supabase/schemas/20260622180622_create_view_api_planetary_hours.sql
+\i supabase/schemas/20260622180623_create_view_api_planet_positions.sql
+\i supabase/schemas/20260622180624_extend_enum_astro_permissions.sql
+\i supabase/schemas/20260622180625_create_type_spiritual_moon_phase.sql
+\i supabase/schemas/20260622180626_create_table_spiritual_astro_events.sql
+\i supabase/schemas/20260622180627_create_index_astro_events_date.sql
+\i supabase/schemas/20260622180628_create_index_astro_events_moon_phase.sql
+\i supabase/schemas/20260622180629_create_index_astro_events_tenant.sql
+\i supabase/schemas/20260622180630_create_table_spiritual_qibla_calculations.sql
+\i supabase/schemas/20260622180631_create_index_qibla_calc_tenant.sql
+\i supabase/schemas/20260622180632_create_function_spiritual_compute_qibla.sql
+\i supabase/schemas/20260622180633_create_trigger_set_astro_events_tenant.sql
+\i supabase/schemas/20260622180634_create_trigger_astro_events_audit.sql
+\i supabase/schemas/20260622180635_create_trigger_set_qibla_calc_tenant.sql
+\i supabase/schemas/20260622180636_enable_rls_spiritual_astro_events.sql
+\i supabase/schemas/20260622180637_enable_rls_spiritual_qibla_calculations.sql
+\i supabase/schemas/20260622180638_create_policy_astro_events_read.sql
+\i supabase/schemas/20260622180639_create_policy_astro_events_create.sql
+\i supabase/schemas/20260622180640_create_policy_qibla_read.sql
+\i supabase/schemas/20260622180641_create_policy_qibla_create.sql
+\i supabase/schemas/20260622180642_create_view_api_astro_events.sql
+\i supabase/schemas/20260622180643_create_view_api_qibla.sql
+\i supabase/schemas/20260622180700_extend_enum_features_permissions.sql
+\i supabase/schemas/20260622180701_create_table_spiritual_tasbih_presets.sql
+\i supabase/schemas/20260622180702_create_table_spiritual_tasbih_sessions.sql
+\i supabase/schemas/20260622180703_create_index_tasbih_sessions_user.sql
+\i supabase/schemas/20260622180704_create_index_tasbih_sessions_tenant.sql
+\i supabase/schemas/20260622180705_create_table_spiritual_quran_bookmarks.sql
+\i supabase/schemas/20260622180706_create_index_quran_bookmarks_user.sql
+\i supabase/schemas/20260622180707_create_index_quran_bookmarks_surah.sql
+\i supabase/schemas/20260622180708_create_index_quran_bookmarks_tenant.sql
+\i supabase/schemas/20260622180709_create_table_spiritual_spiritual_journal.sql
+\i supabase/schemas/20260622180710_create_index_spiritual_journal_user.sql
+\i supabase/schemas/20260622180711_create_index_spiritual_journal_type.sql
+\i supabase/schemas/20260622180712_create_index_spiritual_journal_tenant.sql
+\i supabase/schemas/20260622180713_create_table_spiritual_dua_lists.sql
+\i supabase/schemas/20260622180714_create_table_spiritual_dua_entries.sql
+\i supabase/schemas/20260622180715_create_index_dua_entries_list.sql
+\i supabase/schemas/20260622180716_create_index_dua_lists_tenant.sql
+\i supabase/schemas/20260622180717_create_trigger_set_tasbih_sessions_tenant.sql
+\i supabase/schemas/20260622180718_create_trigger_set_quran_bookmarks_tenant.sql
+\i supabase/schemas/20260622180719_create_trigger_set_spiritual_journal_tenant.sql
+\i supabase/schemas/20260622180720_create_trigger_quran_bookmarks_updated.sql
+\i supabase/schemas/20260622180721_create_trigger_spiritual_journal_updated.sql
+\i supabase/schemas/20260622180722_enable_rls_spiritual_tasbih_presets.sql
+\i supabase/schemas/20260622180723_enable_rls_spiritual_tasbih_sessions.sql
+\i supabase/schemas/20260622180724_enable_rls_spiritual_quran_bookmarks.sql
+\i supabase/schemas/20260622180725_enable_rls_spiritual_spiritual_journal.sql
+\i supabase/schemas/20260622180726_enable_rls_spiritual_dua_lists.sql
+\i supabase/schemas/20260622180727_enable_rls_spiritual_dua_entries.sql
+\i supabase/schemas/20260622180728_create_policy_tasbih_presets_read.sql
+\i supabase/schemas/20260622180729_create_policy_tasbih_sessions_read.sql
+\i supabase/schemas/20260622180730_create_policy_tasbih_sessions_create.sql
+\i supabase/schemas/20260622180731_create_policy_quran_bookmarks_read.sql
+\i supabase/schemas/20260622180732_create_policy_quran_bookmarks_create.sql
+\i supabase/schemas/20260622180733_create_policy_quran_bookmarks_delete.sql
+\i supabase/schemas/20260622180734_create_policy_spiritual_journal_read.sql
+\i supabase/schemas/20260622180735_create_policy_spiritual_journal_create.sql
+\i supabase/schemas/20260622180736_create_policy_spiritual_journal_update.sql
+\i supabase/schemas/20260622180737_create_policy_spiritual_journal_delete.sql
+\i supabase/schemas/20260622180738_create_policy_dua_lists_read.sql
+\i supabase/schemas/20260622180739_create_policy_dua_lists_create.sql
+\i supabase/schemas/20260622180740_create_policy_dua_entries_read.sql
+\i supabase/schemas/20260622180741_create_view_api_quran_bookmarks.sql
+\i supabase/schemas/20260622180742_create_view_api_spiritual_journal.sql
+\i supabase/schemas/20260622180743_create_view_api_tasbih_sessions.sql

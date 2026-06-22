@@ -1,0 +1,1 @@
+create policy qibla_read on spiritual.qibla_calculations for select to authenticated using ( (tenant_id = (select core.current_tenant()) or tenant_id is null) and (select rbac.authorize('qibla.read')) );

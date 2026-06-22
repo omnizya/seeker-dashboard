@@ -1,0 +1,1 @@
+alter table spiritual.qibla_calculations enable row level security; drop policy if exists qibla_read on spiritual.qibla_calculations; drop policy if exists qibla_create on spiritual.qibla_calculations;

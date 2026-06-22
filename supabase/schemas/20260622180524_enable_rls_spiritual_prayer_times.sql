@@ -1,0 +1,1 @@
+alter table spiritual.prayer_times enable row level security; drop policy if exists prayer_times_read on spiritual.prayer_times; drop policy if exists prayer_times_create on spiritual.prayer_times; drop policy if exists prayer_times_delete on spiritual.prayer_times;

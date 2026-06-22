@@ -1,0 +1,1 @@
+drop trigger if exists set_square_computed on magick.square_calculations; create trigger set_square_computed before insert on magick.square_calculations for each row execute function magick.compute_square ();

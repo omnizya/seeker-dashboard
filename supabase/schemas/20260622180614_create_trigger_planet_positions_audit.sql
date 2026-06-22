@@ -1,0 +1,1 @@
+drop trigger if exists planet_positions_audit on spiritual.planet_positions; create trigger planet_positions_audit after insert or delete on spiritual.planet_positions for each row execute function audit.log_change ();

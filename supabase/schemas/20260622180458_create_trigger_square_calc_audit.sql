@@ -1,0 +1,1 @@
+drop trigger if exists square_calc_audit on magick.square_calculations; create trigger square_calc_audit after insert or delete on magick.square_calculations for each row execute function audit.log_change ();

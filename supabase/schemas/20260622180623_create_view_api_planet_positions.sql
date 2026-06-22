@@ -1,0 +1,1 @@
+drop view if exists api.planet_positions; create view api.planet_positions with (security_invoker = true) as select pp.id, pp.obs_date, pp.planet, pp.longitude, pp.latitude, pp.constellation, pp.is_retrograde, pp.magnitude, pp.phase, pp.tenant_id, p.display_name as calculated_by from spiritual.planet_positions pp join identity.profiles p on p.id = pp.calculated_by;

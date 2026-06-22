@@ -1,0 +1,1 @@
+create table if not exists spiritual.dua_entries ( id bigint generated always as identity primary key, list_id bigint not null references spiritual.dua_lists (id) on delete cascade, arabic text not null, transliteration text, translation text, benefit text, sort_order smallint default 0, created_at timestamptz default now() );

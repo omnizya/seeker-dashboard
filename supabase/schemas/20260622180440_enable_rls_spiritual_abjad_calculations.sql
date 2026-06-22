@@ -1,0 +1,1 @@
+alter table spiritual.abjad_calculations enable row level security; drop policy if exists abjad_read on spiritual.abjad_calculations; drop policy if exists abjad_create on spiritual.abjad_calculations; drop policy if exists abjad_delete on spiritual.abjad_calculations;

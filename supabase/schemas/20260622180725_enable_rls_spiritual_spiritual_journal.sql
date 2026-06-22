@@ -1,0 +1,1 @@
+alter table spiritual.spiritual_journal enable row level security; drop policy if exists spiritual_journal_read on spiritual.spiritual_journal; drop policy if exists spiritual_journal_create on spiritual.spiritual_journal; drop policy if exists spiritual_journal_update on spiritual.spiritual_journal; drop policy if exists spiritual_journal_delete on spiritual.spiritual_journal;

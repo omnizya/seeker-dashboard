@@ -1,0 +1,1 @@
+drop trigger if exists set_astro_events_tenant on spiritual.astro_events; create trigger set_astro_events_tenant before insert on spiritual.astro_events for each row execute function spiritual.inject_tenant ();

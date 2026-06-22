@@ -1,0 +1,1 @@
+drop trigger if exists set_square_calc_tenant on magick.square_calculations; create trigger set_square_calc_tenant before insert on magick.square_calculations for each row execute function spiritual.inject_tenant ();

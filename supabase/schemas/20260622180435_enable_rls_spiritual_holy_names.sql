@@ -1,0 +1,1 @@
+alter table spiritual.holy_names enable row level security; drop policy if exists holy_names_read on spiritual.holy_names; drop policy if exists holy_names_create on spiritual.holy_names; drop policy if exists holy_names_update on spiritual.holy_names; drop policy if exists holy_names_delete on spiritual.holy_names;

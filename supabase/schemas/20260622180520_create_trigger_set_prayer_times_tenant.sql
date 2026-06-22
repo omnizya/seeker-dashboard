@@ -1,0 +1,1 @@
+drop trigger if exists set_prayer_times_tenant on spiritual.prayer_times; create trigger set_prayer_times_tenant before insert on spiritual.prayer_times for each row execute function spiritual.inject_tenant ();

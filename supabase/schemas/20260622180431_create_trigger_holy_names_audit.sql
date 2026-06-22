@@ -1,0 +1,1 @@
+drop trigger if exists holy_names_audit on spiritual.holy_names; create trigger holy_names_audit after insert or update or delete on spiritual.holy_names for each row execute function audit.log_change ();

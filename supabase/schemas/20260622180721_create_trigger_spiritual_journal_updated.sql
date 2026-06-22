@@ -1,0 +1,1 @@
+drop trigger if exists spiritual_journal_updated on spiritual.spiritual_journal; create trigger spiritual_journal_updated before update on spiritual.spiritual_journal for each row execute function internal.touch_updated_at ();

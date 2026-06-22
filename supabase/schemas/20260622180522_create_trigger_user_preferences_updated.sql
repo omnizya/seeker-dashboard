@@ -1,0 +1,1 @@
+drop trigger if exists user_preferences_updated on identity.user_preferences; create trigger user_preferences_updated before update on identity.user_preferences for each row execute function internal.touch_updated_at ();

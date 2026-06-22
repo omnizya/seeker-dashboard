@@ -1,0 +1,1 @@
+drop trigger if exists set_holy_names_tenant on spiritual.holy_names; create trigger set_holy_names_tenant before insert on spiritual.holy_names for each row execute function spiritual.inject_tenant ();

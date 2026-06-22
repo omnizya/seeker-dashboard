@@ -1,0 +1,1 @@
+drop view if exists api.planetary_hours; create view api.planetary_hours with (security_invoker = true) as select ph.id, ph.calc_date, ph.day_ruler, ph.hours_json, ph.tenant_id, p.display_name as calculated_by from spiritual.planetary_hours ph join identity.profiles p on p.id = ph.calculated_by;

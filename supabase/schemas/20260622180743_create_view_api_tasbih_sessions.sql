@@ -1,0 +1,1 @@
+drop view if exists api.tasbih_sessions; create view api.tasbih_sessions with (security_invoker = true) as select ts.id, ts.preset_id, ts.custom_phrase, ts.target_count, ts.completed_count, ts.started_at, ts.completed_at, ts.duration_seconds, ts.category, ts.user_id from spiritual.tasbih_sessions ts;

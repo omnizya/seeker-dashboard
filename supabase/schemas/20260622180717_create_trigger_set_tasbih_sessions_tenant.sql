@@ -1,0 +1,1 @@
+drop trigger if exists set_tasbih_sessions_tenant on spiritual.tasbih_sessions; create trigger set_tasbih_sessions_tenant before insert on spiritual.tasbih_sessions for each row execute function spiritual.inject_tenant ();

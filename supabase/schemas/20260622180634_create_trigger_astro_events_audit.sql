@@ -1,0 +1,1 @@
+drop trigger if exists astro_events_audit on spiritual.astro_events; create trigger astro_events_audit after insert or delete on spiritual.astro_events for each row execute function audit.log_change ();

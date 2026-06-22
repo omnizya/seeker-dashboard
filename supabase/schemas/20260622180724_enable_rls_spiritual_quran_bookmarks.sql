@@ -1,0 +1,1 @@
+alter table spiritual.quran_bookmarks enable row level security; drop policy if exists quran_bookmarks_read on spiritual.quran_bookmarks; drop policy if exists quran_bookmarks_create on spiritual.quran_bookmarks; drop policy if exists quran_bookmarks_delete on spiritual.quran_bookmarks;

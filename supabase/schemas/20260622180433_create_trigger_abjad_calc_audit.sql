@@ -1,0 +1,1 @@
+drop trigger if exists abjad_calc_audit on spiritual.abjad_calculations; create trigger abjad_calc_audit after insert or delete on spiritual.abjad_calculations for each row execute function audit.log_change ();

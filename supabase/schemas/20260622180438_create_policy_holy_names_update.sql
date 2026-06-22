@@ -1,0 +1,1 @@
+create policy holy_names_update on spiritual.holy_names for update to authenticated using ( tenant_id = (select core.current_tenant()) and (select rbac.authorize ('holy_names.update')) ) with check ( tenant_id = (select core.current_tenant()) and (select rbac.authorize ('holy_names.update')) );

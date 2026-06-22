@@ -1,0 +1,1 @@
+create policy planet_positions_read on spiritual.planet_positions for select to authenticated using ( (tenant_id = (select core.current_tenant()) or tenant_id is null) and (select rbac.authorize('astro.read')) );

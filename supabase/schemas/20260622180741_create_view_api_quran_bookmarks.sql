@@ -1,0 +1,1 @@
+drop view if exists api.quran_bookmarks; create view api.quran_bookmarks with (security_invoker = true) as select qb.id, qb.ayah_id, qb.surah_id, qb.ayah_number, qb.ayah_text, qb.label, qb.tags, qb.color, qb.user_id, qb.created_at from spiritual.quran_bookmarks qb;
