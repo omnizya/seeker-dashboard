@@ -17,6 +17,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Separator } from "~/components/ui/separator";
+import { useDuaStore } from "~/stores/duaStore";
 
 type DuaEntry = {
   id: number;
@@ -34,10 +35,6 @@ type DuaList = {
   category: string;
   source: string | null;
   entries: DuaEntry[];
-};
-
-type DuaResponse = {
-  lists: DuaList[];
 };
 
 const CATEGORIES: Record<string, string> = {
@@ -60,27 +57,12 @@ const CATEGORIES: Record<string, string> = {
 const CATEGORY_KEYS = Object.keys(CATEGORIES);
 
 export default function DuaPage() {
-  const [data, setData] = useState<DuaResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { lists: storeLists, loading, error, fetchLists } = useDuaStore();
   const [activeCategory, setActiveCategory] = useState("all");
 
   useEffect(() => {
-    const params = activeCategory !== "all" ? `?category=${activeCategory}` : "";
-    fetch(`/api/dua${params}`)
-      .then((r) => {
-        if (r.status === 401) throw new Error("يرجى تسجيل الدخول أولاً");
-        return r.json();
-      })
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
-  }, [activeCategory]);
+    fetchLists();
+  }, [fetchLists]);
 
   if (loading) {
     return (
@@ -112,7 +94,10 @@ export default function DuaPage() {
     );
   }
 
-  const lists = data?.lists || [];
+  const allLists = storeLists as unknown as DuaList[];
+  const lists = activeCategory === "all"
+    ? allLists
+    : allLists.filter((l) => l.category === activeCategory);
 
   return (
     <div className="mx-auto max-w-3xl py-4">

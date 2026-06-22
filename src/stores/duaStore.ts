@@ -46,7 +46,7 @@ export const useDuaStore = create<DuaState>((set) => ({
       const res = await fetch("/api/dua");
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
-      set({ lists: data, loading: false });
+      set({ lists: data.lists || [], loading: false });
     } catch (e) {
       set({ error: (e as Error).message, loading: false });
     }
