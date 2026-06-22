@@ -169,7 +169,7 @@ export default function JournalPage() {
 
   function handleDelete(id: number) {
     if (!window.confirm("هل أنت متأكد من حذف هذه التدوينة؟")) return;
-    deleteEntry(String(id)).then((res) => {
+    deleteEntry(id).then((res) => {
       if (res.success) {
         toast.info("تم الحذف", { duration: 2000 });
       } else {

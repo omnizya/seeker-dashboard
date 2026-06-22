@@ -6,7 +6,7 @@ import {
 } from "~/schemas/bookmark";
 
 interface Bookmark {
-  id: string;
+  id: number;
   ayah_id: number;
   surah_id: number;
   ayah_number: number;
@@ -23,7 +23,7 @@ interface BookmarkState {
 
   fetchBookmarks: (surahId?: number) => Promise<void>;
   addBookmark: (data: BookmarkCreateInput) => Promise<{ success: boolean; error?: string }>;
-  deleteBookmark: (id: string) => Promise<{ success: boolean; error?: string }>;
+  deleteBookmark: (id: number) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useBookmarkStore = create<BookmarkState>((set) => ({

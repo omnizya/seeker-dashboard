@@ -8,7 +8,7 @@ import {
 } from "~/schemas/journal";
 
 interface JournalEntry {
-  id: string;
+  id: number;
   title: string;
   content: string;
   mood?: string;
@@ -25,7 +25,7 @@ interface JournalState {
   fetchEntries: () => Promise<void>;
   addEntry: (data: JournalEntryCreateInput) => Promise<{ success: boolean; error?: string }>;
   updateEntry: (data: JournalEntryUpdateInput) => Promise<{ success: boolean; error?: string }>;
-  deleteEntry: (id: string) => Promise<{ success: boolean; error?: string }>;
+  deleteEntry: (id: number) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useJournalStore = create<JournalState>((set) => ({

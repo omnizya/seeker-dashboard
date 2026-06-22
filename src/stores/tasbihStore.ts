@@ -16,9 +16,9 @@ interface TasbihPreset {
 }
 
 interface TasbihSession {
-  id: string;
+  id: number;
   user_id: string;
-  preset_id: string;
+  preset_id: number;
   completed_count: number;
   started_at: string;
 }

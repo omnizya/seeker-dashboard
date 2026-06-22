@@ -76,7 +76,7 @@ export default function BookmarksPage() {
     return matchesSearch && matchesSurah;
   });
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: number) {
     if (!window.confirm("هل أنت متأكد من حذف هذه العلامة المرجعية؟")) return;
     const result = await deleteBookmark(id);
     if (result.success) {
