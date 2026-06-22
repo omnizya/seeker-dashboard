@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
+import { createClient } from "~/utils/supabase/client";
 import AuthLayout from "../_components/AuthLayout";
 import AuthCard from "../_components/AuthCard";
 import LeftPanel from "../_components/LeftPanel";
@@ -17,6 +18,7 @@ export default function VerifyEmailPage() {
   const router = useRouter();
   const [otp, setOtp] = React.useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [loading, setLoading] = React.useState(false);
+  const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
   const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
 
   /* ─── Auto-focus first input on mount ─── */
@@ -70,11 +72,30 @@ export default function VerifyEmailPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (otp.some((d) => !d)) return;
+
+    const emailFromStorage = sessionStorage.getItem("verify_email");
+    if (!emailFromStorage) {
+      setMessage({ type: "error", text: "البريد الإلكتروني غير متوفر" });
+      return;
+    }
+
     setLoading(true);
-    // Mock — simulate verification
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    setMessage(null);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email: emailFromStorage,
+      token: otp.join(""),
+      type: "signup",
+    });
+
     setLoading(false);
-    router.push("/auth/reset-password");
+
+    if (error) {
+      setMessage({ type: "error", text: "رمز التحقق غير صحيح" });
+    } else {
+      router.push("/auth/login");
+    }
   }
 
   const leftPanelContent = (
@@ -104,6 +125,11 @@ export default function VerifyEmailPage() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {message && (
+          <p className={`text-sm text-center ${message.type === "error" ? "text-destructive" : "text-green-500"}`}>
+            {message.text}
+          </p>
+        )}
         {/* ─── OTP input group ─── */}
         <div className="flex justify-center gap-3 rtl:gap-3" dir="ltr">
           {otp.map((digit, index) => (
