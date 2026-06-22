@@ -23,3 +23,5 @@ export { LodgeService } from "./service";
 export type { LodgeSession, YieldResult } from "./service";
 export { StateMachine } from "./state-machine";
 export type { PsychologicalState } from "./state-machine";
+export { default as CelestialBadge } from "../components/Lodge/CelestialBadge";
+export { default as ElementIndicator } from "../components/Lodge/ElementIndicator";
