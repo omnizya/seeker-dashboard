@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "~/utils/supabase/server";
+import {
+  journalEntryCreateSchema,
+  journalEntryUpdateSchema,
+  journalEntryDeleteSchema,
+} from "~/schemas/journal";
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,13 +47,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    if (!body.content) {
-      return NextResponse.json({ error: "content is required" }, { status: 400 });
+    const parsed = journalEntryCreateSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
     const { data, error } = await supabase
       .schema("spiritual").from("spiritual_journal")
-      .insert({ ...body, user_id: user.id })
+      .insert({ ...parsed.data, user_id: user.id })
       .select()
       .single();
 
@@ -69,22 +79,27 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    if (!body.id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
+    const parsed = journalEntryUpdateSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
     // Verify ownership
     const { data: existing } = await supabase
       .schema("spiritual").from("spiritual_journal")
       .select("id, user_id")
-      .eq("id", body.id)
+      .eq("id", parsed.data.id)
       .single();
 
     if (!existing || existing.user_id !== user.id) {
       return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
     }
 
-    const { id, ...updates } = body;
+    const { id, ...updates } = parsed.data;
     const { data, error } = await supabase
       .schema("spiritual").from("spiritual_journal")
       .update(updates)
@@ -109,15 +124,20 @@ export async function DELETE(request: NextRequest) {
     }
 
     const body = await request.json();
-    if (!body.id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
+    const parsed = journalEntryDeleteSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
     // Verify ownership
     const { data: existing } = await supabase
       .schema("spiritual").from("spiritual_journal")
       .select("id, user_id")
-      .eq("id", body.id)
+      .eq("id", parsed.data.id)
       .single();
 
     if (!existing || existing.user_id !== user.id) {
@@ -127,7 +147,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .schema("spiritual").from("spiritual_journal")
       .delete()
-      .eq("id", body.id);
+      .eq("id", parsed.data.id);
 
     if (error) throw error;
     return NextResponse.json({ success: true });
