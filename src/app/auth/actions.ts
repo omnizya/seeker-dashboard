@@ -1,23 +1,26 @@
 "use server";
 
-import { track } from "@vercel/analytics/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "~/utils/supabase/server";
+import { loginSchema, registerSchema } from "~/schemas/auth";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
 
-  if (!data.email || !data.password) {
-    return { error: "يرجى إدخال البريد الإلكتروني وكلمة المرور" };
+  if (!parsed.success) {
+    return { error: parsed.error.errors[0].message };
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
 
   if (error) {
     if (error.message.includes("Invalid login")) {
@@ -26,24 +29,35 @@ export async function login(formData: FormData) {
     return { error: "حدث خطأ في تسجيل الدخول" };
   }
 
-  track("Login", { location: "Auth Page" });
-  revalidatePath("/dashboard", "layout");
+  revalidatePath("/", "layout");
   redirect("/dashboard");
 }
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
 
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+  const parsed = registerSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("password"),
+    displayName: formData.get("displayName") || "User",
+    interests: JSON.parse((formData.get("interests") as string) || "[]"),
+  });
 
-  if (!data.email || !data.password) {
-    return { error: "يرجى إدخال البريد الإلكتروني وكلمة المرور" };
+  if (!parsed.success) {
+    return { error: parsed.error.errors[0].message };
   }
 
-  const { error } = await supabase.auth.signUp(data);
+  const { error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      data: {
+        display_name: parsed.data.displayName,
+        interests: parsed.data.interests,
+      },
+    },
+  });
 
   if (error) {
     if (error.message.includes("already registered")) {
@@ -52,11 +66,6 @@ export async function signup(formData: FormData) {
     return { error: "حدث خطأ في إنشاء الحساب" };
   }
 
-  track("SignUp", { location: "Auth Page" });
-
-  // Store email for verify-email page
-  // Note: this is a workaround since server actions can't pass data to client state
-
   revalidatePath("/", "layout");
-  redirect("/auth/verify-email");
+  redirect("/");
 }
