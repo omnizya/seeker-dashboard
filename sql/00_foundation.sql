@@ -40,6 +40,21 @@ begin
   end if;
 end$$;
 
+-- Add grand_master role if not already present
+do $$
+begin
+  if not exists (
+    select 1 from pg_enum e
+    join pg_type t on t.oid = e.enumtypid
+    join pg_namespace n on n.oid = t.typnamespace
+    where t.typname = 'app_role'
+      and n.nspname = 'rbac'
+      and e.enumlabel = 'grand_master'
+  ) then
+    alter type rbac.app_role add value 'grand_master' before 'master';
+  end if;
+end$$;
+
 do $$
 begin
   if not exists (

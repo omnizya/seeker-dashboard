@@ -62,6 +62,49 @@ export const Square = (elemental: Elementals, input: number): number[] =>
 /** Sum of any row/column/diagonal for a given starting input. */
 export const magicConstant = (input: number): number => (input * 3 + 12) | 0;
 
+// ---------------------------------------------------------------------------
+// Bitwise validation — constant-time duplicate detection
+// ---------------------------------------------------------------------------
+// Matches magick.is_valid_permutation() in SQL (05_magick.sql).
+// A valid 3x3 magic square contains exactly the values 1..9, each once.
+// The bitmask approach: set bit (1 << v) for each value v encountered.
+// If the final mask equals 0b11111111110 (1022), all values 1..9 are present.
+//
+// This is O(n) with no heap allocations — no Set, no object, no array scan.
+
+const VALID_PERMUTATION_MASK = 0b11111111110; // bits 1..9 set = 1022
+
+/**
+ * Returns true if `cells` is a permutation of [1..9].
+ * Uses a single integer bitmask for constant-time duplicate detection.
+ *
+ * @example
+ * isValidPermutation([6,7,2,1,5,9,8,3,4]) // true (Aero)
+ * isValidPermutation([1,2,3,4,5,6,7,8,9]) // true (identity)
+ * isValidPermutation([1,1,1,1,1,1,1,1,1]) // false (all duplicates)
+ */
+export function isValidPermutation(cells: number[]): boolean {
+  let mask = 0;
+  for (let i = 0; i < cells.length; i++) {
+    const v = cells[i];
+    if (v < 1 || v > 9) return false;
+    mask |= 1 << v;
+  }
+  return mask === VALID_PERMUTATION_MASK;
+}
+
+/**
+ * Builds the presence bitmask for a cell array.
+ * Exported for testing/inspection — mirrors magick.presence_mask() in SQL.
+ */
+export function presenceMask(cells: number[]): number {
+  let mask = 0;
+  for (let i = 0; i < cells.length; i++) {
+    mask |= 1 << cells[i];
+  }
+  return mask;
+}
+
 
 // ---------------------------------------------------------------------------
 // Derivation (not used at runtime) — kept for traceability. Run this if you

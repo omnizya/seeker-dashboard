@@ -60,7 +60,7 @@ export default function Footer() {
           <div>
             <Logo className="text-white" />
           </div>
-          <p className="text-sm">© 2024 Seeker. All rights reserved</p>
+          <p className="text-sm">Designed &amp; Developed by Omnizya</p>
           <div className="flex flex-row gap-6">
             <SocialButton label={"Twitter"} href={"#"}>
               <FaTiktok />

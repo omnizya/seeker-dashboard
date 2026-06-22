@@ -48,7 +48,7 @@ set
     from core.tenant_memberships m
     where m.tenant_id = target_tenant_id
       and m.user_id = auth.uid()
-      and m.role = 'master'
+      and m.role in ('master', 'grand_master')
   );
 $$;
 

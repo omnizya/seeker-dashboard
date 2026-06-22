@@ -48,7 +48,7 @@ export default function SmallWithLogoLeft() {
     <div className="bg-gray-50 text-gray-700">
       <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-4 md:flex-row">
         <Logo />
-        <p>© 2022 Chakra Templates. All rights reserved</p>
+        <p>Designed &amp; Developed by Omnizya</p>
         <div className="flex flex-row gap-6">
           <SocialButton label={"Twitter"} href={"#"}>
             <FaTwitter />

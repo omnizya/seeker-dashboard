@@ -1,5 +1,6 @@
 import { CalcJomalT } from "~/types";
 import { JummalTable } from "~/data/jummal";
+import { dotLess } from "./dotless";
 
 // Pre-compute lookup tables for O(1) character lookup using typed arrays
 const MAX_CHAR_CODE = 1611;
@@ -21,12 +22,28 @@ for (let i = 0; i < JummalTable.length; i++) {
   }
 }
 
+export type JummalOptions = {
+  /**
+   * When true, normalizes Arabic text via dotLess() before computing abjad values.
+   * Removes dots from dotty letters (tanqeet) — ب→ٮ, ت→ٮ, etc.
+   * Tashkeel signs and tahmeez letters are preserved.
+   */
+  dotless?: boolean;
+};
+
 // Memoization cache for dynamic programming caching
 const memoCache = new Map<string, CalcJomalT>();
 
-export function CalcJomal(input: string | string[]): CalcJomalT {
-  const str = Array.isArray(input) ? input.join("") : input;
-  
+export function CalcJomal(
+  input: string | string[],
+  options?: JummalOptions,
+): CalcJomalT {
+  let str = Array.isArray(input) ? input.join("") : input;
+
+  if (options?.dotless) {
+    str = dotLess(str);
+  }
+
   if (memoCache.has(str)) {
     return memoCache.get(str)!;
   }

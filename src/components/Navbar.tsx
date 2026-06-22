@@ -24,6 +24,12 @@ const Links = [
   DefaultText.dashboard.navbar.links.b,
   DefaultText.dashboard.navbar.links.c,
   DefaultText.dashboard.navbar.links.d,
+  DefaultText.dashboard.navbar.links.e,
+  DefaultText.dashboard.navbar.links.f,
+  DefaultText.dashboard.navbar.links.g,
+  DefaultText.dashboard.navbar.links.h,
+  DefaultText.dashboard.navbar.links.i,
+  DefaultText.dashboard.navbar.links.j,
 ];
 
 const NavLink = (props: Props) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -252,13 +253,15 @@ export default function BookmarksPage() {
                   <CardContent className="pt-6">
                     <div className="flex flex-col gap-3">
                       {bm.ayah_text && (
-                        <p
-                          className="text-xl text-right leading-relaxed"
-                          style={{ fontFamily: "'Noto Naskh Arabic', serif" }}
-                          dir="rtl"
-                        >
-                          {bm.ayah_text}
-                        </p>
+                        <Link href={`/dashboard/quran/${bm.ayah_id}`}>
+                          <p
+                            className="text-xl text-right leading-relaxed cursor-pointer hover:text-teal-500 transition-colors"
+                            style={{ fontFamily: "'Noto Naskh Arabic', serif" }}
+                            dir="rtl"
+                          >
+                            {bm.ayah_text}
+                          </p>
+                        </Link>
                       )}
                       <div className="flex flex-wrap items-center gap-2">
                         {bm.surah_id != null && (
@@ -272,9 +275,11 @@ export default function BookmarksPage() {
                           </Badge>
                         )}
                         {bm.ayah_id != null && (
-                          <Badge variant="outline">
-                            رقم {bm.ayah_id}
-                          </Badge>
+                          <Link href={`/dashboard/quran/${bm.ayah_id}`}>
+                            <Badge variant="outline" className="cursor-pointer hover:bg-accent">
+                              رقم {bm.ayah_id} ←
+                            </Badge>
+                          </Link>
                         )}
                         {bm.label && <Badge variant="secondary">{bm.label}</Badge>}
                       </div>

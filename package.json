@@ -33,6 +33,8 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/analytics": "^1.3.1",
     "@vercel/speed-insights": "^1.0.12",
+    "baseline-browser-mapping": "^2.10.38",
+    "caniuse-lite": "^1.0.30001799",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cookie": "^0.6.0",

@@ -15,6 +15,8 @@ import {
   TableCell,
 } from "~/components/ui/table";
 import { Badge } from "~/components/ui/badge";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Label } from "~/components/ui/label";
 
 export default function JummalCard() {
   const [jomalValues, setJomalValues] = useState<CalcJomalT>({
@@ -24,11 +26,12 @@ export default function JummalCard() {
     sw: 0,
     n: 0,
   });
+  const [dotless, setDotless] = useState(false);
   const submitContact = async (event: any) => {
     let inputValue = event.target.value;
     event.preventDefault();
-    track("CalcJummal", { input: inputValue });
-    setJomalValues(CalcJomal(inputValue));
+    track("CalcJummal", { input: inputValue, dotless });
+    setJomalValues(CalcJomal(inputValue, { dotless }));
   };
   return (
     <div className="flex flex-col items-center w-full">
@@ -39,7 +42,24 @@ export default function JummalCard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex items-center gap-2 mb-2">
+            <Checkbox
+              id="dotless"
+              checked={dotless}
+              onCheckedChange={(v) => {
+                const next = v === true;
+                setDotless(next);
+                // Recompute with existing textarea value if any
+                const ta = document.getElementById("jummal-input") as HTMLTextAreaElement | null;
+                if (ta && ta.value) {
+                  setJomalValues(CalcJomal(ta.value, { dotless: next }));
+                }
+              }}
+            />
+            <Label htmlFor="dotless">{DefaultText.JummalCard.dotlessToggle}</Label>
+          </div>
           <Textarea
+            id="jummal-input"
             placeholder={DefaultText.JummalCard.textAreaPlaceholder}
             className="w-full p-2 h-20"
             required

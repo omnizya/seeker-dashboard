@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import JummalCard from "~/components/JummalCard/Jummal";
 import GeoDataCard from "~/components/GeoDataCard";
 import PlanetaryHoursCard from "~/components/PlanetaryHoursCard";
+import ResonanceMatrixCard from "~/components/ResonanceMatrixCard";
 
 import { createClient } from "~/utils/supabase/server";
 
@@ -17,6 +18,7 @@ export default async function DashboardPage() {
       <GeoDataCard />
       <PlanetaryHoursCard />
       <JummalCard />
+      <ResonanceMatrixCard />
     </section>
   );
 }
