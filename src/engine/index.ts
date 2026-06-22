@@ -19,3 +19,7 @@ export type {
   Element,
   SlotIndex,
 } from "./constants";
+export { LodgeService } from "./service";
+export type { LodgeSession, YieldResult } from "./service";
+export { StateMachine } from "./state-machine";
+export type { PsychologicalState } from "./state-machine";
