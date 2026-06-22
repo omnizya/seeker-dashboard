@@ -15,6 +15,7 @@ interface AuthState {
   register: (data: RegisterInput) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   setUser: (user: { id: string; email: string } | null) => void;
+  setError: (error: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -61,21 +62,17 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     set({ loading: true, error: null });
     try {
+      const { signup } = await import("~/app/auth/actions");
       const formData = new FormData();
       formData.append("email", parsed.data.email);
       formData.append("password", parsed.data.password);
       formData.append("displayName", parsed.data.displayName);
       formData.append("interests", JSON.stringify(parsed.data.interests));
 
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const result = await res.json();
+      const result = await signup(formData);
+      if (result?.error) {
         set({ loading: false });
-        return { success: false, error: result.error || "Registration failed" };
+        return { success: false, error: result.error };
       }
 
       set({ loading: false });
@@ -92,4 +89,5 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setUser: (user) => set({ user }),
+  setError: (error) => set({ error }),
 }));

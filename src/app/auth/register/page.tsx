@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signup } from "../actions";
+import { useAuthStore } from "~/stores/authStore";
 import AuthLayout from "../_components/AuthLayout";
 import LeftPanel from "../_components/LeftPanel";
 import SocialProof from "../_components/SocialProof";
@@ -49,10 +49,9 @@ const GOAL_OPTIONS = [
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register, loading, error, setError } = useAuthStore();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -125,14 +124,19 @@ export default function RegisterPage() {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!validateStep(0) || !validateStep(1) || !validateStep(2)) return;
-    setLoading(true);
-    setError(null);
-    try {
-      await signup(formData);
-      router.push("/auth/welcome");
-    } catch {
+
+    const result = await register({
+      email,
+      password,
+      confirmPassword,
+      displayName: displayName || "User",
+      interests: Array.from(selectedInterests),
+    });
+
+    if (result.success) {
       router.push("/auth/welcome");
     }
   };
@@ -285,7 +289,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form action={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             {renderStep()}
 
             <div className="mt-6 flex items-center justify-between">
