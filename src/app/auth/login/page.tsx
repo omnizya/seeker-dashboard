@@ -19,12 +19,9 @@ export default function LoginPage() {
   const router = useRouter();
 
   async function loginAction(_prevState: string | null, formData: FormData) {
-    try {
-      await login(formData);
-      return null;
-    } catch {
-      return "حدث خطأ في تسجيل الدخول. يرجى التحقق من بريدك الإلكتروني وكلمة المرور.";
-    }
+    const result = await login(formData);
+    if (result?.error) return result.error;
+    return null;
   }
 
   const [error, formAction, isPending] = useActionState(loginAction, null);

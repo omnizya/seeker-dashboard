@@ -8,17 +8,22 @@ import { createClient } from "~/utils/supabase/server";
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
+  if (!data.email || !data.password) {
+    return { error: "يرجى إدخال البريد الإلكتروني وكلمة المرور" };
+  }
+
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect("/error");
+    if (error.message.includes("Invalid login")) {
+      return { error: "البريد الإلكتروني أو كلمة المرور غير صحيحة" };
+    }
+    return { error: "حدث خطأ في تسجيل الدخول" };
   }
 
   track("Login", { location: "Auth Page" });
@@ -29,21 +34,29 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your input
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
+  if (!data.email || !data.password) {
+    return { error: "يرجى إدخال البريد الإلكتروني وكلمة المرور" };
+  }
+
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    redirect("/error");
+    if (error.message.includes("already registered")) {
+      return { error: "البريد الإلكتروني مسجل بالفعل" };
+    }
+    return { error: "حدث خطأ في إنشاء الحساب" };
   }
 
   track("SignUp", { location: "Auth Page" });
 
+  // Store email for verify-email page
+  // Note: this is a workaround since server actions can't pass data to client state
+
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/auth/verify-email");
 }
