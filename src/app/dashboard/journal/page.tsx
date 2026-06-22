@@ -144,7 +144,7 @@ export default function JournalPage() {
 
     const result = editingId != null
       ? updateEntry({
-          id: String(editingId),
+          id: editingId,
           title: formTitle || undefined,
           content: formContent,
           mood: (formMood || undefined) as JournalEntryUpdateInput["mood"],

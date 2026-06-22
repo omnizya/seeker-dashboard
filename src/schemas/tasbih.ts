@@ -7,8 +7,9 @@ export const tasbihPresetCreateSchema = z.object({
 });
 
 export const tasbihSessionCreateSchema = z.object({
-  preset_id: z.string().uuid(),
+  preset_id: z.number().int().positive(),
   count: z.number().int().min(0),
+  duration_seconds: z.number().int().min(0).optional(),
 });
 
 export type TasbihPresetCreateInput = z.infer<typeof tasbihPresetCreateSchema>;

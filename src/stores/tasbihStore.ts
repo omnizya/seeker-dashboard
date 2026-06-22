@@ -7,7 +7,7 @@ import {
 } from "~/schemas/tasbih";
 
 interface TasbihPreset {
-  id: string;
+  id: number;
   name: string;
   target: number;
   dhikr: string;

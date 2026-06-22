@@ -16,7 +16,7 @@ import { Toaster } from "~/components/ui/sonner";
 import { useTasbihStore } from "~/stores/tasbihStore";
 
 type ActivePreset = {
-  id: string;
+  id: number;
   name: string;
   dhikr: string;
   target: number;
