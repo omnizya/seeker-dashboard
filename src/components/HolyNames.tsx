@@ -1,5 +1,5 @@
 "use client";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "~/utils/supabase/client";
 import { useEffect, useState } from "react";
 import { Database } from "../types/supabase";
 import {
@@ -20,7 +20,7 @@ export type HolyNames = {
   west: number;
 };
 export const HolyNames = () => {
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createClient();
   const [names, setNames] = useState<any>([]);
   useEffect(() => {
     const getNames = async () => {

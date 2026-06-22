@@ -33,7 +33,8 @@ export default function UserProfileEdit() {
       setUserId(user.id);
       setEmail(user.email ?? "");
 
-      const { data: profile } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: profile } = await (supabase as any)
         .schema("identity")
         .from("profiles")
         .select("display_name, avatar_url")
@@ -57,7 +58,8 @@ export default function UserProfileEdit() {
     setMessage(null);
 
     const supabase = createClient();
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .schema("identity")
       .from("profiles")
       .upsert({

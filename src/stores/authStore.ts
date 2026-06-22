@@ -62,14 +62,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     set({ loading: true, error: null });
     try {
-      const { signup } = await import("~/app/auth/actions");
-      const formData = new FormData();
-      formData.append("email", parsed.data.email);
-      formData.append("password", parsed.data.password);
-      formData.append("displayName", parsed.data.displayName);
-      formData.append("interests", JSON.stringify(parsed.data.interests));
+      const { register } = await import("~/app/auth/actions");
 
-      const result = await signup(formData);
+      const result = await register({
+        email: parsed.data.email,
+        password: parsed.data.password,
+        confirmPassword: parsed.data.password,
+        displayName: parsed.data.displayName,
+        interests: parsed.data.interests,
+      });
       if (result?.error) {
         set({ loading: false });
         return { success: false, error: result.error };
