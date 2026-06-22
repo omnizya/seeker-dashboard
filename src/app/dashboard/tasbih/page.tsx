@@ -13,74 +13,14 @@ import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { toast } from "sonner";
 import { Toaster } from "~/components/ui/sonner";
+import { useTasbihStore } from "~/stores/tasbihStore";
 
-type DhikrPreset = {
+type ActivePreset = {
   id: string;
-  phrase: string;
-  transliteration: string;
-  translation: string;
+  name: string;
+  dhikr: string;
   target: number;
-  category: string;
 };
-
-const PRESETS: DhikrPreset[] = [
-  {
-    id: "subhanallah",
-    phrase: "سُبْحَانَ اللَّهِ",
-    transliteration: "Subhanallah",
-    translation: "Glory be to Allah",
-    target: 33,
-    category: "general",
-  },
-  {
-    id: "alhamdulillah",
-    phrase: "الْحَمْدُ لِلَّهِ",
-    transliteration: "Alhamdulillah",
-    translation: "Praise be to Allah",
-    target: 33,
-    category: "general",
-  },
-  {
-    id: "allahu_akbar",
-    phrase: "اللَّهُ أَكْبَرُ",
-    transliteration: "Allahu Akbar",
-    translation: "Allah is the Greatest",
-    target: 34,
-    category: "general",
-  },
-  {
-    id: "la_ilaha_illallah",
-    phrase: "لَا إِلَٰهَ إِلَّا اللَّهُ",
-    transliteration: "La ilaha illallah",
-    translation: "There is no god but Allah",
-    target: 100,
-    category: "general",
-  },
-  {
-    id: "astaghfirullah",
-    phrase: "أَسْتَغْفِرُ اللَّهَ",
-    transliteration: "Astaghfirullah",
-    translation: "I seek forgiveness from Allah",
-    target: 100,
-    category: "general",
-  },
-  {
-    id: "salawat",
-    phrase: "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ",
-    transliteration: "Allahumma salli 'ala Muhammad",
-    translation: "O Allah, send blessings upon Muhammad",
-    target: 33,
-    category: "general",
-  },
-  {
-    id: "lailaha",
-    phrase: "لَا إِلٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
-    transliteration: "La ilaha illallah wahdahu la sharika lah",
-    translation: "There is no god but Allah, alone, without partner",
-    target: 100,
-    category: "general",
-  },
-];
 
 const COMPLETION_STYLES = `
 @keyframes tasbihComplete {
@@ -148,17 +88,15 @@ function Confetti({ count = 20 }: { count?: number }) {
 }
 
 export default function TasbihPage() {
-  const [activePreset, setActivePreset] = useState<DhikrPreset | null>(null);
+  const { presets, totalCount, loading, error: storeError, fetchPresets, addSession } = useTasbihStore();
+  const [activePreset, setActivePreset] = useState<ActivePreset | null>(null);
   const [count, setCount] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [todayTotal, setTodayTotal] = useState<number>(0);
-  const [todayError, setTodayError] = useState<string | null>(null);
-  const [todayLoading, setTodayLoading] = useState(true);
   const [sessionTick, setSessionTick] = useState(0);
   const startTimeRef = useRef<number | null>(null);
-  const activePresetRef = useRef<DhikrPreset | null>(null);
+  const activePresetRef = useRef<ActivePreset | null>(null);
 
   useEffect(() => {
     activePresetRef.current = activePreset;
@@ -168,55 +106,29 @@ export default function TasbihPage() {
   }, [activePreset, sessionTick]);
 
   useEffect(() => {
-    fetch("/api/tasbih")
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.error) {
-          setTodayError(json.error);
-        } else {
-          setTodayTotal(json.total_count ?? 0);
-        }
-      })
-      .catch((e) => setTodayError(e.message))
-      .finally(() => setTodayLoading(false));
-  }, []);
+    fetchPresets();
+  }, [fetchPresets]);
 
-  const startDhikr = (preset: DhikrPreset) => {
+  const startDhikr = (preset: ActivePreset) => {
     setActivePreset(preset);
     setCount(0);
     setIsCompleted(false);
     setShowConfetti(false);
   };
 
-  const saveSession = () => {
+  const saveSession = async () => {
     const preset = activePresetRef.current;
     if (!preset || !startTimeRef.current) return;
     const duration = Math.floor((new Date().getTime() - startTimeRef.current) / 1000);
     setSaving(true);
-    fetch("/api/tasbih", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        preset_id: preset.id,
-        completed_count: preset.target,
-        duration_seconds: duration,
-        category: preset.category,
-      }),
-    })
-      .then((r) => r.json())
-      .then((json) => {
-        if (!json.error) {
-          toast.success("تم الحفظ", { duration: 2000 });
-          fetch("/api/tasbih")
-            .then((r) => r.json())
-            .then((j) => {
-              if (!j.error) setTodayTotal(j.total_count ?? 0);
-            })
-            .catch(() => {});
-        }
-      })
-      .catch(() => {})
-      .finally(() => setSaving(false));
+    const result = await addSession({
+      preset_id: preset.id,
+      count: preset.target,
+    });
+    if (result.success) {
+      toast.success("تم الحفظ", { duration: 2000 });
+    }
+    setSaving(false);
   }
 
   function increment() {
@@ -275,13 +187,13 @@ export default function TasbihPage() {
                 <p className="text-sm text-muted-foreground">
                   مجموع التسبيح اليوم
                 </p>
-                {todayLoading ? (
+                {loading ? (
                   <Skeleton className="h-6 w-16" />
-                ) : todayError ? (
+                ) : storeError ? (
                   <p className="text-lg font-bold text-red-500">0</p>
                 ) : (
                   <p className="text-3xl font-bold text-green-500">
-                    {todayTotal.toLocaleString("ar")}
+                    {totalCount.toLocaleString("ar")}
                   </p>
                 )}
               </div>
@@ -291,28 +203,39 @@ export default function TasbihPage() {
 
         {!activePreset ? (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {PRESETS.map((preset) => (
-              <Card
-                key={preset.id}
-                className="cursor-pointer p-3 transition-all hover:shadow-md hover:-translate-y-0.5"
-                onClick={() => startDhikr(preset)}
-              >
-                <CardContent>
-                  <div className="flex flex-col items-center gap-2 text-center">
-                    <p className="text-2xl font-bold">{preset.phrase}</p>
-                    <p className="text-sm italic text-muted-foreground">
-                      {preset.transliteration}
-                    </p>
-                    <p className="text-xs text-muted-foreground/60">
-                      {preset.translation}
-                    </p>
-                    <Badge className="bg-purple-500 text-white text-xs">
-                      {preset.target}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="p-3">
+                  <CardContent>
+                    <div className="flex flex-col items-center gap-2">
+                      <Skeleton className="h-8 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-5 w-12 rounded-full" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : storeError ? (
+              <p className="col-span-2 text-center text-red-500">{storeError}</p>
+            ) : (
+              presets.map((preset) => (
+                <Card
+                  key={preset.id}
+                  className="cursor-pointer p-3 transition-all hover:shadow-md hover:-translate-y-0.5"
+                  onClick={() => startDhikr(preset)}
+                >
+                  <CardContent>
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <p className="text-2xl font-bold">{preset.dhikr}</p>
+                      <p className="text-sm text-muted-foreground">{preset.name}</p>
+                      <Badge className="bg-purple-500 text-white text-xs">
+                        {preset.target}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         ) : (
           <Card className="w-full p-4">
@@ -326,15 +249,15 @@ export default function TasbihPage() {
                   ✕
                 </Button>
                 <CardTitle className="text-center flex-1">
-                  {activePreset.phrase}
+                  {activePreset.dhikr}
                 </CardTitle>
                 <div className="w-10" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center gap-6">
-                <p className="text-sm italic text-muted-foreground">
-                  {activePreset.transliteration}
+                <p className="text-sm text-muted-foreground">
+                  {activePreset.name}
                 </p>
 
                 <div className="w-full">
@@ -366,7 +289,7 @@ export default function TasbihPage() {
                       تم التسبيح
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {activePreset.phrase}
+                      {activePreset.dhikr}
                     </p>
                     <p className="text-xs text-muted-foreground/60">
                       {activePreset.target} مرة

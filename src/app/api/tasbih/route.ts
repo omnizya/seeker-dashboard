@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "~/utils/supabase/server";
+import { tasbihSessionCreateSchema } from "~/schemas/tasbih";
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,9 +54,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const parsed = tasbihSessionCreateSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .schema("spiritual").from("tasbih_sessions")
-      .insert({ ...body, user_id: user.id })
+      .insert({ ...parsed.data, user_id: user.id })
       .select()
       .single();
 
