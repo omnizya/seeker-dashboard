@@ -188,6 +188,106 @@ src/components/
   Lodge/        # Lodge Protocol components
   Dashboard/    # Dashboard-specific components
   Layout/       # Layout components (Navbar, Footer, Sidebar)
+src/app/[route]/_components/  # Route-specific private components
+```
+
+## Reusable patterns
+
+### Selectable card (multi-select, keyboard accessible)
+```typescript
+"use client";
+import * as React from "react";
+import { cn } from "~/lib/utils";
+import { Check } from "lucide-react";
+
+interface SelectableCardProps {
+  title: string;
+  icon: string;
+  selected: boolean;
+  onToggle: () => void;
+  className?: string;
+}
+
+export default function SelectableCard({ title, icon, selected, onToggle, className }: SelectableCardProps) {
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); }
+  }, [onToggle]);
+
+  return (
+    <div
+      role="checkbox"
+      aria-checked={selected}
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={handleKeyDown}
+      className={cn(
+        "relative cursor-pointer rounded-xl border p-4 transition-all duration-200 select-none",
+        "flex flex-col items-center gap-2 text-center",
+        "border-border bg-card",
+        selected && "border-primary bg-primary/10 shadow-lg shadow-primary/10",
+        "hover:border-primary/50",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        className,
+      )}
+    >
+      {selected && (
+        <div className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+        </div>
+      )}
+      <span className="mt-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/5 text-2xl">{icon}</span>
+      <span className="text-sm font-medium text-foreground">{title}</span>
+    </div>
+  );
+}
+```
+
+### File upload with preview
+```typescript
+"use client";
+import * as React from "react";
+import { cn } from "~/lib/utils";
+import { Camera, X } from "lucide-react";
+
+interface FileUploadProps {
+  value: string | null;
+  onChange: (dataUrl: string | null) => void;
+  className?: string;
+}
+
+export default function FileUpload({ value, onChange, className }: FileUploadProps) {
+  const fileRef = React.useRef<HTMLInputElement>(null);
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => { onChange(ev.target?.result as string); };
+    reader.readAsDataURL(file);
+  }
+
+  return (
+    <div className={cn("flex flex-col items-center gap-3", className)}>
+      <div onClick={() => fileRef.current?.click()}
+        className={cn("relative flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed transition-colors",
+          value ? "border-primary" : "border-muted-foreground/30 hover:border-primary/50",
+        )}>
+        {value ? (
+          <>
+            <img src={value} alt="Upload" className="h-full w-full object-cover" />
+            <button type="button" onClick={(e) => { e.stopPropagation(); onChange(null); }}
+              className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground">
+              <X className="h-3 w-3" />
+            </button>
+          </>
+        ) : (
+          <Camera className="h-8 w-8 text-muted-foreground/50" />
+        )}
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+    </div>
+  );
+}
 ```
 
 ## Common pitfalls
