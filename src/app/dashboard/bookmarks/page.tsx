@@ -30,18 +30,7 @@ import {
 } from "~/components/ui/dialog";
 import { toast } from "sonner";
 import { Toaster } from "~/components/ui/sonner";
-
-type Bookmark = {
-  id: number;
-  ayah_id: number;
-  surah_id: number | null;
-  ayah_number: number | null;
-  ayah_text: string | null;
-  label: string | null;
-  tags: string | null;
-  color: string | null;
-  created_at: string;
-};
+import { useBookmarkStore } from "~/stores/bookmarkStore";
 
 const COLOR_OPTIONS = [
   { value: "", label: "بدون لون" },
@@ -56,9 +45,9 @@ const COLOR_OPTIONS = [
 ];
 
 export default function BookmarksPage() {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { bookmarks, loading, error, fetchBookmarks, addBookmark, deleteBookmark } =
+    useBookmarkStore();
+
   const [searchLabel, setSearchLabel] = useState("");
   const [filterSurah, setFilterSurah] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -71,23 +60,11 @@ export default function BookmarksPage() {
   const [formColor, setFormColor] = useState("");
 
   useEffect(() => {
-    fetch("/api/bookmarks")
-      .then((r) => {
-        if (r.status === 401) throw new Error("يرجى تسجيل الدخول أولاً");
-        return r.json();
-      })
-      .then((data) => {
-        setBookmarks(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
-  }, []);
+    fetchBookmarks();
+  }, [fetchBookmarks]);
 
   const uniqueSurahIds = [
-    ...new Set(bookmarks.map((b) => b.surah_id).filter((id): id is number => id != null)),
+    ...new Set(bookmarks.map((b) => b.surah_id)),
   ].sort((a, b) => a - b);
 
   const filtered = bookmarks.filter((b) => {
@@ -99,58 +76,55 @@ export default function BookmarksPage() {
     return matchesSearch && matchesSurah;
   });
 
-  function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     if (!window.confirm("هل أنت متأكد من حذف هذه العلامة المرجعية؟")) return;
-    fetch("/api/bookmarks", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error("فشل الحذف");
-        setBookmarks((prev) => prev.filter((b) => b.id !== id));
-        toast.info("تم الحذف", { duration: 2000 });
-      })
-      .catch(() => {
-        toast.error("فشل الحذف", { duration: 2000 });
-      });
+    const result = await deleteBookmark(id);
+    if (result.success) {
+      toast.info("تم الحذف", { duration: 2000 });
+    } else {
+      toast.error(result.error || "فشل الحذف", { duration: 2000 });
+    }
   }
 
-  function handleAdd() {
+  async function handleAdd() {
     if (!formAyahId) {
       toast.warning("الرجاء إدخال رقم الآية", { duration: 2000 });
       return;
     }
-    const body: Record<string, unknown> = { ayah_id: parseInt(formAyahId) };
-    if (formSurahId) body.surah_id = parseInt(formSurahId);
-    if (formAyahNumber) body.ayah_number = parseInt(formAyahNumber);
-    if (formAyahText) body.ayah_text = formAyahText;
-    if (formLabel) body.label = formLabel;
-    if (formColor) body.color = formColor;
+    if (!formSurahId) {
+      toast.warning("الرجاء إدخال رقم السورة", { duration: 2000 });
+      return;
+    }
+    if (!formAyahNumber) {
+      toast.warning("الرجاء إدخال رقم الآية في السورة", { duration: 2000 });
+      return;
+    }
+    if (!formAyahText) {
+      toast.warning("الرجاء إدخال نص الآية", { duration: 2000 });
+      return;
+    }
 
-    fetch("/api/bookmarks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error("فشلت الإضافة");
-        return r.json();
-      })
-      .then((newBm) => {
-        setBookmarks((prev) => [...prev, newBm]);
-        toast.success("تمت الإضافة", { duration: 2000 });
-        setIsOpen(false);
-        setFormAyahId("");
-        setFormSurahId("");
-        setFormAyahNumber("");
-        setFormAyahText("");
-        setFormLabel("");
-        setFormColor("");
-      })
-      .catch(() => {
-        toast.error("فشلت الإضافة", { duration: 2000 });
-      });
+    const result = await addBookmark({
+      ayah_id: Number(formAyahId),
+      surah_id: Number(formSurahId),
+      ayah_number: Number(formAyahNumber),
+      ayah_text: formAyahText,
+      label: formLabel || undefined,
+      color: formColor || undefined,
+    });
+
+    if (result.success) {
+      toast.success("تمت الإضافة", { duration: 2000 });
+      setIsOpen(false);
+      setFormAyahId("");
+      setFormSurahId("");
+      setFormAyahNumber("");
+      setFormAyahText("");
+      setFormLabel("");
+      setFormColor("");
+    } else {
+      toast.error(result.error || "فشلت الإضافة", { duration: 2000 });
+    }
   }
 
   function formatDate(iso: string) {
@@ -264,23 +238,17 @@ export default function BookmarksPage() {
                         </Link>
                       )}
                       <div className="flex flex-wrap items-center gap-2">
-                        {bm.surah_id != null && (
-                          <Badge className="bg-green-500 text-white">
-                            سورة {bm.surah_id}
+                        <Badge className="bg-green-500 text-white">
+                          سورة {bm.surah_id}
+                        </Badge>
+                        <Badge className="bg-blue-500 text-white">
+                          آية {bm.ayah_number}
+                        </Badge>
+                        <Link href={`/dashboard/quran/${bm.ayah_id}`}>
+                          <Badge variant="outline" className="cursor-pointer hover:bg-accent">
+                            رقم {bm.ayah_id} ←
                           </Badge>
-                        )}
-                        {bm.ayah_number != null && (
-                          <Badge className="bg-blue-500 text-white">
-                            آية {bm.ayah_number}
-                          </Badge>
-                        )}
-                        {bm.ayah_id != null && (
-                          <Link href={`/dashboard/quran/${bm.ayah_id}`}>
-                            <Badge variant="outline" className="cursor-pointer hover:bg-accent">
-                              رقم {bm.ayah_id} ←
-                            </Badge>
-                          </Link>
-                        )}
+                        </Link>
                         {bm.label && <Badge variant="secondary">{bm.label}</Badge>}
                       </div>
                       <div className="flex items-center justify-between">
@@ -319,35 +287,39 @@ export default function BookmarksPage() {
                 value={formAyahId}
                 onChange={(e) => setFormAyahId(e.target.value)}
                 placeholder="رقم الآية"
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="surahId">رقم السورة</Label>
+              <Label htmlFor="surahId">رقم السورة *</Label>
               <Input
                 id="surahId"
                 type="number"
                 value={formSurahId}
                 onChange={(e) => setFormSurahId(e.target.value)}
-                placeholder="اختياري"
+                placeholder="رقم السورة"
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ayahNumber">رقم الآية في السورة</Label>
+              <Label htmlFor="ayahNumber">رقم الآية في السورة *</Label>
               <Input
                 id="ayahNumber"
                 type="number"
                 value={formAyahNumber}
                 onChange={(e) => setFormAyahNumber(e.target.value)}
-                placeholder="اختياري"
+                placeholder="رقم الآية في السورة"
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ayahText">نص الآية</Label>
+              <Label htmlFor="ayahText">نص الآية *</Label>
               <Input
                 id="ayahText"
                 value={formAyahText}
                 onChange={(e) => setFormAyahText(e.target.value)}
-                placeholder="اختياري - نص الآية"
+                placeholder="نص الآية"
+                required
               />
             </div>
             <div className="space-y-2">
