@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "~/utils/supabase/server";
+import { bookmarkCreateSchema, bookmarkDeleteSchema } from "~/schemas/bookmark";
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,13 +43,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    if (!body.ayah_id) {
-      return NextResponse.json({ error: "ayah_id is required" }, { status: 400 });
+    const parsed = bookmarkCreateSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
     const { data, error } = await supabase
       .schema("spiritual").from("quran_bookmarks")
-      .insert({ ...body, user_id: user.id })
+      .insert({ ...parsed.data, user_id: user.id })
       .select()
       .single();
 
@@ -69,15 +75,20 @@ export async function DELETE(request: NextRequest) {
     }
 
     const body = await request.json();
-    if (!body.id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
+    const parsed = bookmarkDeleteSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
     // Verify ownership
     const { data: existing } = await supabase
       .schema("spiritual").from("quran_bookmarks")
       .select("id, user_id")
-      .eq("id", body.id)
+      .eq("id", parsed.data.id)
       .single();
 
     if (!existing || existing.user_id !== user.id) {
@@ -87,7 +98,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .schema("spiritual").from("quran_bookmarks")
       .delete()
-      .eq("id", body.id);
+      .eq("id", parsed.data.id);
 
     if (error) throw error;
     return NextResponse.json({ success: true });
