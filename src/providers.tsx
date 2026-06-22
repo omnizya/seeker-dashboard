@@ -9,13 +9,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="light"
+      defaultTheme="dark"
       enableSystem
       disableTransitionOnChange
     >
       <Fonts />
       {children}
-      <Analytics framework="nextjs" disableAutoTrack={false} />
+      <Analytics framework="nextjs" />
       <SpeedInsights />
     </ThemeProvider>
   );
