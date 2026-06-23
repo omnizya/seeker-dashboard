@@ -98,12 +98,12 @@ export default function CelestialPage() {
     <div className="mx-auto max-w-xl space-y-4 py-4">
       <Card>
         <CardHeader>
-          <CardTitle>Celestial Layer</CardTitle>
+          <CardTitle>الطبقة السماوية</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">
-              Planetary Hour
+              الساعة الكوكبية
             </h3>
             <CelestialBadge planet={currentPlanet} />
             <p className="text-xs text-muted-foreground">
@@ -113,7 +113,7 @@ export default function CelestialPage() {
 
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">
-              Element Affinity
+              عنصر الانسجام
             </h3>
             <ElementIndicator element={elementIndex} />
             <p className="text-xs text-muted-foreground">
@@ -123,7 +123,7 @@ export default function CelestialPage() {
 
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">
-              Lunar Mansion ({mansionIndex + 1}/28)
+              منزل قمري ({mansionIndex + 1}/28)
             </h3>
             <p className="text-sm font-medium">{currentMansion.name}</p>
             <p className="text-xs text-muted-foreground">
@@ -133,7 +133,7 @@ export default function CelestialPage() {
 
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-muted-foreground">
-              Celestial Domains
+              المجالات السماوية
             </h3>
             <div className="grid grid-cols-1 gap-2">
               {PLANETS.map((planet) => (

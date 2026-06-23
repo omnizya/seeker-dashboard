@@ -63,7 +63,7 @@ export default function LodgePage() {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error ?? "Failed to start session");
+        setError(json.error ?? "فشل بدء الجلسة");
         return;
       }
       setSession(json.session);
@@ -77,7 +77,7 @@ export default function LodgePage() {
       setResonance(1.0);
       startTimeRef.current = Date.now();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Network error");
+      setError(e instanceof Error ? e.message : "خطأ في الشبكة");
     } finally {
       setLoading(false);
     }
@@ -160,13 +160,13 @@ export default function LodgePage() {
     <div className="mx-auto max-w-xl space-y-4 py-4">
       <Card>
         <CardHeader>
-          <CardTitle>Lodge</CardTitle>
+          <CardTitle>بروتوكول اللودج</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {!session ? (
             <div className="space-y-3">
               <Input
-                placeholder="Enter your intent..."
+                placeholder="أدخل نيتك…"
                 value={intent}
                 onChange={(e) => setIntent(e.target.value)}
                 onKeyDown={(e) => {
@@ -178,7 +178,7 @@ export default function LodgePage() {
                 onClick={startSession}
                 disabled={loading || !intent.trim()}
               >
-                {loading ? "Starting..." : "Start Session"}
+                {loading ? "جاري بدء الجلسة…" : "بدء الجلسة"}
               </Button>
               {error && (
                 <p className="text-sm text-destructive text-center">{error}</p>
@@ -213,14 +213,14 @@ export default function LodgePage() {
                   onClick={endSession}
                   disabled={loading}
                 >
-                  End Session
+                  إنهاء الجلسة
                 </Button>
                 <Button
                   variant="ghost"
                   className="flex-1"
                   onClick={resetSession}
                 >
-                  Reset
+                  إعادة تعيين
                 </Button>
               </div>
 

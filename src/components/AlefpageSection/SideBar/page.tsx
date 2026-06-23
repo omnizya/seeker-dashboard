@@ -3,17 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Home,
-  TrendingUp,
-  Compass,
+  Calculator,
+  BookOpen,
   Star,
-  Settings,
+  Grid3x3,
+  Clock,
+  Globe,
+  Dumbbell,
+  Bookmark,
+  PenLine,
+  HandHeart,
   Menu,
   Bell,
   ChevronDown,
   User,
+  Settings,
   LogOut,
-  CreditCard,
 } from "lucide-react";
 import {
   Sheet,
@@ -34,20 +39,34 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+import { DefaultText } from "~/texts";
 
-const navItems = [
-  { name: "Home", icon: Home, href: "/dashboard" },
-  { name: "Trending", icon: TrendingUp, href: "/dashboard" },
-  { name: "Explore", icon: Compass, href: "/dashboard" },
-  { name: "Favourites", icon: Star, href: "/dashboard" },
-  { name: "Settings", icon: Settings, href: "/dashboard/profile" },
-] as const;
+const NAV_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  a: Calculator,
+  b: BookOpen,
+  c: Star,
+  d: Grid3x3,
+  e: Clock,
+  f: Globe,
+  g: Dumbbell,
+  h: Bookmark,
+  i: PenLine,
+  j: HandHeart,
+};
+
+const navItems = Object.entries(DefaultText.dashboard.navbar.links).map(
+  ([key, { label, href }]) => ({
+    name: label,
+    icon: NAV_ICONS[key] || Calculator,
+    href,
+  }),
+);
 
 const SidebarContent = ({ className }: { className?: string }) => {
   return (
     <nav className={cn("flex h-full flex-col", className)}>
       <div className="flex h-20 items-center justify-between px-8">
-        <span className="text-2xl font-bold font-mono">Logo</span>
+        <span className="text-2xl font-bold">{DefaultText.app.title}</span>
       </div>
       {navItems.map((item) => (
         <Link
@@ -69,16 +88,16 @@ const MobileNav = ({ onOpen }: { onOpen: () => void }) => {
       <button
         type="button"
         className="inline-flex items-center justify-center rounded-md p-2 md:hidden"
-        aria-label="Open menu"
+        aria-label="فتح القائمة"
         onClick={onOpen}
       >
         <Menu className="h-6 w-6" />
       </button>
 
-      <span className="text-2xl font-bold font-mono md:hidden">Logo</span>
+      <span className="text-2xl font-bold md:hidden">{DefaultText.app.title}</span>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+        <Button variant="ghost" size="icon" aria-label="الإشعارات">
           <Bell className="h-5 w-5" />
         </Button>
         <DropdownMenu>
@@ -87,13 +106,13 @@ const MobileNav = ({ onOpen }: { onOpen: () => void }) => {
               <Avatar className="h-8 w-8">
                 <AvatarImage
                   src="https://images.unsplash.com/photo-1619946794135-5bc917a27793?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&s=b616b2c5b373a80ffc9636ba24f7a4a9"
-                  alt="User avatar"
+                  alt="الصورة الشخصية"
                 />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback>م</AvatarFallback>
               </Avatar>
               <div className="hidden flex-col items-start text-sm md:flex">
-                <span>Justina Clark</span>
-                <span className="text-xs text-muted-foreground">Admin</span>
+                <span>المستخدم</span>
+                <span className="text-xs text-muted-foreground">مدير</span>
               </div>
               <ChevronDown className="hidden h-4 w-4 md:block" />
             </Button>
@@ -101,20 +120,16 @@ const MobileNav = ({ onOpen }: { onOpen: () => void }) => {
           <DropdownMenuContent className="w-48" align="end">
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              الملف الشخصي
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CreditCard className="mr-2 h-4 w-4" />
-              Billing
+              الإعدادات
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              تسجيل الخروج
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -134,7 +149,7 @@ const SidebarWithHeader = ({ children }: { children?: React.ReactNode }) => {
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="left" className="w-60 p-0">
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SheetTitle className="sr-only">التنقل</SheetTitle>
           <SidebarContent />
         </SheetContent>
       </Sheet>

@@ -50,7 +50,7 @@ export async function register(input: RegisterInput) {
     password: input.password,
     options: {
       data: {
-        display_name: input.displayName || "User",
+        display_name: input.displayName || "المستخدم",
         interests: input.interests || [],
       },
     },

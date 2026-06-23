@@ -88,10 +88,10 @@ function QiblaCompass({ bearing }: { bearing: number }) {
     <div className="flex flex-col items-center gap-3">
       <div className="relative h-[120px] w-[120px]">
         <div className="absolute inset-0 rounded-full border-3 border-gray-300 dark:border-gray-600" />
-        <span className="absolute left-1/2 top-1 -translate-x-1/2 text-xs font-bold">N</span>
-        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold">S</span>
-        <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-bold">W</span>
-        <span className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold">E</span>
+        <span className="absolute left-1/2 top-1 -translate-x-1/2 text-xs font-bold">ش</span>
+        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold">ج</span>
+        <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-bold">غ</span>
+        <span className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold">م</span>
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl leading-none"
           style={{ transform: `translate(-50%, -50%) rotate(${bearing - 180}deg)` }}

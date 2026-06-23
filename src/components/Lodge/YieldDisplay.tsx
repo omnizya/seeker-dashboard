@@ -11,20 +11,20 @@ export default function YieldDisplay({ yieldResult }: YieldDisplayProps) {
   if (!yieldResult) {
     return (
       <div className="text-center text-muted-foreground text-sm py-4">
-        No yield data yet
+        لا توجد بيانات بعد
       </div>
     );
   }
 
   const rows = [
-    { label: "Total Yield", value: yieldResult.totalYield.toFixed(2) },
-    { label: "Flow Time", value: `${yieldResult.flowTime} ticks` },
-    { label: "Interruptions", value: yieldResult.interruptions },
+    { label: "المحصلة", value: yieldResult.totalYield.toFixed(2) },
+    { label: "وقت التدفق", value: `${yieldResult.flowTime} ثانية` },
+    { label: "الانقطاعات", value: yieldResult.interruptions },
     {
-      label: "Resonance",
+      label: "الرنين",
       value: yieldResult.resonance ? "×1.5" : "×1.0",
     },
-    { label: "Archetype", value: yieldResult.archetype },
+    { label: "النمط", value: yieldResult.archetype },
   ];
 
   return (
@@ -38,7 +38,7 @@ export default function YieldDisplay({ yieldResult }: YieldDisplayProps) {
           <span
             className={cn(
               "font-mono font-medium",
-              row.label === "Resonance" &&
+              row.label === "الرنين" &&
                 yieldResult.resonance &&
                 "text-green-600 dark:text-green-400"
             )}

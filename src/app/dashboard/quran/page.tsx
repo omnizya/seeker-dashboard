@@ -41,7 +41,7 @@ export default function Index() {
     async function loadStream() {
       try {
         const res = await fetch("/api/quran", { signal: abortController.signal });
-        if (!res.body) throw new Error("No readable stream");
+        if (!res.body) throw new Error("التدفق غير مقروء");
         
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -101,11 +101,11 @@ export default function Index() {
     };
   }, []);
 
-  if (error) return <div>Failed to load</div>;
+  if (error) return <div className="text-center text-red-500 p-4">فشل التحميل</div>;
 
   return (
     <ul className="min-h-10 max-h-300 overflow-y-auto max-w-[100ch] text-warning bg-black">
-      {isLoading && data.length === 0 && <div>Loading stream...</div>}
+      {isLoading && data.length === 0 && <div className="text-center p-4 text-muted-foreground">جاري تحميل البيانات…</div>}
       {data.map((p: Ayah) => (
         <AyahComponent key={p.id} values={p} />
       ))}

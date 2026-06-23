@@ -34,7 +34,7 @@ export default function LoginPage() {
       toast.success("تم تسجيل الدخول بنجاح");
       router.push("/dashboard");
     } else {
-      setError(result.error || "Login failed");
+      setError(result.error || "فشل تسجيل الدخول");
     }
   };
 

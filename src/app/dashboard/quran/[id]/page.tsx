@@ -98,7 +98,7 @@ export default function AyahPage({
     Promise.all([
       fetch(`/api/quran/${ayahId}`, { signal: controller.signal }).then(
         (r) => {
-          if (!r.ok) throw new Error("Failed to load ayah");
+          if (!r.ok) throw new Error("فشل تحميل الآية");
           return r.json();
         },
       ),

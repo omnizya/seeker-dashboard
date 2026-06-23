@@ -132,7 +132,7 @@ export default function RegisterPage() {
       email,
       password,
       confirmPassword,
-      displayName: displayName || "User",
+      displayName: displayName || "المستخدم",
       interests: Array.from(selectedInterests),
     });
 
