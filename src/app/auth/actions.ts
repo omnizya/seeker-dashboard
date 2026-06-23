@@ -3,26 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "~/utils/supabase/server";
-
-interface RegisterInput {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  displayName?: string;
-  interests?: string[];
-}
+import { loginSchema, registerSchema } from "~/schemas/auth";
 
 export async function login(formData: FormData) {
-  const supabase = await createClient();
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  if (!email || !password) {
-    return { error: "يرجى إدخال البريد الإلكتروني وكلمة المرور" };
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     if (error.message.includes("Invalid login")) {
@@ -35,23 +29,28 @@ export async function login(formData: FormData) {
   redirect("/dashboard");
 }
 
-export async function register(input: RegisterInput) {
-  if (input.password !== input.confirmPassword) {
-    return { success: false, error: "كلمتا المرور غير متطابقتين" };
-  }
-  if (input.password.length < 6) {
-    return { success: false, error: "يجب أن تكون كلمة المرور 6 أحرف على الأقل" };
+export async function register(input: {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  displayName?: string;
+  interests?: string[];
+}) {
+  const parsed = registerSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signUp({
-    email: input.email,
-    password: input.password,
+    email: parsed.data.email,
+    password: parsed.data.password,
     options: {
       data: {
-        display_name: input.displayName || "المستخدم",
-        interests: input.interests || [],
+        display_name: parsed.data.displayName || "المستخدم",
+        interests: parsed.data.interests || [],
       },
     },
   });
@@ -61,11 +60,6 @@ export async function register(input: RegisterInput) {
       return { success: false, error: "البريد الإلكتروني مسجل بالفعل" };
     }
     return { success: false, error: "حدث خطأ في إنشاء الحساب" };
-  }
-
-  // Store email for verify-email page
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem("verify_email", input.email);
   }
 
   revalidatePath("/", "layout");

@@ -31,26 +31,24 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     set({ loading: true, error: null });
     try {
-      const formData = new FormData();
-      formData.append("email", parsed.data.email);
-      formData.append("password", parsed.data.password);
-
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed.data),
       });
 
+      const result = await res.json();
+
       if (!res.ok) {
-        const result = await res.json();
         set({ loading: false });
-        return { success: false, error: result.error || "Login failed" };
+        return { success: false, error: result.error || "فشل تسجيل الدخول" };
       }
 
       set({ loading: false });
       return { success: true };
     } catch {
-      set({ loading: false, error: "Network error" });
-      return { success: false, error: "Network error" };
+      set({ loading: false, error: "خطأ في الشبكة" });
+      return { success: false, error: "خطأ في الشبكة" };
     }
   },
 
@@ -79,8 +77,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false });
       return { success: true };
     } catch {
-      set({ loading: false, error: "Network error" });
-      return { success: false, error: "Network error" };
+      set({ loading: false, error: "خطأ في الشبكة" });
+      return { success: false, error: "خطأ في الشبكة" };
     }
   },
 
