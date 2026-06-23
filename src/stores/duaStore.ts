@@ -7,15 +7,15 @@ import {
 } from "~/schemas/dua";
 
 interface DuaList {
-  id: string;
+  id: number;
   name: string;
   category?: string;
   created_at: string;
 }
 
 interface DuaEntry {
-  id: string;
-  list_id: string;
+  id: number;
+  list_id: number;
   title: string;
   content: string;
   arabic_text?: string;

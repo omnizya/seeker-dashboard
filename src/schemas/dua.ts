@@ -6,7 +6,7 @@ export const duaListCreateSchema = z.object({
 });
 
 export const duaEntryCreateSchema = z.object({
-  list_id: z.string().uuid(),
+  list_id: z.number().int().positive(),
   title: z.string().min(1, "العنوان مطلوب").max(200),
   content: z.string().min(1, "المحتوى مطلوب"),
   arabic_text: z.string().optional(),
