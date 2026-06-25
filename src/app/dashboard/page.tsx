@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "~/stores/authStore";
+import { setTokens } from "~/lib/api";
 import JummalCard from "~/components/JummalCard/Jummal";
 import GeoDataCard from "~/components/GeoDataCard";
 import PlanetaryHoursCard from "~/components/PlanetaryHoursCard";
@@ -13,6 +14,17 @@ export default function DashboardPage() {
   const { user, loading, initAuth } = useAuthStore();
 
   useEffect(() => {
+    // Check for OAuth tokens in URL params
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+
+    if (accessToken && refreshToken) {
+      setTokens(accessToken, refreshToken);
+      // Clean URL
+      window.history.replaceState({}, "", "/dashboard");
+    }
+
     initAuth();
   }, [initAuth]);
 
