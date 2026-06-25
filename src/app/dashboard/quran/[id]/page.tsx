@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
+import useSWR from "swr";
+import { swrFetcher } from "~/lib/fetcher";
 import { ArrowLeft, Bookmark, BookmarkCheck, Trash2 } from "lucide-react";
 import {
   Card,
@@ -80,55 +82,24 @@ export default function AyahPage({
   const { id } = use(params);
   const ayahId = parseInt(id);
 
-  const [ayah, setAyah] = useState<Ayah | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: ayah, error: ayahError, isLoading: ayahLoading } = useSWR<Ayah>(
+    `/api/quran/${ayahId}`,
+    swrFetcher,
+  );
 
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [bmsLoading, setBmsLoading] = useState(true);
+  const { data: bookmarks = [], isLoading: bmsLoading } = useSWR<Bookmark[]>(
+    `/api/bookmarks?ayah_id=${ayahId}`,
+    async (url: string) => {
+      const res = await fetch(url);
+      if (res.status === 401) return [];
+      return res.json();
+    },
+  );
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formLabel, setFormLabel] = useState("");
   const [formColor, setFormColor] = useState("");
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    Promise.all([
-      fetch(`/api/quran/${ayahId}`, { signal: controller.signal }).then(
-        (r) => {
-          if (!r.ok) throw new Error("فشل تحميل الآية");
-          return r.json();
-        },
-      ),
-      fetch(`/api/bookmarks?ayah_id=${ayahId}`, {
-        signal: controller.signal,
-      }).then((r) => {
-        if (r.status === 401) return [];
-        return r.json();
-      }),
-    ])
-      .then(([ayahData, bmsData]) => {
-        if (!ayahData || !ayahData.id) {
-          setError("لم يتم العثور على الآية");
-        } else {
-          setAyah(ayahData);
-        }
-        setBookmarks(Array.isArray(bmsData) ? bmsData : []);
-        setLoading(false);
-        setBmsLoading(false);
-      })
-      .catch((e) => {
-        if (e.name !== "AbortError") {
-          setError(e.message);
-          setLoading(false);
-          setBmsLoading(false);
-        }
-      });
-
-    return () => controller.abort();
-  }, [ayahId]);
 
   function handleAddBookmark() {
     setSaving(true);
@@ -149,7 +120,6 @@ export default function AyahPage({
         return r.json();
       })
       .then((newBm) => {
-        setBookmarks((prev) => [newBm, ...prev]);
         toast.success("تمت إضافة العلامة", { duration: 2000 });
         setIsDialogOpen(false);
         setFormLabel("");
@@ -171,13 +141,14 @@ export default function AyahPage({
     })
       .then((r) => {
         if (!r.ok) throw new Error("فشل الحذف");
-        setBookmarks((prev) => prev.filter((b) => b.id !== bmId));
         toast.info("تم الحذف", { duration: 2000 });
       })
       .catch(() => {
         toast.error("فشل الحذف", { duration: 2000 });
       });
   }
+
+  const loading = ayahLoading || bmsLoading;
 
   if (loading) {
     return (
@@ -194,7 +165,7 @@ export default function AyahPage({
     );
   }
 
-  if (error || !ayah) {
+  if (ayahError || !ayah) {
     return (
       <div className="mx-auto max-w-3xl py-4">
         <Card className="w-full p-4">
@@ -202,7 +173,7 @@ export default function AyahPage({
             <CardTitle className="text-center">خطأ</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error || "الآية غير موجودة"}</p>
+            <p className="text-center text-red-500">{ayahError?.message || "الآية غير موجودة"}</p>
             <div className="mt-4 text-center">
               <Link href="/dashboard/quran">
                 <Button variant="outline">

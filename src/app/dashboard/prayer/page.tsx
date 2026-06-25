@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useGeolocation } from "@uidotdev/usehooks";
+import useSWR from "swr";
+import { swrFetcher } from "~/lib/fetcher";
 import {
   Card,
   CardContent,
@@ -143,51 +145,30 @@ const prayerKeys = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"];
 
 export default function PrayerPage() {
   const geo = useGeolocation();
-  const [data, setData] = useState<PrayerResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [method, setMethod] = useState<string>("MWL");
   const [currentPrayer, setCurrentPrayer] = useState<string | null>(null);
 
   const today = new Date();
   const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-  const isFetching =
+  const shouldFetch =
     !geo.loading &&
     !geo.error &&
     geo.latitude != null &&
-    geo.longitude != null &&
-    data === null &&
-    error === null;
+    geo.longitude != null;
 
-  useEffect(() => {
-    if (geo.loading || geo.error || geo.latitude == null || geo.longitude == null)
-      return;
-
-    const controller = new AbortController();
-
-    fetch(
-      `/api/prayer?lat=${geo.latitude}&lng=${geo.longitude}&date=${dateStr}&method=${method}`,
-      { signal: controller.signal },
-    )
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.error) {
-          setError(json.error);
-        } else {
-          setData(json);
-          const found = findCurrentPrayer(json.times);
-          setCurrentPrayer(found?.key ?? null);
-        }
-      })
-      .catch((e) => {
-        if (e.name !== "AbortError") setError(e.message);
-      });
-
-    return () => controller.abort();
-  }, [geo.latitude, geo.longitude, geo.loading, geo.error, method, dateStr]);
+  const { data, error, isLoading } = useSWR<PrayerResponse>(
+    shouldFetch
+      ? `/api/prayer?lat=${geo.latitude}&lng=${geo.longitude}&date=${dateStr}&method=${method}`
+      : null,
+    swrFetcher,
+  );
 
   useEffect(() => {
     if (!data?.times) return;
+
+    const found = findCurrentPrayer(data.times);
+    setCurrentPrayer(found?.key ?? null);
 
     const interval = setInterval(() => {
       const found = findCurrentPrayer(data.times);
@@ -229,7 +210,7 @@ export default function PrayerPage() {
     );
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-3xl py-4">
         <Card className="w-full p-4">
@@ -254,7 +235,7 @@ export default function PrayerPage() {
             <CardTitle className="text-center">أوقات الصلاة</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error}</p>
+            <p className="text-center text-red-500">{error.message}</p>
           </CardContent>
         </Card>
       </div>
@@ -279,8 +260,6 @@ export default function PrayerPage() {
                 value={method}
                 onValueChange={(value) => {
                   setMethod(value);
-                  setData(null);
-                  setError(null);
                 }}
               >
                 <SelectTrigger className="w-full max-w-sm">

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useGeolocation } from "@uidotdev/usehooks";
+import useSWR from "swr";
+import { swrFetcher } from "~/lib/fetcher";
 import {
   Card,
   CardContent,
@@ -126,44 +127,22 @@ function MoonPhaseIcon({ phase }: { phase: string }) {
 
 export default function AstroPage() {
   const geo = useGeolocation();
-  const [data, setData] = useState<AstroResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const today = new Date();
   const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-  const isFetching =
+  const shouldFetch =
     !geo.loading &&
     !geo.error &&
     geo.latitude != null &&
-    geo.longitude != null &&
-    data === null &&
-    error === null;
+    geo.longitude != null;
 
-  useEffect(() => {
-    if (geo.loading || geo.error || geo.latitude == null || geo.longitude == null)
-      return;
-
-    const controller = new AbortController();
-
-    fetch(
-      `/api/astro?lat=${geo.latitude}&lng=${geo.longitude}&date=${dateStr}`,
-      { signal: controller.signal },
-    )
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.error) {
-          setError(json.error);
-        } else {
-          setData(json);
-        }
-      })
-      .catch((e) => {
-        if (e.name !== "AbortError") setError(e.message);
-      });
-
-    return () => controller.abort();
-  }, [geo.latitude, geo.longitude, geo.loading, geo.error, dateStr]);
+  const { data, error, isLoading } = useSWR<AstroResponse>(
+    shouldFetch
+      ? `/api/astro?lat=${geo.latitude}&lng=${geo.longitude}&date=${dateStr}`
+      : null,
+    swrFetcher,
+  );
 
   if (geo.loading) {
     return (
@@ -195,7 +174,7 @@ export default function AstroPage() {
     );
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-3xl py-4">
         <Card className="w-full p-4">
@@ -218,7 +197,7 @@ export default function AstroPage() {
             <CardTitle className="text-center">البيانات الفلكية واتجاه القبلة</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error}</p>
+            <p className="text-center text-red-500">{error.message}</p>
           </CardContent>
         </Card>
       </div>
