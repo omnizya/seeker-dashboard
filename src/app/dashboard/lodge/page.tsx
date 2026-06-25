@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -12,18 +12,22 @@ import { Input } from "~/components/ui/input";
 import WafqGrid from "~/components/Lodge/WafqGrid";
 import ResonanceIndicator from "~/components/Lodge/ResonanceIndicator";
 import YieldDisplay from "~/components/Lodge/YieldDisplay";
-import type {
-  LodgeSession,
-  YieldResult,
-  PsychologicalState,
-} from "~/engine";
+import { api } from "~/lib/api";
+import type { LodgeComputeResponse, LodgeValidateResponse } from "~/types/api";
+import type { YieldResult } from "~/engine";
 
-type WafqResult = { cells: number[]; magicConst: number };
+interface SessionState {
+  userId: string;
+  intent: string;
+  seed: number;
+  element: string;
+  square: number[][];
+  magicConstant: number;
+}
 
 export default function LodgePage() {
   const [intent, setIntent] = useState("");
-  const [session, setSession] = useState<LodgeSession | null>(null);
-  const [psychState, setPsychState] = useState<PsychologicalState>("SCATTERED");
+  const [session, setSession] = useState<SessionState | null>(null);
   const [matrix, setMatrix] = useState<number[]>(Array(9).fill(0));
   const [completion, setCompletion] = useState<boolean[]>(Array(9).fill(false));
   const [resonance, setResonance] = useState(1.0);
@@ -32,47 +36,18 @@ export default function LodgePage() {
   const [error, setError] = useState<string | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    fetch("/api/lodge")
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.session) {
-          setSession(json.session);
-          const wafq = json.session.wafq as WafqResult | null;
-          if (wafq?.cells) {
-            setMatrix(wafq.cells);
-            setCompletion(Array(9).fill(true));
-          }
-        }
-        if (json.state) {
-          setPsychState(json.state);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   const startSession = async () => {
     if (!intent.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/lodge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "start", intent: intent.trim() }),
+      const data = await api.post<LodgeComputeResponse>("/api/lodge/compute", {
+        intent: intent.trim(),
       });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error ?? "فشل بدء الجلسة");
-        return;
-      }
-      setSession(json.session);
-      setPsychState(json.state);
-      const wafq = json.session.wafq as WafqResult | null;
-      if (wafq?.cells) {
-        setMatrix(wafq.cells);
-        setCompletion(Array(9).fill(true));
-      }
+      setSession(data);
+      const flat = data.square.flat();
+      setMatrix(flat);
+      setCompletion(Array(9).fill(true));
       setYieldResult(null);
       setResonance(1.0);
       startTimeRef.current = Date.now();
@@ -94,18 +69,14 @@ export default function LodgePage() {
     const completionRatio = toggledCells.length / 9;
 
     try {
-      const res = await fetch("/api/lodge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "resonance",
-          cells: toggledCells,
-          completion: completionRatio,
-        }),
-      });
-      const json = await res.json();
-      if (json.resonance) {
-        setResonance(json.resonance.multiplier);
+      const data = await api.post<LodgeValidateResponse>(
+        "/api/lodge/validate",
+        { cells: toggledCells, completion: completionRatio },
+      );
+      if (data.valid) {
+        setResonance((prev) => Math.min(prev + 0.1, 2.0));
+      } else {
+        setResonance((prev) => Math.max(prev - 0.1, 0.1));
       }
     } catch {
       // keep previous resonance on error
@@ -120,20 +91,12 @@ export default function LodgePage() {
     );
     const interruptionCount = completion.filter((c) => !c).length;
     try {
-      const res = await fetch("/api/lodge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "yield",
-          durationTicks,
-          interruptions: interruptionCount,
-          resonance: resonance >= 1.5,
-        }),
+      const data = await api.post<YieldResult>("/api/lodge/compute", {
+        durationTicks,
+        interruptions: interruptionCount,
+        resonance: resonance >= 1.5,
       });
-      const json = await res.json();
-      if (json.yield) {
-        setYieldResult(json.yield);
-      }
+      setYieldResult(data);
     } catch {
       // ignore
     } finally {
@@ -151,7 +114,6 @@ export default function LodgePage() {
     setCompletion(Array(9).fill(false));
     setResonance(1.0);
     setYieldResult(null);
-    setPsychState("SCATTERED");
     setIntent("");
     startTimeRef.current = null;
   };
@@ -192,9 +154,6 @@ export default function LodgePage() {
                 </p>
                 <div className="flex items-center gap-2">
                   <ResonanceIndicator resonance={resonance} />
-                  <span className="text-xs text-muted-foreground">
-                    {psychState}
-                  </span>
                 </div>
               </div>
 
