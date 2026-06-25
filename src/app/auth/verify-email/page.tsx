@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { createClient } from "~/utils/supabase/client";
+import { api } from "~/lib/api";
 import AuthLayout from "../_components/AuthLayout";
 import AuthCard from "../_components/AuthCard";
 import LeftPanel from "../_components/LeftPanel";
@@ -82,20 +82,17 @@ export default function VerifyEmailPage() {
     setLoading(true);
     setMessage(null);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
-      email: emailFromStorage,
-      token: otp.join(""),
-      type: "signup",
-    });
+    try {
+      await api.post("/api/auth/verify-email", {
+        email: emailFromStorage,
+        token: otp.join(""),
+      });
+      router.push("/auth/login");
+    } catch {
+      setMessage({ type: "error", text: "رمز التحقق غير صحيح" });
+    }
 
     setLoading(false);
-
-    if (error) {
-      setMessage({ type: "error", text: "رمز التحقق غير صحيح" });
-    } else {
-      router.push("/auth/login");
-    }
   }
 
   const leftPanelContent = (

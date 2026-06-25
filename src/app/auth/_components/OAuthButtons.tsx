@@ -4,7 +4,6 @@ import * as React from "react";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
-import { createClient } from "~/utils/supabase/client";
 
 interface OAuthButtonsProps {
   mode?: "login" | "register";
@@ -57,13 +56,8 @@ export default function OAuthButtons({
   const prefix = mode === "register" ? "التسجيل عبر" : "المتابعة عبر";
 
   async function handleOAuth(provider: string) {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: provider as "google" | "apple" | "github",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    // OAuth not yet supported via seeker-api
+    console.log(`OAuth login with ${provider} not yet implemented`);
   }
 
   return (

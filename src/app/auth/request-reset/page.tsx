@@ -6,7 +6,7 @@ import { Mail, Check, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { createClient } from "~/utils/supabase/client";
+import { api } from "~/lib/api";
 import AuthLayout from "../_components/AuthLayout";
 import AuthCard from "../_components/AuthCard";
 import LeftPanel from "../_components/LeftPanel";
@@ -31,16 +31,15 @@ export default function RequestResetPage() {
     if (!email.trim()) return;
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
-
-    setLoading(false);
-
-    if (!error) {
+    try {
+      await api.post("/api/auth/request-reset", { email });
+      setSubmitted(true);
+    } catch {
+      // Silently fail — don't reveal if email exists
       setSubmitted(true);
     }
+
+    setLoading(false);
   }
 
   const rightPanelContent = (

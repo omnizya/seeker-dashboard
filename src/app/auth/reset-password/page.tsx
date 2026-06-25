@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
-import { createClient } from "~/utils/supabase/client";
+import { api } from "~/lib/api";
 import AuthLayout from "../_components/AuthLayout";
 import AuthCard from "../_components/AuthCard";
 import LeftPanel from "../_components/LeftPanel";
@@ -39,17 +39,15 @@ export default function ResetPasswordPage() {
     }
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password });
-
-    setLoading(false);
-
-    if (error) {
-      toast.error("حدث خطأ أثناء تعيين كلمة المرور");
-    } else {
+    try {
+      await api.post("/api/auth/reset-password", { password });
       toast.success("تم تعيين كلمة المرور الجديدة بنجاح");
       router.push("/auth/login");
+    } catch {
+      toast.error("حدث خطأ أثناء تعيين كلمة المرور");
     }
+
+    setLoading(false);
   }
 
   const rightPanelContent = (

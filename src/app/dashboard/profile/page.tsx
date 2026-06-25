@@ -12,7 +12,8 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { createClient } from "~/utils/supabase/client";
+import { useAuthStore } from "~/stores/authStore";
+import { api } from "~/lib/api";
 
 export default function UserProfileEdit() {
   const [loading, setLoading] = useState(true);
@@ -24,26 +25,23 @@ export default function UserProfileEdit() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-
     async function loadProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const authUser = useAuthStore.getState().user;
+      if (!authUser) return;
 
-      setUserId(user.id);
-      setEmail(user.email ?? "");
+      setUserId(authUser.id);
+      setEmail(authUser.email ?? "");
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: profile } = await (supabase as any)
-        .schema("identity")
-        .from("profiles")
-        .select("display_name, avatar_url")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        setDisplayName(profile.display_name ?? "");
-        setAvatarUrl(profile.avatar_url);
+      try {
+        const profile = await api.get<{ display_name?: string; avatar_url?: string }>(
+          `/api/users/${authUser.id}`
+        );
+        if (profile) {
+          setDisplayName(profile.display_name ?? "");
+          setAvatarUrl(profile.avatar_url ?? null);
+        }
+      } catch {
+        // Profile not found — use defaults
       }
 
       setLoading(false);
@@ -57,25 +55,17 @@ export default function UserProfileEdit() {
     setSaving(true);
     setMessage(null);
 
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .schema("identity")
-      .from("profiles")
-      .upsert({
-        id: userId,
-        display_name: displayName,
-        avatar_url: avatarUrl,
-        updated_at: new Date().toISOString(),
+    try {
+      await api.put(`/api/users/${userId}`, {
+        displayName,
+        avatarUrl,
       });
+      setMessage({ type: "success", text: "تم حفظ التغييرات بنجاح" });
+    } catch {
+      setMessage({ type: "error", text: "حدث خطأ أثناء الحفظ" });
+    }
 
     setSaving(false);
-
-    if (error) {
-      setMessage({ type: "error", text: "حدث خطأ أثناء الحفظ" });
-    } else {
-      setMessage({ type: "success", text: "تم حفظ التغييرات بنجاح" });
-    }
   }
 
   if (loading) {
