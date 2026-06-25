@@ -18,7 +18,7 @@ import { useTasbihStore } from "~/stores/tasbihStore";
 type ActivePreset = {
   id: number;
   name: string;
-  dhikr: string;
+  dhikr?: string;
   target: number;
 };
 
@@ -88,7 +88,7 @@ function Confetti({ count = 20 }: { count?: number }) {
 }
 
 export default function TasbihPage() {
-  const { presets, totalCount, loading, error: storeError, fetchPresets, addSession } = useTasbihStore();
+  const { presets, totalCount, loading, error: storeError, fetchData, addSession } = useTasbihStore();
   const [activePreset, setActivePreset] = useState<ActivePreset | null>(null);
   const [count, setCount] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -106,8 +106,8 @@ export default function TasbihPage() {
   }, [activePreset, sessionTick]);
 
   useEffect(() => {
-    fetchPresets();
-  }, [fetchPresets]);
+    fetchData();
+  }, [fetchData]);
 
   const startDhikr = (preset: ActivePreset) => {
     setActivePreset(preset);

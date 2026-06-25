@@ -1,3 +1,5 @@
+// src/stores/duaStore.ts
+
 import { create } from "zustand";
 import {
   duaListCreateSchema,
@@ -5,32 +7,18 @@ import {
   type DuaListCreateInput,
   type DuaEntryCreateInput,
 } from "~/schemas/dua";
-
-interface DuaList {
-  id: number;
-  name: string;
-  category?: string;
-  created_at: string;
-}
-
-interface DuaEntry {
-  id: number;
-  list_id: number;
-  title: string;
-  content: string;
-  arabic_text?: string;
-  created_at: string;
-}
+import { api } from "~/lib/api";
+import type { DuaList } from "~/types/api";
 
 interface DuaState {
   lists: DuaList[];
-  entries: DuaEntry[];
+  entries: DuaList["entries"];
   loading: boolean;
   error: string | null;
 
   fetchLists: () => Promise<void>;
+  fetchEntries: (listId: number) => Promise<void>;
   addList: (data: DuaListCreateInput) => Promise<{ success: boolean; error?: string }>;
-  fetchEntries: (listId?: string) => Promise<void>;
   addEntry: (data: DuaEntryCreateInput) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -43,10 +31,20 @@ export const useDuaStore = create<DuaState>((set) => ({
   fetchLists: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("/api/dua");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      set({ lists: data.lists || [], loading: false });
+      const data = await api.get<DuaList[]>("/api/dua");
+      set({ lists: data, loading: false });
+    } catch (e) {
+      set({ error: (e as Error).message, loading: false });
+    }
+  },
+
+  fetchEntries: async (listId) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await api.get<DuaList["entries"]>("/api/dua", {
+        params: { list_id: listId },
+      });
+      set({ entries: data, loading: false });
     } catch (e) {
       set({ error: (e as Error).message, loading: false });
     }
@@ -59,35 +57,11 @@ export const useDuaStore = create<DuaState>((set) => ({
     }
 
     try {
-      const res = await fetch("/api/dua", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "list", ...parsed.data }),
-      });
-
-      if (!res.ok) {
-        const result = await res.json();
-        return { success: false, error: result.error || "Failed to add" };
-      }
-
-      const list = await res.json();
-      set((state) => ({ lists: [list, ...state.lists] }));
+      const list = await api.post<DuaList>("/api/dua", parsed.data);
+      set((state) => ({ lists: [...state.lists, list] }));
       return { success: true };
-    } catch {
-      return { success: false, error: "Network error" };
-    }
-  },
-
-  fetchEntries: async (listId) => {
-    set({ loading: true, error: null });
-    try {
-      const url = listId ? `/api/dua?list_id=${listId}` : "/api/dua";
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      set({ entries: data, loading: false });
     } catch (e) {
-      set({ error: (e as Error).message, loading: false });
+      return { success: false, error: (e as Error).message ?? "Network error" };
     }
   },
 
@@ -98,22 +72,11 @@ export const useDuaStore = create<DuaState>((set) => ({
     }
 
     try {
-      const res = await fetch("/api/dua", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "entry", ...parsed.data }),
-      });
-
-      if (!res.ok) {
-        const result = await res.json();
-        return { success: false, error: result.error || "Failed to add" };
-      }
-
-      const entry = await res.json();
-      set((state) => ({ entries: [entry, ...state.entries] }));
+      const entry = await api.post("/api/dua", parsed.data);
+      set((state) => ({ entries: [...state.entries, entry as DuaList["entries"][number]] }));
       return { success: true };
-    } catch {
-      return { success: false, error: "Network error" };
+    } catch (e) {
+      return { success: false, error: (e as Error).message ?? "Network error" };
     }
   },
 }));

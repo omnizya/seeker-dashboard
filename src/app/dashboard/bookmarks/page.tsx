@@ -64,7 +64,7 @@ export default function BookmarksPage() {
   }, [fetchBookmarks]);
 
   const uniqueSurahIds = [
-    ...new Set(bookmarks.map((b) => b.surah_id)),
+    ...new Set(bookmarks.map((b) => b.surahId).filter((id): id is number => id !== undefined)),
   ].sort((a, b) => a - b);
 
   const filtered = bookmarks.filter((b) => {
@@ -72,7 +72,7 @@ export default function BookmarksPage() {
       !searchLabel ||
       (b.label && b.label.toLowerCase().includes(searchLabel.toLowerCase()));
     const matchesSurah =
-      !filterSurah || String(b.surah_id) === filterSurah;
+      !filterSurah || String(b.surahId) === filterSurah;
     return matchesSearch && matchesSurah;
   });
 
@@ -226,34 +226,34 @@ export default function BookmarksPage() {
                   )}
                   <CardContent className="pt-6">
                     <div className="flex flex-col gap-3">
-                      {bm.ayah_text && (
-                        <Link href={`/dashboard/quran/${bm.ayah_id}`}>
+                      {bm.ayahText && (
+                        <Link href={`/dashboard/quran/${bm.ayahId}`}>
                           <p
                             className="text-xl text-right leading-relaxed cursor-pointer hover:text-teal-500 transition-colors"
                             style={{ fontFamily: "'Noto Naskh Arabic', serif" }}
                             dir="rtl"
                           >
-                            {bm.ayah_text}
+                            {bm.ayahText}
                           </p>
                         </Link>
                       )}
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge className="bg-green-500 text-white">
-                          سورة {bm.surah_id}
+                           سورة {bm.surahId}
                         </Badge>
                         <Badge className="bg-blue-500 text-white">
-                          آية {bm.ayah_number}
+                          آية {bm.ayahNumber}
                         </Badge>
-                        <Link href={`/dashboard/quran/${bm.ayah_id}`}>
+                        <Link href={`/dashboard/quran/${bm.ayahId}`}>
                           <Badge variant="outline" className="cursor-pointer hover:bg-accent">
-                            رقم {bm.ayah_id} ←
+                            رقم {bm.ayahId} ←
                           </Badge>
                         </Link>
                         {bm.label && <Badge variant="secondary">{bm.label}</Badge>}
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                          أضيف في {formatDate(bm.created_at)}
+                           أضيف في {bm.createdAt ? formatDate(bm.createdAt) : ""}
                         </p>
                         <Button
                           variant="ghost"

@@ -1,3 +1,5 @@
+// src/stores/tasbihStore.ts
+
 import { create } from "zustand";
 import {
   tasbihPresetCreateSchema,
@@ -5,23 +7,8 @@ import {
   type TasbihPresetCreateInput,
   type TasbihSessionCreateInput,
 } from "~/schemas/tasbih";
-
-interface TasbihPreset {
-  id: number;
-  name: string;
-  target: number;
-  dhikr: string;
-  sort_order: number;
-  created_at: string;
-}
-
-interface TasbihSession {
-  id: number;
-  user_id: string;
-  preset_id: number;
-  completed_count: number;
-  started_at: string;
-}
+import { api } from "~/lib/api";
+import type { TasbihPreset, TasbihSession, TasbihResponse } from "~/types/api";
 
 interface TasbihState {
   presets: TasbihPreset[];
@@ -30,9 +17,8 @@ interface TasbihState {
   loading: boolean;
   error: string | null;
 
-  fetchPresets: () => Promise<void>;
+  fetchData: () => Promise<void>;
   addPreset: (data: TasbihPresetCreateInput) => Promise<{ success: boolean; error?: string }>;
-  fetchSessions: () => Promise<void>;
   addSession: (data: TasbihSessionCreateInput) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -43,13 +29,16 @@ export const useTasbihStore = create<TasbihState>((set) => ({
   loading: false,
   error: null,
 
-  fetchPresets: async () => {
+  fetchData: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("/api/tasbih");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      set({ presets: data.presets ?? [], sessions: data.sessions ?? [], totalCount: data.total_count ?? 0, loading: false });
+      const data = await api.get<TasbihResponse>("/api/tasbih");
+      set({
+        presets: data.presets,
+        sessions: data.sessions,
+        totalCount: data.total_count,
+        loading: false,
+      });
     } catch (e) {
       set({ error: (e as Error).message, loading: false });
     }
@@ -62,34 +51,11 @@ export const useTasbihStore = create<TasbihState>((set) => ({
     }
 
     try {
-      const res = await fetch("/api/tasbih", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
-      });
-
-      if (!res.ok) {
-        const result = await res.json();
-        return { success: false, error: result.error || "Failed to add" };
-      }
-
-      const preset = await res.json();
+      const preset = await api.post<TasbihPreset>("/api/tasbih", { type: "preset", ...parsed.data });
       set((state) => ({ presets: [...state.presets, preset] }));
       return { success: true };
-    } catch {
-      return { success: false, error: "Network error" };
-    }
-  },
-
-  fetchSessions: async () => {
-    set({ loading: true, error: null });
-    try {
-      const res = await fetch("/api/tasbih");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      set({ presets: data.presets ?? [], sessions: data.sessions ?? [], totalCount: data.total_count ?? 0, loading: false });
     } catch (e) {
-      set({ error: (e as Error).message, loading: false });
+      return { success: false, error: (e as Error).message ?? "Network error" };
     }
   },
 
@@ -100,22 +66,11 @@ export const useTasbihStore = create<TasbihState>((set) => ({
     }
 
     try {
-      const res = await fetch("/api/tasbih", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
-      });
-
-      if (!res.ok) {
-        const result = await res.json();
-        return { success: false, error: result.error || "Failed to add" };
-      }
-
-      const session = await res.json();
-      set((state) => ({ sessions: [session, ...state.sessions] }));
+      const session = await api.post<TasbihSession>("/api/tasbih", { type: "session", ...parsed.data });
+      set((state) => ({ sessions: [...state.sessions, session] }));
       return { success: true };
-    } catch {
-      return { success: false, error: "Network error" };
+    } catch (e) {
+      return { success: false, error: (e as Error).message ?? "Network error" };
     }
   },
 }));
