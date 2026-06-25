@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import {
   Card,
   CardContent,
@@ -31,6 +32,8 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "~/components/ui/sonner";
 import { useBookmarkStore } from "~/stores/bookmarkStore";
+import { api } from "~/lib/api";
+import type { Bookmark } from "~/types/api";
 
 const COLOR_OPTIONS = [
   { value: "", label: "بدون لون" },
@@ -44,9 +47,12 @@ const COLOR_OPTIONS = [
   { value: "pink", label: "وردي" },
 ];
 
+function fetchBookmarks({ path, params }: { path: string; params?: Record<string, string | number | boolean | undefined> }) {
+  return api.get<Bookmark[]>(path, { params });
+}
+
 export default function BookmarksPage() {
-  const { bookmarks, loading, error, fetchBookmarks, addBookmark, deleteBookmark } =
-    useBookmarkStore();
+  const { addBookmark, deleteBookmark } = useBookmarkStore();
 
   const [searchLabel, setSearchLabel] = useState("");
   const [filterSurah, setFilterSurah] = useState("");
@@ -59,9 +65,11 @@ export default function BookmarksPage() {
   const [formLabel, setFormLabel] = useState("");
   const [formColor, setFormColor] = useState("");
 
-  useEffect(() => {
-    fetchBookmarks();
-  }, [fetchBookmarks]);
+  const { data: bookmarks = [], isLoading, error } = useSWR(
+    { path: "/api/bookmarks" },
+    fetchBookmarks,
+    { revalidateOnFocus: false },
+  );
 
   const uniqueSurahIds = [
     ...new Set(bookmarks.map((b) => b.surahId).filter((id): id is number => id !== undefined)),
@@ -139,7 +147,7 @@ export default function BookmarksPage() {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-3xl py-4">
         <Card className="w-full p-4">
@@ -162,7 +170,7 @@ export default function BookmarksPage() {
             <CardTitle className="text-center">العلامات المرجعية</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error}</p>
+            <p className="text-center text-red-500">{error.message}</p>
           </CardContent>
         </Card>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import {
   Card,
   CardContent,
@@ -33,6 +34,7 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "~/components/ui/sonner";
 import { useJournalStore } from "~/stores/journalStore";
+import { api } from "~/lib/api";
 import type { JournalEntryCreateInput, JournalEntryUpdateInput } from "~/schemas/journal";
 
 type JournalEntry = {
@@ -86,8 +88,12 @@ const MOOD_EMOJI: Record<string, string> = {
   reflective: "🤔",
 };
 
+function fetchJournal() {
+  return api.get<JournalEntry[]>("/api/journal");
+}
+
 export default function JournalPage() {
-  const { entries, loading, error, fetchEntries, addEntry, updateEntry, deleteEntry } = useJournalStore();
+  const { addEntry, updateEntry, deleteEntry } = useJournalStore();
   const [tabValue, setTabValue] = useState("all");
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -99,17 +105,18 @@ export default function JournalPage() {
   const [formTags, setFormTags] = useState("");
   const [formIsPrivate, setFormIsPrivate] = useState(false);
 
-  useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
+  const { data: entries = [], isLoading, error } = useSWR(
+    "/api/journal",
+    fetchJournal,
+    { revalidateOnFocus: false },
+  );
 
   const typeKeys = Object.keys(ENTRY_TYPES);
   const selectedType = tabValue === "all" ? null : tabValue;
 
-  const storeEntries = entries as unknown as JournalEntry[];
   const filtered = selectedType
-    ? storeEntries.filter((e) => e.entry_type === selectedType)
-    : storeEntries;
+    ? entries.filter((e) => e.entry_type === selectedType)
+    : entries;
 
   function openCreate() {
     setEditingId(null);
@@ -201,7 +208,7 @@ export default function JournalPage() {
     return content.slice(0, 100) + "…";
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-3xl py-4">
         <Card className="w-full p-4">
@@ -224,7 +231,7 @@ export default function JournalPage() {
             <CardTitle className="text-center">التدوينات الروحانية</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error}</p>
+            <p className="text-center text-red-500">{error.message}</p>
           </CardContent>
         </Card>
       </div>

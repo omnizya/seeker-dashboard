@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
+import useSWR from "swr";
 import {
   Card,
   CardContent,
@@ -14,6 +15,8 @@ import { Progress } from "~/components/ui/progress";
 import { toast } from "sonner";
 import { Toaster } from "~/components/ui/sonner";
 import { useTasbihStore } from "~/stores/tasbihStore";
+import { api } from "~/lib/api";
+import type { TasbihResponse } from "~/types/api";
 
 type ActivePreset = {
   id: number;
@@ -87,8 +90,12 @@ function Confetti({ count = 20 }: { count?: number }) {
   );
 }
 
+function fetchTasbih() {
+  return api.get<TasbihResponse>("/api/tasbih");
+}
+
 export default function TasbihPage() {
-  const { presets, totalCount, loading, error: storeError, fetchData, addSession } = useTasbihStore();
+  const { addSession } = useTasbihStore();
   const [activePreset, setActivePreset] = useState<ActivePreset | null>(null);
   const [count, setCount] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -98,16 +105,21 @@ export default function TasbihPage() {
   const startTimeRef = useRef<number | null>(null);
   const activePresetRef = useRef<ActivePreset | null>(null);
 
+  const { data, isLoading, error: swrError } = useSWR(
+    "/api/tasbih",
+    fetchTasbih,
+    { revalidateOnFocus: false },
+  );
+
+  const presets = data?.presets ?? [];
+  const totalCount = data?.total_count ?? 0;
+
   useEffect(() => {
     activePresetRef.current = activePreset;
     if (activePreset) {
       startTimeRef.current = Date.now();
     }
   }, [activePreset, sessionTick]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   const startDhikr = (preset: ActivePreset) => {
     setActivePreset(preset);
@@ -172,6 +184,8 @@ export default function TasbihPage() {
     return () => window.removeEventListener("keydown", handler);
   });
 
+  const storeError = swrError?.message ?? null;
+
   return (
     <div className="mx-auto max-w-xl py-4">
       <style>{COMPLETION_STYLES}</style>
@@ -187,7 +201,7 @@ export default function TasbihPage() {
                 <p className="text-sm text-muted-foreground">
                   مجموع التسبيح اليوم
                 </p>
-                {loading ? (
+                {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : storeError ? (
                   <p className="text-lg font-bold text-red-500">0</p>
@@ -203,7 +217,7 @@ export default function TasbihPage() {
 
         {!activePreset ? (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {loading ? (
+            {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-3">
                   <CardContent>

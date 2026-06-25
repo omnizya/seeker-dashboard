@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import {
   Card,
   CardContent,
@@ -9,7 +10,7 @@ import {
 } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Badge } from "~/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   Accordion,
   AccordionContent,
@@ -17,25 +18,8 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Separator } from "~/components/ui/separator";
-import { useDuaStore } from "~/stores/duaStore";
-
-type DuaEntry = {
-  id: number;
-  arabic: string;
-  transliteration: string;
-  translation: string;
-  benefit: string | null;
-  sort_order: number;
-};
-
-type DuaList = {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  source: string | null;
-  entries: DuaEntry[];
-};
+import { api } from "~/lib/api";
+import type { DuaList } from "~/types/api";
 
 const CATEGORIES: Record<string, string> = {
   all: "الكل",
@@ -56,15 +40,20 @@ const CATEGORIES: Record<string, string> = {
 
 const CATEGORY_KEYS = Object.keys(CATEGORIES);
 
+function fetchDuaLists() {
+  return api.get<DuaList[]>("/api/dua");
+}
+
 export default function DuaPage() {
-  const { lists: storeLists, loading, error, fetchLists } = useDuaStore();
   const [activeCategory, setActiveCategory] = useState("all");
 
-  useEffect(() => {
-    fetchLists();
-  }, [fetchLists]);
+  const { data: lists = [], isLoading, error } = useSWR(
+    "/api/dua",
+    fetchDuaLists,
+    { revalidateOnFocus: false },
+  );
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-3xl py-4">
         <Card className="w-full p-4">
@@ -87,17 +76,16 @@ export default function DuaPage() {
             <CardTitle className="text-center">الأدعية والأذكار</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error}</p>
+            <p className="text-center text-red-500">{error.message}</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const allLists = storeLists as unknown as DuaList[];
-  const lists = activeCategory === "all"
-    ? allLists
-    : allLists.filter((l) => l.category === activeCategory);
+  const filtered = activeCategory === "all"
+    ? lists
+    : lists.filter((l) => l.category === activeCategory);
 
   return (
     <div className="mx-auto max-w-3xl py-4">
@@ -118,13 +106,13 @@ export default function DuaPage() {
             </TabsList>
           </Tabs>
 
-          {lists.length === 0 ? (
+          {filtered.length === 0 ? (
             <p className="text-center text-lg text-muted-foreground">
               لا توجد أدعية في هذا التصنيف
             </p>
           ) : (
             <div className="space-y-6">
-              {lists.map((list) => (
+              {filtered.map((list) => (
                 <Card key={list.id} className="border">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-right text-base">
