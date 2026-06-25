@@ -1,7 +1,7 @@
 "use client";
-import { createClient } from "~/utils/supabase/client";
-import { useEffect, useState } from "react";
-import { Database } from "../types/supabase";
+
+import useSWR from "swr";
+import { swrFetcher } from "~/lib/fetcher";
 import {
   Table,
   TableCaption,
@@ -13,23 +13,24 @@ import {
 } from "~/components/ui/table";
 import { Badge } from "~/components/ui/badge";
 
-export type HolyNames = {
+export type HolyName = {
   id: number;
   holy_name: string;
   east: number;
   west: number;
 };
+
+type HolyNamesResponse = {
+  holy_names: HolyName[];
+};
+
 export const HolyNames = () => {
-  const supabase = createClient();
-  const [names, setNames] = useState<any>([]);
-  useEffect(() => {
-    const getNames = async () => {
-      const { data, error } = await supabase.from("holy_names").select();
-      if (error) throw error;
-      setNames(data);
-    };
-    getNames();
-  }, [supabase]);
+  const { data, error, isLoading } = useSWR<HolyNamesResponse>(
+    "/api/holy-names",
+    swrFetcher,
+  );
+
+  const names = data?.holy_names ?? [];
 
   return (
     <Table className="lg:w-1/3">
@@ -44,7 +45,21 @@ export const HolyNames = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {names.map((i: HolyNames, j: number) => (
+        {isLoading && (
+          <TableRow>
+            <TableCell colSpan={3} className="text-center">
+              جاري التحميل...
+            </TableCell>
+          </TableRow>
+        )}
+        {error && (
+          <TableRow>
+            <TableCell colSpan={3} className="text-center text-red-500">
+              {error instanceof Error ? error.message : "حدث خطأ"}
+            </TableCell>
+          </TableRow>
+        )}
+        {names.map((i, j) => (
           <TableRow key={i.id + j}>
             <TableCell className="w-min bg-zinc-500">
               <Badge variant="secondary" className="text-base px-3 py-1">

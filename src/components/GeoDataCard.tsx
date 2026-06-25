@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { useGeolocation } from "@uidotdev/usehooks";
+import { swrFetcher } from "~/lib/fetcher";
 import {
   Card,
   CardContent,
@@ -21,6 +22,11 @@ type SunriseResult = {
   nautical_twilight_end: string;
   astronomical_twilight_begin: string;
   astronomical_twilight_end: string;
+};
+
+type SunriseApiResponse = {
+  results: SunriseResult;
+  status: string;
 };
 
 function toLocalTime(iso: string) {
@@ -44,29 +50,19 @@ function formatDuration(seconds: number) {
 
 export default function GeoDataCard() {
   const geo = useGeolocation();
-  const [data, setData] = useState<SunriseResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  const isFetching =
-    !geo.loading && !geo.error && geo.latitude != null && geo.longitude != null && data === null && error === null;
+  const shouldFetch =
+    !geo.loading &&
+    !geo.error &&
+    geo.latitude != null &&
+    geo.longitude != null;
 
-  useEffect(() => {
-    if (geo.loading || geo.error || geo.latitude == null || geo.longitude == null)
-      return;
-
-    fetch(
-      `/api/sunrise?lat=${geo.latitude}&lng=${geo.longitude}`
-    )
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.error) {
-          setError(json.error);
-        } else {
-          setData(json.results);
-        }
-      })
-      .catch((e) => setError(e.message));
-  }, [geo.latitude, geo.longitude, geo.loading, geo.error]);
+  const { data, error, isLoading } = useSWR<SunriseApiResponse>(
+    shouldFetch
+      ? `/api/sunrise?lat=${geo.latitude}&lng=${geo.longitude}`
+      : null,
+    swrFetcher,
+  );
 
   if (geo.loading) {
     return (
@@ -100,7 +96,7 @@ export default function GeoDataCard() {
     );
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
@@ -125,7 +121,9 @@ export default function GeoDataCard() {
             <CardTitle className="text-center">أوقات الشمس</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error}</p>
+            <p className="text-center text-red-500">
+              {error instanceof Error ? error.message : "حدث خطأ"}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -133,6 +131,8 @@ export default function GeoDataCard() {
   }
 
   if (!data) return null;
+
+  const result = data.results;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -144,43 +144,43 @@ export default function GeoDataCard() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             <div>
               <p className="text-sm text-muted-foreground">الشروق</p>
-              <p className="text-lg font-bold">{toLocalTime(data.sunrise)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.sunrise)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">الغروب</p>
-              <p className="text-lg font-bold">{toLocalTime(data.sunset)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.sunset)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">منتصف النهار</p>
-              <p className="text-lg font-bold">{toLocalTime(data.solar_noon)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.solar_noon)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">طول النهار</p>
-              <p className="text-lg font-bold">{formatDuration(data.day_length)}</p>
+              <p className="text-lg font-bold">{formatDuration(result.day_length)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">بداية الشفق المدني</p>
-              <p className="text-lg font-bold">{toLocalTime(data.civil_twilight_begin)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.civil_twilight_begin)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">نهاية الشفق المدني</p>
-              <p className="text-lg font-bold">{toLocalTime(data.civil_twilight_end)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.civil_twilight_end)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">بداية الشفق البحري</p>
-              <p className="text-lg font-bold">{toLocalTime(data.nautical_twilight_begin)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.nautical_twilight_begin)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">نهاية الشفق البحري</p>
-              <p className="text-lg font-bold">{toLocalTime(data.nautical_twilight_end)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.nautical_twilight_end)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">بداية الشفق الفلكي</p>
-              <p className="text-lg font-bold">{toLocalTime(data.astronomical_twilight_begin)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.astronomical_twilight_begin)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">نهاية الشفق الفلكي</p>
-              <p className="text-lg font-bold">{toLocalTime(data.astronomical_twilight_end)}</p>
+              <p className="text-lg font-bold">{toLocalTime(result.astronomical_twilight_end)}</p>
             </div>
           </div>
         </CardContent>

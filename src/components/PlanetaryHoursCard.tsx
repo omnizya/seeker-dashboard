@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { useGeolocation } from "@uidotdev/usehooks";
+import { swrFetcher } from "~/lib/fetcher";
 import {
   Card,
   CardContent,
@@ -23,6 +24,15 @@ import { Badge } from "~/components/ui/badge";
 import { computePlanetaryHours, PlanetaryHour } from "~/utils/planetary-hours";
 import { DefaultText } from "~/texts";
 
+type SunriseApiResponse = {
+  results: {
+    sunrise: string;
+    sunset: string;
+    day_length: number;
+  };
+  status: string;
+};
+
 function toLocalTime(d: Date) {
   return d.toLocaleTimeString("ar", {
     hour: "2-digit",
@@ -38,66 +48,67 @@ function dateParam(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+function dateParamTomorrow(d: Date): string {
+  const tomorrow = new Date(d);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return dateParam(tomorrow);
+}
+
+async function fetchPlanetaryHours(key: string): Promise<PlanetaryHour[]> {
+  const url = new URL(key, window.location.origin);
+  const lat = url.searchParams.get("lat")!;
+  const lng = url.searchParams.get("lng")!;
+  const today = new Date();
+  const todayStr = dateParam(today);
+  const tomorrowStr = dateParamTomorrow(today);
+
+  const [todayData, tomorrowData] = await Promise.all([
+    swrFetcher<SunriseApiResponse>(
+      `/api/sunrise?lat=${lat}&lng=${lng}&date=${todayStr}`,
+    ),
+    swrFetcher<SunriseApiResponse>(
+      `/api/sunrise?lat=${lat}&lng=${lng}&date=${tomorrowStr}`,
+    ),
+  ]);
+
+  if (tomorrowData.status !== "OK") {
+    const sunrise = new Date(todayData.results.sunrise);
+    const sunset = new Date(todayData.results.sunset);
+    const dayLen = todayData.results.day_length * 1000;
+    const nextSunrise = new Date(sunset.getTime() + (86400000 - dayLen));
+    return computePlanetaryHours(
+      todayData.results.sunrise,
+      todayData.results.sunset,
+      nextSunrise.toISOString(),
+      today,
+    );
+  }
+
+  return computePlanetaryHours(
+    todayData.results.sunrise,
+    todayData.results.sunset,
+    tomorrowData.results.sunrise,
+    today,
+  );
+}
+
 export default function PlanetaryHoursCard() {
   const geo = useGeolocation();
-  const [hours, setHours] = useState<PlanetaryHour[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  const isFetching =
-    !geo.loading && !geo.error && geo.latitude != null && geo.longitude != null && hours === null && error === null;
+  const shouldFetch =
+    !geo.loading &&
+    !geo.error &&
+    geo.latitude != null &&
+    geo.longitude != null;
+
+  const { data: hours, error, isLoading } = useSWR<PlanetaryHour[]>(
+    shouldFetch
+      ? `/api/sunrise?lat=${geo.latitude}&lng=${geo.longitude}`
+      : null,
+    fetchPlanetaryHours,
+  );
 
   const T = DefaultText.PlanetaryHours;
-
-  useEffect(() => {
-    if (
-      geo.loading ||
-      geo.error ||
-      geo.latitude == null ||
-      geo.longitude == null
-    )
-      return;
-
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    Promise.all([
-      fetch(
-        `/api/sunrise?lat=${geo.latitude}&lng=${geo.longitude}&date=${dateParam(today)}`,
-      ).then((r) => r.json()),
-      fetch(
-        `/api/sunrise?lat=${geo.latitude}&lng=${geo.longitude}&date=${dateParam(tomorrow)}`,
-      ).then((r) => r.json()),
-    ])
-      .then(([todayData, tomorrowData]) => {
-        if (todayData.error) {
-          setError(todayData.error);
-          return;
-        }
-        if (tomorrowData.error) {
-          const sunrise = new Date(todayData.results.sunrise);
-          const sunset = new Date(todayData.results.sunset);
-          const dayLen = todayData.results.day_length * 1000;
-          const nextSunrise = new Date(sunset.getTime() + (86400000 - dayLen));
-          const result = computePlanetaryHours(
-            todayData.results.sunrise,
-            todayData.results.sunset,
-            nextSunrise.toISOString(),
-            today,
-          );
-          setHours(result);
-          return;
-        }
-        const result = computePlanetaryHours(
-          todayData.results.sunrise,
-          todayData.results.sunset,
-          tomorrowData.results.sunrise,
-          today,
-        );
-        setHours(result);
-      })
-      .catch((e) => setError(e.message));
-  }, [geo.latitude, geo.longitude, geo.loading, geo.error]);
 
   if (geo.loading) {
     return (
@@ -129,7 +140,7 @@ export default function PlanetaryHoursCard() {
     );
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-2xl">
         <Card className="w-full p-4">
@@ -152,7 +163,9 @@ export default function PlanetaryHoursCard() {
             <CardTitle className="text-center">{T.cardTitle}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-red-500">{error}</p>
+            <p className="text-center text-red-500">
+              {error instanceof Error ? error.message : "حدث خطأ"}
+            </p>
           </CardContent>
         </Card>
       </div>
