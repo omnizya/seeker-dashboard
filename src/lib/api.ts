@@ -101,11 +101,17 @@ async function request<T>(
       });
       if (!retryRes.ok) {
         clearTokens();
+        if (typeof window !== "undefined") {
+          window.location.href = "/auth/login";
+        }
         throw new Error("Unauthorized");
       }
       return retryRes.json() as Promise<T>;
     }
     clearTokens();
+    if (typeof window !== "undefined") {
+      window.location.href = "/auth/login";
+    }
     throw new Error("Unauthorized");
   }
 
