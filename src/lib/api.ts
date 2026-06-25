@@ -32,21 +32,29 @@ export function getAccessToken() {
   return accessToken;
 }
 
+let refreshPromise: Promise<boolean> | null = null;
+
 async function tryRefresh(): Promise<boolean> {
   if (!refreshToken) return false;
-  try {
-    const res = await fetch(`${API_URL}/api/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-    if (!res.ok) return false;
-    const data = (await res.json()) as { access_token: string; refresh_token: string };
-    setTokens(data.access_token, data.refresh_token);
-    return true;
-  } catch {
-    return false;
-  }
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      if (!res.ok) return false;
+      const data = (await res.json()) as { access_token: string; refresh_token: string };
+      setTokens(data.access_token, data.refresh_token);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+  return refreshPromise;
 }
 
 interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
@@ -104,7 +112,8 @@ async function request<T>(
         if (typeof window !== "undefined") {
           window.location.href = "/auth/login";
         }
-        throw new Error("Unauthorized");
+        const errData = (await retryRes.json().catch(() => ({}))) as { error?: string };
+        throw new Error(errData.error ?? "Unauthorized");
       }
       return retryRes.json() as Promise<T>;
     }
