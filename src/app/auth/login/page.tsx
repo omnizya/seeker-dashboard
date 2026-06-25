@@ -16,6 +16,7 @@ import {
 } from "~/components/ui/card";
 import { useAuthStore } from "~/stores/authStore";
 import { toast } from "sonner";
+import OAuthButtons from "../_components/OAuthButtons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "جاري التسجيل..." : "تسجيل الدخول"}
             </Button>
+            <OAuthButtons mode="login" />
             <Link
               href="/auth/register"
               className="text-sm text-muted-foreground hover:underline"
