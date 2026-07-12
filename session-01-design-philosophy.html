@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسة ١ — فلسفة التصميم ونظام الرموز | Session 1 — Design Philosophy & Token System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --cosmic-indigo: #1a1a3e;
+    --cosmic-indigo-2: #2a2a5e;
+    --mystic-purple: #6c3fa0;
+    --mystic-purple-light: #8b5cf6;
+    --gold-accent: #c9a84c;
+    --gold-accent-light: #e8c96a;
+    --near-black: #0a0a1a;
+    --near-black-2: #0f0f25;
+    --near-black-3: #151530;
+    --soft-ivory: #f5f0e8;
+    --soft-ivory-2: #ddd8ce;
+    --soft-ivory-3: #b8b3a8;
+    --success: #4ade80;
+    --error: #f87171;
+    --surface-1: #12122a;
+    --surface-2: #1a1a3a;
+    --surface-3: #22224a;
+    --radius: 12px;
+    --font-arabic: 'Noto Naskh Arabic', serif;
+    --font-english: 'Inter', -apple-system, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--near-black);
+    color: var(--soft-ivory);
+    font-family: var(--font-english);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .lang-ar {
+    font-family: var(--font-arabic);
+    direction: rtl;
+  }
+
+  /* Navigation */
+  .sidebar {
+    position: fixed;
+    top: 0; right: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface-1);
+    border-left: 1px solid rgba(201, 168, 76, 0.1);
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    z-index: 100;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+  .sidebar h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gold-accent);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+  .sidebar nav a {
+    display: block;
+    color: var(--soft-ivory-2);
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s;
+    border-right: 2px solid transparent;
+  }
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    background: var(--surface-2);
+    color: var(--soft-ivory);
+    border-right-color: var(--gold-accent);
+  }
+  .sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem; left: 1rem;
+    z-index: 101;
+    background: var(--surface-2);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--soft-ivory);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+
+  /* Main content */
+  .main {
+    margin-right: 280px;
+    padding: 0;
+    max-width: 900px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 6rem 4rem 4rem;
+    background: linear-gradient(135deg, var(--near-black) 0%, var(--cosmic-indigo) 50%, var(--near-black) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -30%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(108,63,160,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%; left: -20%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    border-radius: 100px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--gold-accent);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 .arabic {
+    display: block;
+    font-family: var(--font-arabic);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gold-accent);
+    margin-top: 0.5rem;
+  }
+  .hero-subtitle {
+    font-size: 1.125rem;
+    color: var(--soft-ivory-2);
+    max-width: 600px;
+    margin-bottom: 2rem;
+    line-height: 1.8;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(201,168,76,0.1);
+  }
+  .hero-stat {
+    text-align: center;
+  }
+  .hero-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold-accent);
+  }
+  .hero-stat-label {
+    font-size: 0.75rem;
+    color: var(--soft-ivory-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Sections */
+  .section {
+    padding: 4rem;
+  }
+  .section-alt {
+    background: var(--surface-1);
+  }
+  .section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .section h2 .arabic-label {
+    display: block;
+    font-family: var(--font-arabic);
+    font-size: 1rem;
+    color: var(--gold-accent);
+    font-weight: 400;
+    margin-top: 0.25rem;
+  }
+  .section-subtitle {
+    color: var(--soft-ivory-3);
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+    max-width: 650px;
+  }
+  .section-intro {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--soft-ivory-2);
+    max-width: 700px;
+    margin-bottom: 2rem;
+  }
+
+  /* Philosophy quote */
+  .philosophy-block {
+    background: linear-gradient(135deg, var(--surface-2), var(--cosmic-indigo));
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    margin: 2rem 0;
+    position: relative;
+  }
+  .philosophy-block::before {
+    content: '"';
+    position: absolute;
+    top: -10px; right: 20px;
+    font-size: 5rem;
+    color: var(--gold-accent);
+    opacity: 0.15;
+    line-height: 1;
+    font-family: serif;
+  }
+  .philosophy-block p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    font-style: italic;
+    color: var(--soft-ivory);
+  }
+  .philosophy-block .attribution {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--gold-accent);
+    font-style: normal;
+  }
+
+  /* Emotional Journey Cards */
+  .journey-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .journey-step {
+    background: var(--surface-2);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+  .journey-step:hover {
+    border-color: var(--gold-accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(201,168,76,0.1);
+  }
+  .journey-step-number {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--mystic-purple);
+    color: var(--soft-ivory);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 auto 0.75rem;
+  }
+  .journey-step h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .journey-step p {
+    font-size: 0.8rem;
+    color: var(--soft-ivory-3);
+    line-height: 1.5;
+  }
+
+  /* Color swatches */
+  .color-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .color-swatch {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface-2);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.2s;
+  }
+  .color-swatch:hover {
+    transform: scale(1.03);
+  }
+  .color-swatch-preview {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .color-swatch-preview .symbol {
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+  .color-swatch-info {
+    padding: 0.75rem;
+  }
+  .color-swatch-info h5 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .color-swatch-info .hex {
+    font-size: 0.75rem;
+    color: var(--soft-ivory-3);
+    font-family: monospace;
+  }
+  .color-swatch-info p {
+    font-size: 0.75rem;
+    color: var(--soft-ivory-2);
+    margin-top: 0.35rem;
+    line-height: 1.4;
+  }
+
+  /* Reference comparison */
+  .references-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  .reference-card {
+    background: var(--surface-2);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  .reference-card:hover {
+    border-color: var(--gold-accent);
+  }
+  .reference-card .icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  .reference-card h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .reference-card .what-to-borrow {
+    font-size: 0.8rem;
+    color: var(--soft-ivory-3);
+    line-height: 1.5;
+  }
+  .reference-card .what-to-borrow strong {
+    color: var(--gold-accent);
+    font-weight: 500;
+  }
+
+  /* Try This callout */
+  .try-this {
+    background: linear-gradient(135deg, var(--surface-2), #1a1a3e);
+    border: 1px solid var(--gold-accent);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin: 2rem 0;
+    position: relative;
+  }
+  .try-this::before {
+    content: '🔬 جرب هذا';
+    position: absolute;
+    top: -12px; right: 20px;
+    background: var(--near-black);
+    padding: 0 0.75rem;
+    font-family: var(--font-arabic);
+    font-size: 0.85rem;
+    color: var(--gold-accent);
+    font-weight: 600;
+  }
+  .try-this.en::before {
+    content: '🔬 Try This';
+    font-family: var(--font-english);
+  }
+  .try-this h4 {
+    font-size: 0.9rem;
+    color: var(--gold-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Interactive color tool */
+  .color-tool {
+    background: var(--surface-1);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+  .color-tool h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  .color-sliders {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .color-slider-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .color-slider-group label {
+    width: 80px;
+    font-size: 0.8rem;
+    color: var(--soft-ivory-3);
+    flex-shrink: 0;
+  }
+  .color-slider-group input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--surface-3);
+    outline: none;
+  }
+  .color-slider-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--gold-accent);
+    cursor: pointer;
+  }
+  .color-slider-group .value {
+    width: 50px;
+    text-align: left;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--soft-ivory-2);
+    direction: ltr;
+  }
+  .color-preview-box {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 0.75rem;
+  }
+  .color-preview-label {
+    font-size: 0.85rem;
+    text-align: center;
+    color: var(--soft-ivory-2);
+  }
+
+  /* Card grid for principles */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  .principle-card {
+    background: var(--surface-2);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .principle-card h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .principle-card p {
+    font-size: 0.85rem;
+    color: var(--soft-ivory-3);
+    line-height: 1.6;
+  }
+
+  /* Token table */
+  .token-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.85rem;
+  }
+  .token-table th {
+    text-align: right;
+    padding: 0.75rem 1rem;
+    background: var(--surface-2);
+    color: var(--gold-accent);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  .token-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--soft-ivory-2);
+  }
+  .token-table tr:hover td {
+    background: var(--surface-2);
+  }
+  .token-demo {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* RTL considerations */
+  .rtl-note {
+    background: var(--surface-1);
+    border: 1px solid rgba(108,63,160,0.3);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+  .rtl-note h4 {
+    color: var(--mystic-purple-light);
+    margin-bottom: 1rem;
+  }
+
+  .rtl-note ul {
+    list-style: none;
+    padding: 0;
+  }
+  .rtl-note li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.9rem;
+    color: var(--soft-ivory-2);
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .rtl-note li:last-child { border-bottom: none; }
+  .rtl-note li .bullet {
+    color: var(--mystic-purple-light);
+    flex-shrink: 0;
+  }
+
+  /* Info box */
+  .info-box {
+    background: rgba(108,63,160,0.1);
+    border: 1px solid rgba(108,63,160,0.2);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .info-box h5 {
+    color: var(--mystic-purple-light);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .info-box p {
+    font-size: 0.85rem;
+    color: var(--soft-ivory-2);
+    line-height: 1.6;
+  }
+
+  /* What to avoid */
+  .avoid-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  .avoid-col h4 {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid;
+  }
+  .avoid-col.do h4 {
+    color: var(--success);
+    border-color: var(--success);
+  }
+  .avoid-col.dont h4 {
+    color: var(--error);
+    border-color: var(--error);
+  }
+  .avoid-item {
+    padding: 0.75rem;
+    background: var(--surface-2);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--soft-ivory-2);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(280px);
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .sidebar-toggle {
+      display: block;
+    }
+    .main {
+      margin-right: 0;
+    }
+    .hero { padding: 4rem 1.5rem 3rem; }
+    .hero h1 { font-size: 2rem; }
+    .section { padding: 2.5rem 1.5rem; }
+    .hero-stats { flex-wrap: wrap; gap: 1rem; }
+    .avoid-grid { grid-template-columns: 1fr; }
+    .journey-steps { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* RTL specific overrides */
+  .token-table th, .token-table td { text-align: right; }
+  .try-this { text-align: right; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+<aside class="sidebar">
+  <h3>جلسة ١ · المحتويات</h3>
+  <nav>
+    <a href="#philosophy" class="active">فلسفة البدء <br><small>Initiation Philosophy</small></a>
+    <a href="#emotional">الرحلة العاطفية <br><small>Emotional Journey</small></a>
+    <a href="#visual">اللغة البصرية <br><small>Visual Vocabulary</small></a>
+    <a href="#references">المراجع <br><small>Reference Framework</small></a>
+    <a href="#tokens">نظام الرموز <br><small>Design Tokens</small></a>
+    <a href="#rtl">العربية والاتجاه <br><small>Arabic & RTL</small></a>
+    <a href="#principles">المبادئ الأساسية <br><small>Core Principles</small></a>
+  </nav>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">جلسة ١ · Session 1</div>
+  <h1>
+    فلسفة التصميم
+    <span class="arabic">ونظام الرموز البصري</span>
+  </h1>
+  <p class="hero-subtitle">
+    لم يعد تسجيل الدخول مجرد نموذج.
+    إنه بداية الرحلة.
+    كيف نبني تجربة مصادقة تحوّل الفضول إلى التزام،
+    وتجعل كل زائر يشعر أنه على أعتاب معرفة عظيمة.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-value">١٤</div>
+      <div class="hero-stat-label">مخرجات التصميم</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">٥</div>
+      <div class="hero-stat-label">مراحل الرحلة العاطفية</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">٣٦٠°</div>
+      <div class="hero-stat-label">تجربة متكاملة</div>
+    </div>
+  </div>
+</section>
+
+<!-- Initiation Philosophy -->
+<section class="section" id="philosophy">
+  <h2>فلسفة البدء <span class="arabic-label">The Initiation Philosophy</span></h2>
+  <p class="section-intro">
+    في منصات التعلم الإلكتروني، صفحة المصادقة هي أول نقطة تواصل حقيقي بين المستخدم والمنتج.
+    لكن في منصة روحانية وتعليمية مثل <strong>الباحث</strong>،
+    هذه اللحظة تحمل معنى أعمق.
+  </p>
+
+  <div class="philosophy-block">
+    <p>
+      المصادقة ليست مجرد تسجيل دخول. إنها بداية التكليف.
+      المستخدم لا يملأ نموذجاً — بل يخطو أولى خطوات رحلة تحوّل.
+      كل حقل في النموذج هو بوابة معرفة.
+      كل نقرة هي التزام بالنمو.
+    </p>
+    <div class="attribution">— فلسفة التصميم، الباحث</div>
+  </div>
+
+  <p class="section-intro">
+    هذا التحول في الإطار الذهني يغير كل قرار تصميمي:
+    من لون الزر إلى تسلسل الحقول إلى نوع الحركة عند الانتقال بين الخطوات.
+    العبور من <em>"تسجيل حساب"</em> إلى <em>"بدء الرحلة"</em>.
+  </p>
+</section>
+
+<!-- Emotional Journey -->
+<section class="section section-alt" id="emotional">
+  <h2>الرحلة العاطفية <span class="arabic-label">The Emotional Journey</span></h2>
+  <p class="section-subtitle">
+    خمس طبقات عاطفية يجب أن يمر بها المستخدم خلال تجربة المصادقة.
+    كل طبقة تبني على التي قبلها وتؤدي إلى التي بعدها.
+  </p>
+
+  <div class="journey-steps">
+    <div class="journey-step">
+      <div class="journey-step-number">١</div>
+      <h4>فضول</h4>
+      <p>جذب الانتباه من خلال الغموض الجميل والوعود بالمعرفة المخفية</p>
+    </div>
+    <div class="journey-step">
+      <div class="journey-step-number">٢</div>
+      <h4>ثقة</h4>
+      <p>بناء المصداقية من خلال مؤشرات الأمان، الشفافية، والإثبات الاجتماعي</p>
+    </div>
+    <div class="journey-step">
+      <div class="journey-step-number">٣</div>
+      <h4>دهشة</h4>
+      <p>إثارة الإعجاب من خلال جمال التصميم، الرموز، والتجربة السلسة</p>
+    </div>
+    <div class="journey-step">
+      <div class="journey-step-number">٤</div>
+      <h4>إمكانات</h4>
+      <p>إظهار ما يمكن أن يصبح عليه المستخدم — الإمكانات التحويلية</p>
+    </div>
+    <div class="journey-step">
+      <div class="journey-step-number">٥</div>
+      <h4>التزام</h4>
+      <p>اللحظة التي يقرر فيها المستخدم أن هذه الرحلة تستحق وقته وجهده</p>
+    </div>
+  </div>
+
+  <div class="try-this en">
+    <h4>🔬 Apply This</h4>
+    <p style="font-size:0.9rem;color:var(--soft-ivory-2);line-height:1.7;">
+      Open your current login page (<code>src/app/auth/login/page.tsx</code>).
+      Go through each of the 5 emotional layers and rate your current page 1–10 on each.
+      Which layers are missing entirely? Which are handled well?<br><br>
+      <strong>Most teams score well on Trust (they have HTTPS, Supabase auth) but fail completely on Wonder and Potential.</strong>
+      This tells you exactly where the biggest design opportunity is.
+    </p>
+  </div>
+</section>
+
+<!-- Visual Vocabulary -->
+<section class="section" id="visual">
+  <h2>اللغة البصرية <span class="arabic-label">Visual Vocabulary</span></h2>
+  <p class="section-subtitle">
+    خمسة ألوان تحدد هوية المنصة. اختيرت بعناية لتعكس الحكمة، العمق، والجودة premium
+    دون الوقوع في فخاخ الجماليات الرخيصة للروحانيات.
+  </p>
+
+  <div class="color-palette">
+    <div class="color-swatch">
+      <div class="color-swatch-preview" style="background:linear-gradient(135deg,#0a0a1a,#0f0f25);">
+        <span class="symbol">✦</span>
+      </div>
+      <div class="color-swatch-info">
+        <h5>Near-Black Blue</h5>
+        <div class="hex">#0a0a1a → #0f0f25</div>
+        <p>الخلفية الأساسية. لون عمق الكون الليلي. يعطي إحساساً باللامتناهي والجودة premium.</p>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-swatch-preview" style="background:linear-gradient(135deg,#1a1a3e,#2a2a5e);">
+        <span class="symbol">☽</span>
+      </div>
+      <div class="color-swatch-info">
+        <h5>Cosmic Indigo</h5>
+        <div class="hex">#1a1a3e → #2a2a5e</div>
+        <p>اللون الأساسي. نيلي عميق يرمز للحكمة، الغموض، والتأمل. يعطي هوية مميزة دون ابتذال.</p>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-swatch-preview" style="background:linear-gradient(135deg,#6c3fa0,#8b5cf6);">
+        <span class="symbol">♃</span>
+      </div>
+      <div class="color-swatch-info">
+        <h5>Mystic Purple</h5>
+        <div class="hex">#6c3fa0 → #8b5cf6</div>
+        <p>اللون الثانوي. أرجواني صوفي يستخدم في التدرجات والتفاعلات. يربط بين الأزرق والذهبي.</p>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-swatch-preview" style="background:linear-gradient(135deg,#c9a84c,#e8c96a);">
+        <span class="symbol">☉</span>
+      </div>
+      <div class="color-swatch-info">
+        <h5>Gold Accent</h5>
+        <div class="hex">#c9a84c → #e8c96a</div>
+        <p>لون التفاعل والتميز. أزرار CTA، الإنجازات، الرموز. يرمز للخلاص والكمال والنور.</p>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-swatch-preview" style="background:linear-gradient(135deg,#f5f0e8,#ddd8ce);">
+        <span class="symbol">☀</span>
+      </div>
+      <div class="color-swatch-info">
+        <h5>Soft Ivory</h5>
+        <div class="hex">#f5f0e8 → #ddd8ce</div>
+        <p>لون النص الأساسي. أبيض دافئ يشبه ورق البردي القديم. أسهل على العين وأكثر فخامة من الأبيض النقي.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="try-this">
+    <h4>🔬 جرب هذا</h4>
+    <p style="font-size:0.9rem;color:var(--soft-ivory-2);line-height:1.7;">
+      افتح ملف <code>src/app/globals.css</code>.
+      ابحث عن متغيرات CSS الحالية (shadcn/ui variables).
+      هل يمكنك تمييز أي من هذه الألوان الخمسة في النظام الحالي؟
+      هل الألوان الحالية تعكس الحكمة والعمق، أم أنها ألوان افتراضية؟
+    </p>
+  </div>
+
+  <!-- Interactive Color Explorer -->
+  <div class="color-tool">
+    <h4>🎨 مستكشف الألوان التفاعلي · Color Palette Explorer</h4>
+    <p style="font-size:0.85rem;color:var(--soft-ivory-3);margin-bottom:1.5rem;">
+      حرك المنزلقات لتعديل اللون الأساسي وشاهد كيف تتفاعل الألوان معاً.
+    </p>
+    <div class="color-sliders">
+      <div class="color-slider-group">
+        <label>Cosmic Indigo</label>
+        <input type="range" id="indigoH" min="220" max="260" value="240" oninput="updateColors()">
+        <span class="value" id="indigoVal">240°</span>
+      </div>
+      <div class="color-slider-group">
+        <label>Gold Warmth</label>
+        <input type="range" id="goldH" min="30" max="55" value="42" oninput="updateColors()">
+        <span class="value" id="goldVal">42°</span>
+      </div>
+      <div class="color-slider-group">
+        <label>Purple Shift</label>
+        <input type="range" id="purpleH" min="250" max="290" value="270" oninput="updateColors()">
+        <span class="value" id="purpleVal">270°</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+      <div>
+        <div class="color-preview-box" id="indigoPreview" style="background:hsl(240, 50%, 17%);"></div>
+        <div class="color-preview-label">Cosmic Indigo</div>
+      </div>
+      <div>
+        <div class="color-preview-box" id="goldPreview" style="background:hsl(42, 55%, 54%);"></div>
+        <div class="color-preview-label">Gold Accent</div>
+      </div>
+      <div>
+        <div class="color-preview-box" id="purplePreview" style="background:hsl(270, 50%, 44%);"></div>
+        <div class="color-preview-label">Mystic Purple</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h5>💡 Why These Colors Work Together</h5>
+    <p>
+      The palette uses a <strong>split-complementary</strong> scheme. Indigo (240°) and Gold (42°) are near-complementary, creating natural contrast without fighting. Purple (270°) bridges them harmoniously. The near-black background creates a "void" that makes all colors glow. Soft ivory text ensures readability against dark surfaces while maintaining the warm, premium feel.
+      <br><br>
+      <em>Reference: <a href="https://www.refactoringui.com/book" style="color:var(--gold-accent-light);">Refactoring UI Book — Color chapter</a></em>
+    </p>
+  </div>
+</section>
+
+<!-- Reference Framework -->
+<section class="section section-alt" id="references">
+  <h2>إطار المرجعيات <span class="arabic-label">Reference Framework</span></h2>
+  <p class="section-subtitle">
+    لا نصمم من الفراغ. نستعير من الأفضل في العالم، ثم نركب بطريقة تخلق شيئاً جديداً بالكامل.
+  </p>
+
+  <div class="references-grid">
+    <div class="reference-card">
+      <div class="icon">🦉</div>
+      <h4>Duolingo</h4>
+      <div class="what-to-borrow">
+        <strong>نظام التقدم</strong> — كيف تحوّل كل إجراء صغير إلى مكافأة. XP، المستويات، الإنجازات فور التسجيل.
+        <br><br>
+        <strong>الشخصية</strong> — هوية "الساعي" (Seeker) فور التسجيل تعطي المستخدم دوراً فورياً.
+      </div>
+    </div>
+    <div class="reference-card">
+      <div class="icon">📝</div>
+      <h4>Notion</h4>
+      <div class="what-to-borrow">
+        <strong>النظافة البصرية</strong> — مساحات بيضاء واسعة، طباعة واضحة، عدم ازدحام.
+        <br><br>
+        <strong>التدرج في الكشف</strong> — Notion لا يرمي كل شيء في وجهك دفعة واحدة. خطوة بخطوة.
+      </div>
+    </div>
+    <div class="reference-card">
+      <div class="icon">🧘</div>
+      <h4>Headspace</h4>
+      <div class="what-to-borrow">
+        <strong>الدفء والرعاية</strong> — تصميم يهتم بالمستخدم، يطمئنه، ويشعره بالأمان.
+        <br><br>
+        <strong>الرموز الهادئة</strong> — أيقونات بسيطة ذات معنى، غير صارخة أو طفولية.
+      </div>
+    </div>
+    <div class="reference-card">
+      <div class="icon">🍎</div>
+      <h4>Apple</h4>
+      <div class="what-to-borrow">
+        <strong>البريميوم الصامت</strong> — الجودة تظهر في التفاصيل، لا في الشعارات.
+        <br><br>
+        <strong>الحركات السلسة</strong> — transitions و micro-animations تجعل التجربة تنفس.
+      </div>
+    </div>
+  </div>
+
+  <div class="philosophy-block" style="margin-top:2rem;">
+    <p>
+      السر ليس في التقليد. السر في فهم <em>لماذا</em> تعمل هذه التصاميم عند تلك المنصات،
+      ثم تطبيق نفس المبادئ في سياق مختلف تماماً.
+      ما يناسب Duolingo للغات يناسبنا للحكمة القديمة —
+       كلتاهما رحلة تحوّل من الجهل إلى المعرفة.
+    </p>
+  </div>
+</section>
+
+<!-- Design Tokens -->
+<section class="section" id="tokens">
+  <h2>نظام الرموز <span class="arabic-label">Design Token System</span></h2>
+  <p class="section-subtitle">
+    الرموز هي لغة التصميم المشتركة بين المصمم والمطور. كل قيمة مسماة وقابلة لإعادة الاستخدام.
+    ثلاثة مستويات: بدائي → دلالي → مكون.
+  </p>
+
+  <h4 style="color:var(--gold-accent);font-size:1rem;margin-bottom:1rem;">🎨 Primitive Tokens (Layer 1)</h4>
+  <table class="token-table">
+    <thead>
+      <tr><th>الاسم</th><th>القيمة</th><th>الاستخدام</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>color-indigo-900</td><td><span class="token-demo" style="background:#0d0d25"></span> #0d0d25</td><td>Deepest background</td></tr>
+      <tr><td>color-indigo-700</td><td><span class="token-demo" style="background:#1a1a3e"></span> #1a1a3e</td><td>Surface backgrounds</td></tr>
+      <tr><td>color-indigo-500</td><td><span class="token-demo" style="background:#2a2a5e"></span> #2a2a5e</td><td>Hover/active surfaces</td></tr>
+      <tr><td>color-purple-600</td><td><span class="token-demo" style="background:#6c3fa0"></span> #6c3fa0</td><td>Secondary elements</td></tr>
+      <tr><td>color-purple-400</td><td><span class="token-demo" style="background:#8b5cf6"></span> #8b5cf6</td><td>Interactive purple</td></tr>
+      <tr><td>color-gold-500</td><td><span class="token-demo" style="background:#c9a84c"></span> #c9a84c</td><td>Primary accent</td></tr>
+      <tr><td>color-gold-300</td><td><span class="token-demo" style="background:#e8c96a"></span> #e8c96a</td><td>Light accent hover</td></tr>
+      <tr><td>color-ivory-100</td><td><span class="token-demo" style="background:#f5f0e8"></span> #f5f0e8</td><td>Primary text</td></tr>
+      <tr><td>color-ivory-200</td><td><span class="token-demo" style="background:#ddd8ce"></span> #ddd8ce</td><td>Secondary text</td></tr>
+      <tr><td>color-ivory-400</td><td><span class="token-demo" style="background:#b8b3a8"></span> #b8b3a8</td><td>Disabled/placeholder text</td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="color:var(--gold-accent);font-size:1rem;margin:2rem 0 1rem;">🧩 Semantic Tokens (Layer 2)</h4>
+  <table class="token-table">
+    <thead>
+      <tr><th>الاسم الدلالي</th><th>يرتبط بـ</th><th>الغرض</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>bg-primary</td><td>color-indigo-700</td><td>خلفية المكونات الأساسية</td></tr>
+      <tr><td>bg-canvas</td><td>color-indigo-900</td><td>خلفية الصفحة</td></tr>
+      <tr><td>bg-elevated</td><td>color-indigo-500</td><td>خلفية البطاقات المرتفعة</td></tr>
+      <tr><td>text-primary</td><td>color-ivory-100</td><td>النص الأساسي</td></tr>
+      <tr><td>text-secondary</td><td>color-ivory-200</td><td>النص الثانوي</td></tr>
+      <tr><td>text-muted</td><td>color-ivory-400</td><td>النص الخافت</td></tr>
+      <tr><td>accent-primary</td><td>color-gold-500</td><td>عناصر التفاعل الرئيسية</td></tr>
+      <tr><td>accent-secondary</td><td>color-purple-600</td><td>العناصر الثانوية</td></tr>
+      <tr><td>border-subtle</td><td>rgba(255,255,255,0.06)</td><td>حدود خفيفة</td></tr>
+      <tr><td>border-accent</td><td>rgba(201,168,76,0.2)</td><td>حدود مميزة</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <h5>🔗 Why Token Layers Matter</h5>
+    <p>
+      Primitive tokens rarely change. Semantic tokens map primitives to <em>meaning</em>.
+      If you want to change your brand color someday, you only update the primitive.
+      If you want to make cards lighter, you update <code>bg-elevated</code>.
+      This separation is what enables <strong>theming</strong> — light mode, high contrast mode, seasonal variants —
+      without rewriting CSS everywhere.
+      <br><br>
+      <em>Reference: <a href="https://m3.material.io/foundations/design-tokens" style="color:var(--gold-accent-light);">Material Design 3 — Design Tokens</a></em>
+    </p>
+  </div>
+
+  <div class="try-this en">
+    <h4>🔬 Apply This</h4>
+    <p style="font-size:0.9rem;color:var(--soft-ivory-2);line-height:1.7;">
+      Look at <code>src/app/globals.css</code>. Currently it uses shadcn/ui's default HSL variables
+      (<code>--primary</code>, <code>--secondary</code>, etc.).
+      Map each shadcn/ui variable to a semantic token from Layer 2 above.
+      Which shadcn/ui variables map to <code>accent-primary</code>?
+      Which ones need updating to reflect the Cosmic Indigo / Gold palette?
+    </p>
+  </div>
+</section>
+
+<!-- Arabic & RTL -->
+<section class="section section-alt" id="rtl">
+  <h2>العربية والاتجاه <span class="arabic-label">Arabic & RTL Design</span></h2>
+  <p class="section-subtitle">
+    منصة الباحث عربية أولاً. ليست ترجمة — بل تصميم يبدأ من اليمين وينمو باتجاه اليسار.
+  </p>
+
+  <div class="rtl-note">
+    <h4>📐 RTL Considerations for Auth Design</h4>
+    <ul>
+      <li>
+        <span class="bullet">◆</span>
+        <span><strong>Mirror the visual flow.</strong> The eye starts at top-right, not top-left.
+        The "left panel" with aspirational content should be on the right.
+        The form should flow right-to-left.</span>
+      </li>
+      <li>
+        <span class="bullet">◆</span>
+        <span><strong>Arabic typography for headings.</strong> Use a premium Arabic serif
+        (like Noto Naskh Arabic or Amiri) for headlines. English UI text for labels is acceptable
+        but should support Arabic IMEs and keyboard input.</span>
+      </li>
+      <li>
+        <span class="bullet">◆</span>
+        <span><strong>Baseline alignment.</strong> Arabic text sits on a different baseline than Latin text.
+        Arabic UI needs extra line-height (1.8 vs 1.5 for English) to accommodate diacritics (تشكيل).</span>
+      </li>
+      <li>
+        <span class="bullet">◆</span>
+        <span><strong>Icon placement.</strong> In RTL, icons should appear to the <em>right</em> of labels,
+        not the left. What looks like "leading icon" in English becomes "trailing icon" in Arabic.</span>
+      </li>
+      <li>
+        <span class="bullet">◆</span>
+        <span><strong>Form direction.</strong> <code>dir="rtl"</code> on form elements automatically
+        mirrors the layout, but inputs with <code>type="email"</code> or <code>type="url"</code>
+        should use <code>dir="ltr"</code> for LTR data entry.</span>
+      </li>
+      <li>
+        <span class="bullet">◆</span>
+        <span><strong>Arabic symbols.</strong> The platform already uses Quranic and spiritual Arabic content.
+        Auth pages should feel like an extension of that — not an English page with Arabic text poured in.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="try-this">
+    <h4>🔬 جرب هذا</h4>
+    <p style="font-size:0.9rem;color:var(--soft-ivory-2);line-height:1.7;">
+      افتح صفحة تسجيل الدخول الحالية (<code>src/app/auth/login/page.tsx</code>).
+      أضف <code>dir="rtl"</code> إلى الـ container div.
+      لاحظ كيف يتغير موضع checkbox بالنسبة للنص، وكيف يتحرك زر "Forgot password".
+      هل لا يزال التصميم يعمل بشكل جيد؟ ما الذي يحتاج إلى تعديل؟
+    </p>
+  </div>
+
+  <div class="info-box">
+    <h5>📖 Arabic Design Resources</h5>
+    <p>
+      Arabic UI design has unique challenges. Key references:
+      <br>
+      • <a href="https://www.ibm.com/design/language/typography/arabic/" style="color:var(--gold-accent-light);">IBM Arabic Typography Guide</a>
+      — baseline differences, diacritics handling
+      <br>
+      • <a href="https://rtlstyling.com/" style="color:var(--gold-accent-light);">RTL Styling Guide</a>
+      — practical CSS patterns for right-to-left layouts
+      <br>
+      • <a href="https://fonts.google.com/noto/fonts?query=arabic" style="color:var(--gold-accent-light);">Google Noto Arabic Fonts</a>
+      — free, high-quality Arabic typefaces
+    </p>
+  </div>
+</section>
+
+<!-- Core Principles -->
+<section class="section" id="principles">
+  <h2>المبادئ الأساسية <span class="arabic-label">Core Design Principles</span></h2>
+  <p class="section-subtitle">
+    عشرة مبادئ توجه كل قرار تصميمي في تجربة المصادقة.
+  </p>
+
+  <div class="principles-grid">
+    <div class="principle-card">
+      <h4>١. بدء الرحلة</h4>
+      <p>كل شاشة مصادقة هي محطة في رحلة تحوّل. ليست عقبة يجب تخطيها.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٢. التدرج في الكشف</h4>
+      <p>لا ترمِ كل شيء دفعة واحدة. خطوة بخطوة، سؤال بعد سؤال. كل خطوة تبني الترقب.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٣. الجودة الصامتة</h4>
+      <p>Premium لا تعني الكثير من الزخارف. تعني أن كل بكسل في مكانه الصحيح. مساحة، طباعة نظيفة، ألوان عميقة.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٤. المكافأة الفورية</h4>
+      <p>بعد التسجيل مباشرة: XP، المستوى ١، أول إنجاز. المستخدم يشعر بالتقدم منذ اللحظة الأولى.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٥. الثقة قبل كل شيء</h4>
+      <p>مؤشرات الأمان ظاهرة: تشفير، خصوصية، شفافية البيانات. المستخدم يرى أنه في أيدٍ أمينة.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٦. الهوية الفورية</h4>
+      <p>بعد التسجيل، المستخدم ليس "مستخدم ١٢٣" — بل "ساعي"، "مبتدئ"، "طالب حكمة". دور واضح في الرحلة.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٧. الجوال أولاً</h4>
+      <p>عمود واحد، أزرار كبيرة في متناول الإبهام، تسجيل اجتماعي في المقدمة. لا جداول معقدة.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٨. الرموز الهادفة</h4>
+      <p>الشمس، القمر، الزهرة، زحل — رموز لها معنى تعليمي، لا ديكور فقط. كل رمز يعلّم شيئاً.</p>
+    </div>
+    <div class="principle-card">
+      <h4>٩. لا خوف، لا رخص</h4>
+      <p>لا شياطين، لا جماجم، لا نيون صارخ. لا هالوين. الجمال في العمق والغموض، لا في الصدمة.</p>
+    </div>
+    <div class="principle-card">
+      <h4>١٠. إمكانية الوصول</h4>
+      <p>WCAG AA minimum. تباين كافٍ، تركيز مرئي، قارئ شاشة. التصميم الجميل لا يعني شيئاً إذا كان بعض الناس لا يستطيعون استخدامه.</p>
+    </div>
+  </div>
+
+  <!-- What to do vs what to avoid -->
+  <h3 style="font-size:1.25rem;margin:3rem 0 1rem;">Do This — Not That</h3>
+  <div class="avoid-grid">
+    <div class="avoid-col do">
+      <h4>✓ افعل هذا</h4>
+      <div class="avoid-item">استخدم الأزرق النيلي العميق كلون أساسي للهوية</div>
+      <div class="avoid-item">ضع الإثبات الاجتماعي (عدد المتعلمين، الدروس المنجزة) في الواجهة</div>
+      <div class="avoid-item">استخدم أيقونات فلكية (الشمس، القمر، الزهرة) بدقة وتعليمية</div>
+      <div class="avoid-item">أظهر مؤشرات الأمان (تشفير، خصوصية) بشكل واضح ومطمئن</div>
+      <div class="avoid-item">صمم RTL من البداية — لا تجعله فكرة لاحقة</div>
+    </div>
+    <div class="avoid-col dont">
+      <h4>✗ تجنب هذا</h4>
+      <div class="avoid-item">لا تستخدم الأحمر الدموي أو الأسود الكامل — يوحى بالخوف والموت</div>
+      <div class="avoid-item">لا تضع شهادات وهمية — استخدم أرقاماً حقيقية عن المستخدمين</div>
+      <div class="avoid-item">لا تستخدم رموزاً شيطانية أو هالوينية — نحن منصة تعليم، لا لعبة رعب</div>
+      <div class="avoid-item">لا تفرط في النيون والزخارف — الجودة في البساطة</div>
+      <div class="avoid-item">لا تترجم من الإنجليزية للعربية — صمم للعربية من اليوم الأول</div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer / Next Steps -->
+<section class="section" style="background:linear-gradient(135deg,var(--near-black),var(--cosmic-indigo));border-top:1px solid rgba(201,168,76,0.1);">
+  <h2>الخطوات القادمة <span class="arabic-label">Next Steps</span></h2>
+  <p class="section-subtitle">
+    في الجلسة القادمة، سنحول هذه الفلسفة إلى wireframes وتصميم عالي الدقة.
+  </p>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+    <div style="background:var(--surface-2);border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius);padding:1.25rem;flex:1;min-width:200px;">
+      <h4 style="font-size:0.9rem;color:var(--gold-accent);margin-bottom:0.5rem;">✓ أكملت الجلسة ١</h4>
+      <ul style="list-style:none;font-size:0.85rem;color:var(--soft-ivory-3);">
+        <li style="padding:0.25rem 0;">— فهمت فلسفة البدء (Initiation Philosophy)</li>
+        <li style="padding:0.25rem 0;">— تعرفت على الرحلة العاطفية ذات الـ ٥ طبقات</li>
+        <li style="padding:0.25rem 0;">— استوعبت اللغة البصرية ونظام الألوان</li>
+        <li style="padding:0.25rem 0;">— فهمت نظام الرموز (Design Tokens)</li>
+        <li style="padding:0.25rem 0;">— عرفت تحديات التصميم العربي (RTL)</li>
+      </ul>
+    </div>
+    <div style="background:var(--surface-2);border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius);padding:1.25rem;flex:1;min-width:200px;">
+      <h4 style="font-size:0.9rem;color:var(--mystic-purple-light);margin-bottom:0.5rem;">⟳ الجلسة ٢ — قادمة</h4>
+      <ul style="list-style:none;font-size:0.85rem;color:var(--soft-ivory-3);">
+        <li style="padding:0.25rem 0;">— UX Flow Diagram لكامل تجربة المصادقة</li>
+        <li style="padding:0.25rem 0;">— تصميم شاشة Login عالية الدقة</li>
+        <li style="padding:0.25rem 0;">— Multi-step Registration Flow</li>
+        <li style="padding:0.25rem 0;">— Gamification Layer بعد التسجيل</li>
+        <li style="padding:0.25rem 0;">— Mobile و Desktop variants</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+function updateColors() {
+  const indigoH = document.getElementById('indigoH').value;
+  const goldH = document.getElementById('goldH').value;
+  const purpleH = document.getElementById('purpleH').value;
+
+  document.getElementById('indigoVal').textContent = indigoH + '°';
+  document.getElementById('goldVal').textContent = goldH + '°';
+  document.getElementById('purpleVal').textContent = purpleH + '°';
+
+  const indigoS = 50;
+  const indigoL = 17 + (parseInt(indigoH) - 240) * 0.1;
+  document.getElementById('indigoPreview').style.background =
+    `hsl(${indigoH}, ${indigoS}%, ${Math.max(10, Math.min(30, indigoL))}%)`;
+
+  const goldS = 55;
+  const goldL = 54 + (parseInt(goldH) - 42) * 0.2;
+  document.getElementById('goldPreview').style.background =
+    `hsl(${goldH}, ${goldS}%, ${Math.max(40, Math.min(65, goldL))}%)`;
+
+  const purpleS = 50;
+  const purpleL = 44 + (parseInt(purpleH) - 270) * 0.1;
+  document.getElementById('purplePreview').style.background =
+    `hsl(${purpleH}, ${purpleS}%, ${Math.max(35, Math.min(55, purpleL))}%)`;
+}
+
+// Smooth scroll for sidebar links
+document.querySelectorAll('.sidebar nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelector('.sidebar').classList.remove('open');
+    document.querySelectorAll('.sidebar nav a').forEach(l => l.classList.remove('active'));
+    a.classList.add('active');
+  });
+});
+
+// Highlight active section on scroll
+const sections = document.querySelectorAll('.section, .hero');
+const navLinks = document.querySelectorAll('.sidebar nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id || 'philosophy';
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { threshold: 0.3 });
+
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

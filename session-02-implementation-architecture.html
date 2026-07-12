@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسة ٢ — هندسة التنفيذ | Session 2 — Implementation Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+  :root {
+    --bg-canvas: #090B14;
+    --bg-surface: #111827;
+    --bg-card: #161B2D;
+    --primary: #8B5CF6;
+    --primary-light: #A78BFA;
+    --gold: #F5C451;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --border: rgba(255,255,255,0.08);
+    --radius: 12px;
+    --font-arabic: 'Noto Naskh Arabic', serif;
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sidebar {
+    position: fixed; top: 0; right: 0;
+    width: 280px; height: 100vh;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar nav a {
+    display: block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s;
+    border-right: 2px solid transparent;
+  }
+  .sidebar nav a:hover, .sidebar nav a.active {
+    background: rgba(139,92,246,0.1);
+    color: var(--text-primary);
+    border-right-color: var(--gold);
+  }
+  .sidebar-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 101; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-primary); padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; }
+
+  .main { margin-right: 280px; max-width: 960px; }
+
+  .hero {
+    padding: 5rem 4rem 3rem;
+    background: linear-gradient(135deg, var(--bg-canvas) 0%, #0f1330 50%, var(--bg-canvas) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    border-radius: 100px;
+    background: rgba(245,196,81,0.1);
+    border: 1px solid rgba(245,196,81,0.2);
+    color: var(--gold);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+  }
+  .hero h1 .arabic {
+    display: block;
+    font-family: var(--font-arabic);
+    font-size: 1.75rem;
+    color: var(--gold);
+    margin-top: 0.5rem;
+    font-weight: 600;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-bottom: 2rem;
+  }
+  .hero-meta {
+    display: flex; gap: 2rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .hero-meta-item { text-align: center; }
+  .hero-meta-value { font-size: 1.25rem; font-weight: 700; color: var(--gold); }
+  .hero-meta-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; }
+
+  .section { padding: 4rem; }
+  .section-alt { background: var(--bg-surface); }
+
+  .section h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .section h2 .ar {
+    display: block;
+    font-family: var(--font-arabic);
+    font-size: 1rem;
+    color: var(--gold);
+    font-weight: 400;
+    margin-top: 0.25rem;
+  }
+  .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    max-width: 650px;
+  }
+
+  /* Token Mapping Table */
+  .token-mapping {
+    display: grid;
+    gap: 0;
+    margin: 2rem 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .token-row {
+    display: grid;
+    grid-template-columns: 180px 200px 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .token-row:last-child { border-bottom: none; }
+  .token-row.header {
+    background: rgba(139,92,246,0.1);
+    font-weight: 600;
+    color: var(--gold);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .token-cell {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .token-cell .swatch {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .token-cell .sub {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-family: monospace;
+  }
+  .token-row:nth-child(even):not(.header) {
+    background: rgba(255,255,255,0.02);
+  }
+
+  /* Code Blocks */
+  .code-block {
+    background: #0a0e1a;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    direction: ltr;
+    text-align: left;
+    overflow-x: auto;
+    white-space: pre;
+    color: #e2e8f0;
+  }
+  .code-block .comment { color: #64748b; }
+  .code-block .keyword { color: #818cf8; }
+  .code-block .string { color: #34d399; }
+  .code-block .number { color: #f472b6; }
+  .code-block .func { color: #fbbf24; }
+
+  /* Card Grid */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  .info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  .info-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+  }
+  .info-card .icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .info-card h4 { font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+  .info-card p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; }
+
+  /* Page Wireframe Cards */
+  .page-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin: 1.5rem 0;
+  }
+  .page-card .page-number {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(139,92,246,0.15);
+    color: var(--primary-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  .page-card h3 { font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 0.5rem; }
+  .page-card .desc { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
+
+  .layout-diagram {
+    background: #0a0e1a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    direction: ltr;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  /* Step Flow */
+  .step-flow { display: flex; gap: 1rem; align-items: flex-start; margin: 1rem 0; flex-wrap: wrap; }
+  .step-item {
+    flex: 1; min-width: 140px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .step-item .num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 auto 0.5rem;
+  }
+  .step-item h5 { font-size: 0.85rem; margin-bottom: 0.25rem; }
+  .step-item p { font-size: 0.75rem; color: var(--text-secondary); }
+  .step-item.active { border-color: var(--gold); }
+  .step-item.active .num { background: var(--gold); color: #000; }
+
+  /* Component spec list */
+  .component-list { list-style: none; margin: 1rem 0; }
+  .component-list li {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .component-list li:last-child { border-bottom: none; }
+  .component-list li .tag {
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(139,92,246,0.15);
+    color: var(--primary-light);
+    flex-shrink: 0;
+  }
+
+  /* Try This */
+  .try-this {
+    background: linear-gradient(135deg, var(--bg-surface), #0f1330);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin: 2rem 0;
+    position: relative;
+  }
+  .try-this::before {
+    content: '🔬 جرب هذا';
+    position: absolute;
+    top: -12px; right: 20px;
+    background: var(--bg-canvas);
+    padding: 0 0.75rem;
+    font-family: var(--font-arabic);
+    font-size: 0.85rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .try-this h4 { font-size: 0.9rem; color: var(--gold); margin-bottom: 0.75rem; }
+  .try-this p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+  .try-this code {
+    background: rgba(255,255,255,0.05);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Principle box */
+  .principle-box {
+    border-right: 3px solid var(--gold);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    background: rgba(245,196,81,0.03);
+  }
+  .principle-box h5 { color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem; }
+
+  /* Callout */
+  .callout {
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border: 1px solid;
+  }
+  .callout.info {
+    background: rgba(139,92,246,0.08);
+    border-color: rgba(139,92,246,0.2);
+  }
+  .callout.info h5 { color: var(--primary-light); }
+  .callout.warn {
+    background: rgba(245,196,81,0.08);
+    border-color: rgba(245,196,81,0.2);
+  }
+  .callout.warn h5 { color: var(--gold); }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(280px); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: block; }
+    .main { margin-right: 0; }
+    .hero { padding: 3rem 1.5rem 2rem; }
+    .hero h1 { font-size: 2rem; }
+    .section { padding: 2rem 1.5rem; }
+    .token-row { grid-template-columns: 1fr 1fr; }
+    .token-row .token-cell:nth-child(3) { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+<aside class="sidebar">
+  <h3>جلسة ٢ · المحتويات</h3>
+  <nav>
+    <a href="#tokens" class="active">ربط الرموز<br><small>Token Mapping</small></a>
+    <a href="#page-01">صفحة ١ — الدخول<br><small>Split Screen Auth</small></a>
+    <a href="#page-02">صفحة ٢ — التسجيل<br><small>Multi-Step Register</small></a>
+    <a href="#page-03">صفحة ٣–٧<br><small>Additional Pages</small></a>
+    <a href="#components">المكونات<br><small>Component Architecture</small></a>
+    <a href="#rtl">RTL التنفيذ<br><small>Arabic Implementation</small></a>
+    <a href="#motion">الحركة والتفاعل<br><small>Motion Specs</small></a>
+  </nav>
+</aside>
+
+<div class="main">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">جلسة ٢ · Session 2</div>
+  <h1>
+    هندسة التنفيذ
+    <span class="arabic">من الرموز إلى الشاشات</span>
+  </h1>
+  <p>
+    الجلسة الأولى أعطتك <em>لماذا</em>. هذه الجلسة تعطيك <em>كيف</em>.
+    سنحول التصميم النظري ونظام الرموز إلى ملفات CSS حقيقية،
+    وهياكل مكونات، و wireframes لكل صفحة من صفحات المصادقة السبع.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><div class="hero-meta-value">٧</div><div class="hero-meta-label">صفحات</div></div>
+    <div class="hero-meta-item"><div class="hero-meta-value">٢٢</div><div class="hero-meta-label">مكوناً</div></div>
+    <div class="hero-meta-item"><div class="hero-meta-value">٣</div><div class="hero-meta-label">مستويات ترميز</div></div>
+  </div>
+</section>
+
+<!-- ====== TOKEN MAPPING ====== -->
+<section class="section" id="tokens">
+  <h2>ربط الرموز <span class="ar">Mapping Design Tokens → shadcn/ui CSS Variables</span></h2>
+  <p class="section-subtitle">
+    هذا هو المفتاح. نظام ألوان shadcn/ui يعمل بمتغيرات CSS بتنسيق HSL.
+    سنأخذ لوحة الألوان من المواصفات ونحولها إلى قيم HSL مناسبة.
+  </p>
+
+  <div class="callout info">
+    <h5>🎯 لماذا HSL؟</h5>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;">
+      shadcn/ui تستخدم HSL ( Hue, Saturation, Lightness ) بدلاً من HEX لأن HSL تسمح
+      بتعديل الشفافية والسطوع بسهولة عبر <code>hsl(var(--primary) / 0.8)</code>.
+      هذا هو أساس نظام التظليل (theming) في shadcn/ui.
+    </p>
+  </div>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:2rem 0 1rem;">① تحويل الألوان من HEX → HSL</h4>
+  <table class="token-mapping">
+    <tr class="token-row header">
+      <td class="token-cell">اسم الرمز</td>
+      <td class="token-cell">HEX</td>
+      <td class="token-cell">قيمة HSL ← متغير shadcn/ui</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#F8FAFC"></span> Text Primary</td>
+      <td class="token-cell"><span class="sub">#F8FAFC</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--foreground: 210 40% 98%</code> ← <span class="sub">القيمة الحالية قريبة جداً، يمكن تركها</span></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#CBD5E1"></span> Text Secondary</td>
+      <td class="token-cell"><span class="sub">#CBD5E1</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--muted-foreground: 215 20% 65%</code> ← <span class="sub">القيمة الحالية متطابقة</span></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#090B14"></span> Background Canvas</td>
+      <td class="token-cell"><span class="sub">#090B14</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--background: 228 35% 5%</code> ← <span class="sub">تحتاج تحديث</span></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#111827"></span> Surface</td>
+      <td class="token-cell"><span class="sub">#111827</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--card: 228 35% 10%</code> ← <span class="sub">تحتاج تحديث</span></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#161B2D"></span> Card</td>
+      <td class="token-cell"><span class="sub">#161B2D</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--card: 228 35% 13%</code></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#8B5CF6"></span> Primary (Purple)</td>
+      <td class="token-cell"><span class="sub">#8B5CF6</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--primary: 258 90% 66%</code> ← <span class="sub">تحتاج تحديث (حالياً: 222.2 84% 4.9% = أسود)</span></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#A78BFA"></span> Secondary (Light Purple)</td>
+      <td class="token-cell"><span class="sub">#A78BFA</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--secondary: 256 90% 76%</code></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#F5C451"></span> Gold Accent</td>
+      <td class="token-cell"><span class="sub">#F5C451</span></td>
+      <td class="token-cell"><span class="sub">لن تكون متغير shadcn/ui — سنستخدم كلاس مباشر: text-gold, bg-gold, border-gold/20</span></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#22C55E"></span> Success</td>
+      <td class="token-cell"><span class="sub">#22C55E</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--success: 142 70% 45%</code></td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell"><span class="swatch" style="background:#EF4444"></span> Destructive</td>
+      <td class="token-cell"><span class="sub">#EF4444</span></td>
+      <td class="token-cell"><code style="font-family:monospace;">--destructive: 0 84% 60%</code> ← <span class="sub">القيمة الحالية متطابقة</span></td>
+    </tr>
+  </table>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:2rem 0 1rem;">② الكود النهائي لملف globals.css</h4>
+  <div class="code-block"><span class="comment">/* src/app/globals.css — النسخة المحدثة */</span>
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    <span class="comment">/* إضاءة (سنبقيها لأغراض التوافق — لكن الموقع داكن بشكل افتراضي) */</span>
+    --background: 0 0% 100%;
+    --foreground: 228 35% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 228 35% 5%;
+    --primary: 258 90% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 256 60% 85%;
+    --secondary-foreground: 258 90% 66%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 256 60% 92%;
+    --accent-foreground: 258 90% 50%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: 258 90% 66%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    <span class="comment">/* الخلفيات */</span>
+    --background: 228 35% 5%;       <span class="comment">/* #090B14 */</span>
+    --foreground: 210 40% 98%;      <span class="comment">/* #F8FAFC */</span>
+    --card: 228 35% 10%;            <span class="comment">/* #111827 */</span>
+    --card-foreground: 210 40% 98%;
+
+    <span class="comment">/* الألوان الأساسية */</span>
+    --primary: 258 90% 66%;         <span class="comment">/* #8B5CF6 */</span>
+    --primary-foreground: 0 0% 100%;
+    --secondary: 256 60% 30%;       <span class="comment">/* أرجواني داكن */</span>
+    --secondary-foreground: 210 40% 98%;
+
+    <span class="comment">/* الألوان المساعدة */</span>
+    --muted: 228 30% 12%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 258 50% 20%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    <span class="comment">/* الحدود */</span>
+    --border: 228 20% 15%;          <span class="comment">/* rgba(255,255,255,0.08) */</span>
+    --input: 228 20% 15%;
+    --ring: 258 90% 66%;
+  }
+}</div>
+
+  <div class="principle-box">
+    <h5>🔑 المبدأ الأساسي</h5>
+    <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;">
+      <strong>لا تضع أبداً قيم HEX مباشرة في المكونات.</strong>
+      كل لون يمر عبر متغير CSS ← كلاس Tailwind. بهذا نضمن:
+      (١) التبديل بين الوضع الداكن والفاتح بتغيير المتغيرات فقط
+      (٢) إمكانية إضافة ثيمات (موسمية، عالية التباين) لاحقاً
+      (٣) اتساق الألوان عبر التطبيق بالكامل
+    </p>
+  </div>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:2rem 0 1rem;">③ إضافة ألوان مخصصة في tailwind.config.ts</h4>
+  <div class="code-block"><span class="comment">// إضافة إلى ملف tailwind.config.ts</span>
+
+colors: {
+  <span class="comment">// ... الألوان الحالية تبقى كما هي</span>
+  gold: {
+    50:  '#fdf8e8',
+    100: '#fcf0c8',
+    200: '#f9e4a0',
+    300: '#f5d46e',
+    400: '#f5c451',
+    500: '#eeb234',
+    600: '#d4941f',
+    700: '#b07716',
+    800: '#8e5e17',
+    900: '#754d19',
+  },
+  cosmic: {
+    50:  '#f0f1ff',
+    100: '#e0e2ff',
+    200: '#c7cafe',
+    300: '#a5a8fc',
+    400: '#8b5cf6',       <span class="comment">/* primary */</span>
+    500: '#7c3aed',
+    600: '#6d28d9',
+    700: '#5b21b6',
+    800: '#4c1d95',
+    900: '#3b0f7a',
+    950: '#1e0a3d',
+  },
+}</div>
+
+  <div class="try-this">
+    <h4>🔬 جرب هذا</h4>
+    <p>
+      افتح <code>src/app/globals.css</code>.
+      استبدل قيم <code>.dark</code> الحالية بالقيم الجديدة في المربع أعلاه.
+      أعد تشغيل dev server وشاهد كيف تتغير ألوان التطبيق بالكامل.
+      الزر الأزرق الافتراضي سيتحول إلى البنفسجي.
+    </p>
+  </div>
+</section>
+
+<!-- ====== PAGE 01: SPLIT SCREEN AUTH ====== -->
+<section class="section section-alt" id="page-01">
+  <h2>صفحة ١ — الدخول <span class="ar">Split Screen Authentication</span></h2>
+  <p class="section-subtitle">
+    الصفحة الأهم. أول انطباع للمستخدم. نصفين: يسار للمحتوى الملهم، يمين لنموذج الدخول.
+    تصميم يشبه Linear + Notion مع لمسة روحانية.
+  </p>
+
+  <div class="page-card">
+    <div class="page-number">PAGE 01</div>
+    <h3>تسجيل الدخول | Sign In</h3>
+    <p class="desc">شاشة الدخول بتقسيم الشاشة (55% يسار / 45% يمين)</p>
+
+    <h5 style="color:var(--primary-light);margin:1rem 0 0.5rem;">📐 تخطيط الصفحة</h5>
+    <div class="layout-diagram">
+┌─────────────────────────────────────────────────────┐
+│  Desktop Layout (min-width: 1024px)                  │
+│  ┌──────────────────────┬─────────────────────────┐  │
+│  │     LEFT PANEL       │      RIGHT PANEL        │  │
+│  │      (55%)           │       (45%)             │  │
+│  │                      │                         │  │
+│  │  ✦ Celestial Chart   │  ┌─────────────────┐   │  │
+│  │    (bg decorative)    │  │  Card Container   │   │  │
+│  │                      │  │                   │   │  │
+│  │  "Ancient Wisdom.    │  │  Welcome Back,    │   │  │
+│  │   Modern Mastery."   │  │  Seeker           │   │  │
+│  │                      │  │                   │   │  │
+│  │  [Feature List]      │  │  [OAuth Buttons]  │   │  │
+│  │  ⚗ Alchemy          │  │  Continue w/ Google│  │  │
+│  │  ☿ Astrology        │  │  Continue w/ Apple │   │  │
+│  │  🪐 Planetary Hours  │  │  Continue w/ GitHub│  │  │
+│  │  □ Magick Squares    │  │                   │   │  │
+│  │                      │  │  ─── or ───       │   │  │
+│  │  [Social Proof]      │  │                   │   │  │
+│  │  12k+ Practitioners  │  │  Email ────────── │   │  │
+│  │  50k+ Lessons        │  │  Password ─────── │   │  │
+│  │                      │  │                   │   │  │
+│  │                      │  │  [Remember] [Forgot│  │  │
+│  │                      │  │  [Sign In]         │  │  │
+│  │                      │  │                   │   │  │
+│  │                      │  │  Create Account    │   │  │
+│  │                      │  │                   │   │  │
+│  │                      │  │  Privacy • GDPR    │   │  │
+│  │                      │  │  • Encryption      │   │  │
+│  │                      │  └─────────────────┘   │  │
+│  └──────────────────────┴─────────────────────────┘  │
+│                                                        │
+│  Mobile (&lt; 1024px): Single column, left panel hides    │
+│  Feature list moves below the card                     │
+└─────────────────────────────────────────────────────────┘
+    </div>
+
+    <h5 style="color:var(--primary-light);margin:1.5rem 0 0.5rem;">🧱 هيكل المكونات</h5>
+    <div class="code-block"><span class="comment">// هيكل المكونات المقترح</span>
+
+app/auth/
+  login/
+    page.tsx                          <span class="comment">// صفحة الدخول الرئيسية</span>
+  _components/                        <span class="comment">// مكونات مشتركة للمصادقة</span>
+    AuthLayout.tsx                    <span class="comment">// تخطيط الشاشة المنقسمة</span>
+    AuthCard.tsx                      <span class="comment">// بطاقة النموذج</span>
+    OAuthButtons.tsx                  <span class="comment">// أزرار Google, Apple, GitHub</span>
+    LeftPanel.tsx                     <span class="comment">// اللوحة اليسرى (المحتوى الملهم)</span>
+    SocialProof.tsx                   <span class="comment">// الأرقام الإحصائية</span>
+    FeatureShowcase.tsx               <span class="comment">// قائمة الميزات</span>
+    TrustFooter.tsx                   <span class="comment">// مؤشرات الأمان</span></div>
+
+    <h5 style="color:var(--primary-light);margin:1.5rem 0 0.5rem;">🎯 توزيع المساحات</h5>
+    <div class="code-block"><span class="comment">/* اللوحة اليسرى — ثابتة على ديسكتوب */</span>
+&lt;div className="hidden lg:flex lg:w-[55%] h-screen
+            fixed top-0 right-0
+            flex-col justify-between
+            p-12 overflow-hidden"&gt;
+  <span class="comment">/* محتوى ملهم + خلفية كونية */</span>
+&lt;/div&gt;
+
+<span class="comment">/* اللوحة اليمنى — قابلة للتمرير */</span>
+&lt;div className="w-full lg:w-[45%] min-h-screen
+            mr-auto <span class="comment">/* لأن RTL */</span>
+            flex items-center justify-center
+            p-6 lg:p-12"&gt;
+  &lt;AuthCard /&gt;
+&lt;/div&gt;</div>
+  </div>
+
+  <div class="try-this">
+    <h4>🔬 جرب هذا</h4>
+    <p>
+      أنشئ المجلد <code>src/app/auth/_components/</code> وأنشئ أول مكون:
+      <code>AuthLayout.tsx</code>. اجعله يقبل <code>leftPanel</code> و <code>rightPanel</code>
+      كـ props وطبق التوزيع 55%/45%. أضف خلفية كونية (gradient + نقاط متلألئة) للوحة اليسرى.
+    </p>
+  </div>
+</section>
+
+<!-- ====== PAGE 02: MULTI-STEP REGISTRATION ====== -->
+<section class="section" id="page-02">
+  <h2>صفحة ٢ — التسجيل متعدد الخطوات <span class="ar">Multi-Step Registration Wizard</span></h2>
+  <p class="section-subtitle">
+    أربع خطوات، كل خطوة تبني على سابقتها. من الحساب → الاهتمامات → الهدف → الملف الشخصي.
+    التدرج في الكشف هو سر تقليل الاحتكاك.
+  </p>
+
+  <div class="page-card">
+    <div class="page-number">PAGE 02</div>
+    <h3>إنشاء الحساب | Registration</h3>
+    <p class="desc">مسجل متعدد الخطوات مع شريط تقدم</p>
+
+    <h5 style="color:var(--primary-light);margin:1rem 0 0.5rem;">📐 هيكل التخطيط</h5>
+    <div class="layout-diagram">
+┌──────────────────────────────────────────────┐
+│              Registration Wizard               │
+│                                                │
+│   ● ● ○ ○ ○                                   │
+│  Step 1  Step 2  Step 3  Step 4               │
+│                                                │
+│  ┌────────────────────────────────────────┐   │
+│  │                                        │   │
+│  │   STEP 1: Create Account               │   │
+│  │                                        │   │
+│  │   الاسم: [Input with label]             │   │
+│  │   البريد: [Input with label]            │   │
+│  │   كلمة المرور: [Input with toggle]      │   │
+│  │   تأكيد كلمة المرور: [Input]            │   │
+│  │                                        │   │
+│  │   ☐ أوافق على الشروط                    │   │
+│  │                                        │   │
+│  │         [ Continue → ]                 │   │
+│  │                                        │   │
+│  └────────────────────────────────────────┘   │
+│                                                │
+│   ─────────── أو ───────────                    │
+│                                                │
+│  Continue with Google                          │
+│  Continue with Apple                           │
+│                                                │
+│  Already have an account? Sign In              │
+└──────────────────────────────────────────────┘
+    </div>
+
+    <h5 style="color:var(--primary-light);margin:1.5rem 0 0.5rem;">🧩 Stepper Component</h5>
+    <div class="code-block"><span class="comment">// Stepper — شريط التقدم</span>
+interface Step {
+  id: number;
+  label: string;     <span class="comment">// "Account", "Interests", "Goals", "Profile"</span>
+  icon: LucideIcon;  <span class="comment">// icons: User, Sparkles, Target, UserCircle</span>
+}
+
+&lt;div className="flex items-center justify-center gap-2 mb-8"&gt;
+  {steps.map((step, i) =&gt; (
+    &lt;React.Fragment key={step.id}&gt;
+      <span class="comment">// الدائرة</span>
+      &lt;div className={cn(
+        "w-10 h-10 rounded-full flex items-center justify-center",
+        "text-sm font-semibold transition-all duration-300",
+        currentStep &gt; i
+          ? "bg-primary text-white"           <span class="comment">// completed</span>
+          : currentStep === i
+          ? "bg-primary/20 text-primary border-2 border-primary" <span class="comment">// active</span>
+          : "bg-muted text-muted-foreground"  <span class="comment">// pending</span>
+      )}&gt;
+        {currentStep &gt; i ? &lt;Check className="w-5 h-5" /&gt; : step.icon &amp;&amp; &lt;step.icon className="w-5 h-5" /&gt;}
+      &lt;/div&gt;
+
+      <span class="comment">// الخط الفاصل بين الخطوات</span>
+      {i &lt; steps.length - 1 &amp;&amp; (
+        &lt;div className={cn(
+          "h-0.5 flex-1 max-w-[60px] transition-colors duration-300",
+          currentStep &gt; i ? "bg-primary" : "bg-muted"
+        )} /&gt;
+      )}
+    &lt;/React.Fragment&gt;
+  ))}
+&lt;/div&gt;</div>
+
+    <h5 style="color:var(--primary-light);margin:1.5rem 0 0.5rem;">🎯 STEP 2 — بطاقات الاهتمامات</h5>
+    <div class="code-block"><span class="comment">// InterestCard — بطاقة قابلة للاختيار</span>
+interface InterestCardProps {
+  title: string;        <span class="comment">// "Astrology", "Alchemy", إلخ.</span>
+  icon: string;         <span class="comment">// رمز: ☿, ⚗, 🜁</span>
+  selected: boolean;
+  onToggle: () =&gt; void;
+}
+
+&lt;div
+  onClick={onToggle}
+  className={cn(
+    "relative p-4 rounded-xl border cursor-pointer",
+    "transition-all duration-200",
+    "flex flex-col items-center gap-2 text-center",
+    selected
+      ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
+      : "border-border bg-card hover:border-primary/50"
+  )}
+  role="checkbox"
+  aria-checked={selected}
+  tabIndex={0}
+  onKeyDown={(e) =&gt; (e.key === 'Enter' || e.key === ' ') &amp;&amp; onToggle()}
+&gt;
+  <span class="comment">// علامة الاختيار</span>
+  {selected &amp;&amp; (
+    &lt;div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"&gt;
+      &lt;Check className="w-3 h-3 text-white" /&gt;
+    &lt;/div&gt;
+  )}
+  &lt;span className="text-3xl"&gt;{icon}&lt;/span&gt;
+  &lt;span className="text-sm font-medium"&gt;{title}&lt;/span&gt;
+&lt;/div&gt;
+
+<span class="comment">/* توزيع البطاقات */</span>
+&lt;div className="grid grid-cols-3 gap-3"&gt;
+  {interests.map(i =&gt; &lt;InterestCard ... /&gt;)}
+&lt;/div&gt;</div>
+
+    <h5 style="color:var(--primary-light);margin:1.5rem 0 0.5rem;">🎯 STEP 4 — الملف الشخصي مع معلومات التنجيم</h5>
+    <div class="callout warn">
+      <h5>☝️ مهم: معلومات الميلاد</h5>
+      <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;">
+        حقل تاريخ ومكان الميلاد <strong>اختياري</strong> ويظهر مع شرح واضح:
+        <br>
+        <code style="background:rgba(255,255,255,0.05);padding:0.1rem 0.35rem;border-radius:3px;">"تُستخدم هذه المعلومات فقط لحساب الأبراج والطالع الفلكي. خصوصيتك محمية."</code>
+        <br>
+        هذا يبني الثقة ويقلل القلق من مشاركة المعلومات الشخصية الحساسة.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ====== PAGES 03-07 ====== -->
+<section class="section section-alt" id="page-03">
+  <h2>الصفحات ٣–٧ <span class="ar">Additional Auth Screens</span></h2>
+  <p class="section-subtitle">
+    خمس صفحات إضافية تكمل تجربة المصادقة. كل واحدة تحل مشكلة محددة وتستجيب لحالة معينة.
+  </p>
+
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="icon">🌙</div>
+      <h4>PAGE 03 — Password Recovery</h4>
+      <p>
+        <strong>التخطيط:</strong> شاشة بسيطة بمركز واحد. رسم توضيحي لأطوار القمر في الأعلى.
+        <br><br>
+        <strong>الحالات:</strong> إدخال البريد ← إرسال ← نجاح ← خطأ
+        <br><br>
+        <strong>UI:</strong> أيقونة قمر في الخلفية (تأثير خفيف). تصميم يشبه Headspace — بسيط، هادئ، مطمئن.
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">🔮</div>
+      <h4>PAGE 04 — Email Verification</h4>
+      <p>
+        <strong>التخطيط:</strong> ختم/رمز كبير في المنتصف (شمس أو نجمة سداسية).
+        <br><br>
+        <strong>الحالات:</strong> في الانتظار ← نجاح ← انتهاء المهلة
+        <br><br>
+        <strong>UI:</strong> إشعار يشرح خطوات التحقق. زر إعادة الإرسال مع عد تنازلي.
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">🏆</div>
+      <h4>PAGE 05 — Welcome Achievement</h4>
+      <p>
+        <strong>انفجار المكافآت:</strong> يظهر بعد التسجيل مباشرة.
+        XP + المستوى ١ + أول إنجاز "First Step Taken".
+        <br><br>
+        <strong>UI:</strong> بطاقة إنجاز مع تأثير ذهبي. جزيئات كونية متحركة.
+        <br><br>
+        <strong>Two CTAs:</strong> "ابدأ الرحلة" (رئيسي) و "عرض الملف الشخصي" (ثانوي).
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">📋</div>
+      <h4>PAGE 06 — Onboarding Questionnaire</h4>
+      <p>
+        <strong>التخطيط:</strong> واجهة أسئلة شبيهة بـ Duolingo/Headspace.
+        <br><br>
+        <strong>الأسئلة:</strong> (١) ما يهمك أكثر؟ (٢) مستوى الخبرة: مبتدئ/متوسط/متقدم
+        (٣) كم ساعة أسبوعياً؟ ← يولّد مسار تعلم مخصص
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">📱</div>
+      <h4>PAGE 07 — Mobile Auth</h4>
+      <p>
+        <strong>نسخة الجوال:</strong> عمود واحد، CTA ثابت في الأسفل.
+        <br><br>
+        <strong>أزرق OAuth</strong> في المقدمة. Bottom sheet للخطوات الإضافية.
+        <br><br>
+        <strong>Touch targets ≥ 44px.</strong> تصميم أصلي يشعر المستخدم أنه تطبيق وليس موقع ويب.
+      </p>
+    </div>
+  </div>
+
+  <div class="principle-box">
+    <h5>🔑 مفتاح الاتساق</h5>
+    <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;">
+      كل هذه الصفحات تشارك نفس <strong>نظام التخطيط</strong>: خلفية موحدة (#090B14)،
+      بطاقات (#111827)، أزرار بنفسجية (#8B5CF6)، أكسنت ذهبي (#F5C451).
+      الاختلاف فقط في المحتوى والوظيفة — لا في اللغة البصرية.
+    </p>
+  </div>
+</section>
+
+<!-- ====== COMPONENT ARCHITECTURE ====== -->
+<section class="section" id="components">
+  <h2>هندسة المكونات <span class="ar">Component Architecture & Reusability</span></h2>
+  <p class="section-subtitle">
+    لا نعيد كتابة نفس المكون لكل صفحة. نبني مكتبة مكونات قابلة لإعادة الاستخدام.
+  </p>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin-bottom:1rem;">📦 مكتبة المكونات المصادقة</h4>
+
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="icon">🔘</div>
+      <h4>Button Variants</h4>
+      <p>
+        <strong>Primary:</strong> bg-primary مع hover opacity<br>
+        <strong>Gold:</strong> bg-gold-400 text-black (للمكافآت)<br>
+        <strong>OAuth:</strong> bg-white/5 border + أيقونة<br>
+        <strong>Ghost:</strong> بدون خلفية (للروابط)
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">📝</div>
+      <h4>Input Field</h4>
+      <p>
+        <strong>Label</strong> خارجي مع htmlFor.<br>
+        <strong>Helper text</strong> أسفل الحقل.<br>
+        <strong>Error:</strong> نص أحمر + إطار أحمر.<br>
+        <strong>Password:</strong> زر إظهار/إخفاء مدمج.
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">🔑</div>
+      <h4>OAuth Button</h4>
+      <p>
+        أيقونة + نص + border خفيف.<br>
+        <strong>Google:</strong> أيقونة Google<br>
+        <strong>Apple:</strong> أيقونة Apple<br>
+        <strong>GitHub:</strong> أيقونة GitHub<br>
+        hover: bg-white/10
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">🏅</div>
+      <h4>Achievement Card</h4>
+      <p>
+        بطاقة مع أيقونة ذهبية + اسم الإنجاز + XP.<br>
+        تأثير توهج خفيف.<br>
+        للشاشة ٥ (بعد التسجيل مباشرة).
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">⭐</div>
+      <h4>XP Badge</h4>
+      <p>
+        شارة صغيرة: أيقونة نجمة + رقم.<br>
+        <code>bg-gold-400/10 text-gold-400 border-gold-400/20</code><br>
+        تظهر في الركن العلوي من البطاقات.
+      </p>
+    </div>
+    <div class="info-card">
+      <div class="icon">👤</div>
+      <h4>Avatar Upload</h4>
+      <p>
+        دائرة مع صورة أو placeholder.<br>
+        hover: طبقة شفافة مع أيقونة كاميرا.<br>
+        يدعم السحب والإفلات مستقبلاً.
+      </p>
+    </div>
+  </div>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:2rem 0 1rem;">📁 هيكل المجلدات النهائي</h4>
+  <div class="code-block">src/
+  app/auth/
+    actions.ts                          <span class="comment">// login() و signup() موجودة</span>
+
+    login/
+      page.tsx                          <span class="comment">// إعادة كتابة كاملة</span>
+
+    register/
+      page.tsx                          <span class="comment">// تحويل إلى multi-step</span>
+
+    _components/
+      AuthLayout.tsx                    <span class="comment">// تخطيط الشاشة المنقسمة</span>
+      AuthCard.tsx                      <span class="comment">// بطاقة النموذج</span>
+      OAuthButtons.tsx                  <span class="comment">// أزرار الدخول الاجتماعي</span>
+      LeftPanel.tsx                     <span class="comment">// المحتوى الملهم</span>
+      SocialProof.tsx                   <span class="comment">// الإحصائيات</span>
+      FeatureShowcase.tsx               <span class="comment">// الميزات</span>
+      Stepper.tsx                       <span class="comment">// شريط التقدم</span>
+      InterestCard.tsx                  <span class="comment">// بطاقة اختيار الاهتمامات</span>
+      PasswordInput.tsx                 <span class="comment">// حقل كلمة المرور مع toggle</span>
+      AchievementCard.tsx               <span class="comment">// بطاقة الإنجاز بعد التسجيل</span>
+
+  components/ui/
+    <span class="comment">// المكونات الحالية من shadcn/ui تبقى كما هي</span>
+    button.tsx, card.tsx, input.tsx, label.tsx, etc.</div>
+
+  <div class="callout info">
+    <h5>💡 لماذا مجلد _components/</h5>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;">
+      البادئة <code>_</code> في Next.js App Router تعني أن هذا المجلد خاص ولن يتم
+      إنشاء route له. مثالي للمكونات المشتركة بين صفحات المصادقة.
+    </p>
+  </div>
+</section>
+
+<!-- ====== RTL ====== -->
+<section class="section section-alt" id="rtl">
+  <h2>RTL تنفيذ <span class="ar">Arabic-First Implementation</span></h2>
+  <p class="section-subtitle">
+    منصة الباحث عربية من الجذور. هذا ليس مجرد <code>dir="rtl"</code> —
+    إنه قرارات تصميمية تبدأ من اليمين.
+  </p>
+
+  <div class="callout warn">
+    <h5>⚠️ أهم مشكلة RTL واجهتها</h5>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;">
+      في تخطيط الشاشة المنقسمة، اللوحة اليسرى (المحتوى) ستكون على <strong>اليمين</strong>
+      في RTL. اللوحة اليمنى (النموذج) ستكون على <strong>اليسار</strong>.
+      هذا عكس تخطيط Linear/Notion — لكنه صحيح للعربية.
+    </p>
+  </div>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:1.5rem 0 1rem;">قواعد RTL في Tailwind</h4>
+  <div class="code-block"><span class="comment">/* RTL Utilities — يجب إضافتها */</span>
+
+<span class="comment">// 1. تأكد من أن tailwind.config.ts يفهم الاتجاه</span>
+<span class="comment">// أضف هذا الإعداد:</span>
+export default {
+  <span class="comment">// ... باقي الإعدادات</span>
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
+  <span class="comment">// لا يوجد خيار rtl مباشر — نستخدم كلاسات يدوية</span>
+}
+
+<span class="comment">// 2. في المكونات، استخدم كلاسات شرطية</span>
+&lt;div className="<strong>rtl:text-right ltr:text-left</strong>" /&gt;
+
+<span class="comment">// 3. للأيقونات: تظهر يمين النص في RTL</span>
+&lt;span className="<strong>inline-flex items-center gap-2</strong>"&gt;
+  &lt;Icon className="<strong>rtl:order-last</strong>" /&gt;  <span class="comment">// الأيقونة على اليمين</span>
+  &lt;span&gt;النص&lt;/span&gt;
+&lt;/span&gt;</div>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:2rem 0 1rem;">📐 تحدي Split Screen مع RTL</h4>
+  <div class="code-block"><span class="comment">// الحل: استخدام flex-direction مع الاتجاه</span>
+
+// في صفحة تسجيل الدخول:
+
+&lt;div className="flex w-full min-h-screen" <strong>dir="rtl"</strong>&gt;
+
+  <span class="comment">// اللوحة اليسرى — تظهر على اليمين في RTL</span>
+  &lt;aside className="hidden lg:flex lg:w-[55%]
+              flex-col justify-between p-12
+              bg-gradient-to-br from-cosmic-950 via-cosmic-900 to-bg-canvas
+              relative overflow-hidden"&gt;
+    &lt;!-- المحتوى الملهم --&gt;
+  &lt;/aside&gt;
+
+  <span class="comment">// اللوحة اليمنى — تظهر على اليسار في RTL</span>
+  &lt;main className="w-full lg:w-[45%]
+              min-h-screen overflow-y-auto
+              flex items-center justify-center p-6 lg:p-12"&gt;
+    &lt;!-- AuthCard --&gt;
+  &lt;/main&gt;
+
+&lt;/div&gt;</div>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:2rem 0 1rem;">🖋 الخطوط العربية</h4>
+  <div class="code-block"><span class="comment">// في layout.tsx، أضف الخطوط العربية</span>
+
+<span class="comment">// 1. أضف Google Fonts (أو استخدم Noto Naskh Arabic الموجود)</span>
+<span class="comment">// 2. في صفحة auth، استخدم الخط العربي للعناوين</span>
+
+&lt;h1 className="font-arabic text-4xl font-bold text-gold-400"&gt;
+  حكمة قديمة. إتقان حديث.
+&lt;/h1&gt;
+
+&lt;p className="font-arabic text-lg text-text-secondary mt-4"&gt;
+  اكتشف علوم الأجداد من خلال مسارات تعليمية موجهة،
+  وطقوس عملية، ودورات كوكبية، وممارسات تحويلية.
+&lt;/p&gt;</div>
+</section>
+
+<!-- ====== MOTION ====== -->
+<section class="section" id="motion">
+  <h2>الحركة والتفاعل <span class="ar">Motion & Interaction Specifications</span></h2>
+  <p class="section-subtitle">
+    الحركة ليست ديكوراً — إنها دلالة. تخبر المستخدم من أين أتى وإلى أين يذهب.
+  </p>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin-bottom:1rem;">⏱ جدول التوقيت</h4>
+  <table class="token-mapping">
+    <tr class="token-row header">
+      <td class="token-cell">التفاعل</td>
+      <td class="token-cell">المدة</td>
+      <td class="token-cell">Easing</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell">زر CTA — hover/active</td>
+      <td class="token-cell">150ms</td>
+      <td class="token-cell">ease-out</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell">بطاقة اختيار — toggle</td>
+      <td class="token-cell">200ms</td>
+      <td class="token-cell">ease-out</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell">الانتقال بين خطوات التسجيل</td>
+      <td class="token-cell">300ms</td>
+      <td class="token-cell">ease-in-out</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell">ظهور قائمة الميزات (stagger)</td>
+      <td class="token-cell">50ms بين كل عنصر</td>
+      <td class="token-cell">ease-out</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell">إنجاز XP (أرقام متحركة)</td>
+      <td class="token-cell">800ms</td>
+      <td class="token-cell">spring (stiffness 100)</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell">توهج البطاقة المختارة (glow)</td>
+      <td class="token-cell">1000ms</td>
+      <td class="token-cell">ease-in-out (loop)</td>
+    </tr>
+    <tr class="token-row">
+      <td class="token-cell">إخفاء Toast</td>
+      <td class="token-cell">400ms</td>
+      <td class="token-cell">ease-in</td>
+    </tr>
+  </table>
+
+  <h4 style="color:var(--gold);font-size:0.95rem;margin:2rem 0 1rem;">🎬 مثال: حركات Framer Motion للخطوات</h4>
+  <div class="code-block"><span class="comment">// AnimatePresence للانتقال بين خطوات التسجيل</span>
+
+&lt;AnimatePresence mode="wait"&gt;
+  &lt;motion.div
+    key={currentStep}
+    initial={{ opacity: 0, x: 50 }}   <span class="comment">// يظهر من اليسار ← (لأن RTL)</span>
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -50 }}      <span class="comment">// يختفي إلى اليمين ←</span>
+    transition={{ duration: 0.25, ease: "easeInOut" }}
+  &gt;
+    {renderStep(currentStep)}
+  &lt;/motion.div&gt;
+&lt;/AnimatePresence&gt;
+
+<span class="comment">/* ملاحظة: في RTL، اليسار واليمين معكوسان.
+   لكن Framer Motion يستخدم CSS translate, لذا
+   نفس القيم تعمل بشكل طبيعي مع dir="rtl" */</span></div>
+
+  <div class="principle-box">
+    <h5>🔑 مبدأ أساسي في الحركة</h5>
+    <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;">
+      احترم <code>prefers-reduced-motion</code>. أضف هذا الشرط في كل motion component:
+      <br><br>
+      <code>if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { skipAnimations(); }</code>
+      <br><br>
+      الحركة تحسن التجربة — لكنها لا يجب أن تمنع الوصول أبداً.
+    </p>
+  </div>
+
+  <div class="try-this">
+    <h4>🔬 جرب هذا</h4>
+    <p>
+      افحص <code>src/lib/utils.ts</code> — هل يوجد فيه دالة <code>cn</code> من tailwind-merge؟
+      إذا كان كذلك، فأنت جاهز لاستخدام كلاسات Tailwind الشرطية بدون تعارض.
+      اختبر إضافة <code>cn("base", condition && "dark:bg-cosmic-900")</code>.
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<section class="section" style="border-top:1px solid var(--border);">
+  <h2>الخطوات القادمة <span class="ar">Session 3 Preview</span></h2>
+  <p class="section-subtitle">
+    الجلسة الثالثة: التنفيذ المباشر — سنكتب كود واجهة تسجيل الدخول كاملة.
+  </p>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;flex:1;min-width:200px;">
+      <h4 style="color:var(--gold);margin-bottom:0.5rem;">✓ الجلسة ٢ مكتملة</h4>
+      <ul style="list-style:none;font-size:0.85rem;color:var(--text-secondary);">
+        <li style="padding:0.25rem 0;">— تعيين Design Tokens ← HSL لـ shadcn/ui</li>
+        <li style="padding:0.25rem 0;">— هيكلة Page 01 (Split Screen Auth)</li>
+        <li style="padding:0.25rem 0;">— هيكلة Page 02 (Multi-Step Registration)</li>
+        <li style="padding:0.25rem 0;">— تصميم 5 صفحات إضافية</li>
+        <li style="padding:0.25rem 0;">— 22 مكوناً مع التوزيع في المجلدات</li>
+        <li style="padding:0.25rem 0;">— حلول RTL للتخطيط المنقسم</li>
+        <li style="padding:0.25rem 0;">— مواصفات الحركة والتوقيت</li>
+      </ul>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;flex:1;min-width:200px;">
+      <h4 style="color:var(--primary-light);margin-bottom:0.5rem;">⟳ الجلسة ٣ — تنفيذ مباشر</h4>
+      <ul style="list-style:none;font-size:0.85rem;color:var(--text-secondary);">
+        <li style="padding:0.25rem 0;">— كتابة AuthLayout.tsx كاملاً</li>
+        <li style="padding:0.25rem 0;">— LeftPanel.tsx مع الخلفية الكونية</li>
+        <li style="padding:0.25rem 0;">— AuthCard.tsx مع النموذج</li>
+        <li style="padding:0.25rem 0;">— OAuthButtons.tsx</li>
+        <li style="padding:0.25rem 0;">— التأكد من RTL في كل مكون</li>
+        <li style="padding:0.25rem 0;">— اختبار التباين والألوان</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+// Smooth scroll
+document.querySelectorAll('.sidebar nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelector('.sidebar').classList.remove('open');
+  });
+});
+
+// Active section highlight
+const sections = document.querySelectorAll('.section, .hero');
+const links = document.querySelectorAll('.sidebar nav a');
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id || 'tokens';
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+    }
+  });
+}, { threshold: 0.3 }).observe(document.querySelector('.hero'));
+sections.forEach(s => new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+    }
+  });
+}, { threshold: 0.3 }).observe(s));
+</script>
+</body>
+</html>
