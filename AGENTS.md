@@ -36,10 +36,12 @@ Arabic-first (RTL) Islamic/spiritual platform called **"الباحث"** (seeker)
 | **Icons** | `lucide-react` (primary), `react-icons` (secondary) | |
 | **Toast** | `sonner` | Via `~/components/ui/sonner.tsx` |
 | **Auth** | Supabase (`@supabase/ssr` + `@supabase/auth-helpers-nextjs`) | Mixed clients — see Auth section |
-| **Data fetching** | `useEffect` + `fetch()` + `AbortController` | **NOT** SWR (SWR is in deps but never imported) |
+| **State** | Zustand stores in `~/stores/` | `authStore`, `bookmarkStore`, `duaStore`, `journalStore`, `tasbihStore` |
+| **Validation** | Zod schemas in `~/schemas/` | `auth`, `bookmark`, `dua`, `journal`, `tasbih` — used by stores |
+| **Data fetching** | `useEffect` + `fetch()` + `AbortController` (page components) | **NOT** SWR (SWR is in deps but never imported) |
+| **API client** | `~/lib/api.ts` — centralized HTTP with JWT refresh | Auto-retry on 401, token refresh, auto-redirect to `/auth/login` |
 | **i18n** | Manual `DefaultText` object from `~/texts` | **NOT** next-intl hooks (next-intl installed but unused in components) |
 | **Analytics** | Vercel Analytics + Speed Insights | See Providers section |
-| **Toast** | `sonner` | Radix Dialog + Input for bookmark creation |
 
 ### CSS variable theme
 
@@ -130,11 +132,37 @@ src/app/
 3. Email confirm → `/auth/confirm` handles `token_hash` from email link
 4. Auth-required API routes return 401 if `getUser()` fails
 
-**Env vars required** (both `NEXT_PUBLIC_`):
+**Env vars required** (all `NEXT_PUBLIC_`):
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_API_URL=           # optional, defaults to http://localhost:3001
 ```
+
+---
+
+## Zustand stores + Zod schemas
+
+Stores in `~/stores/` pair with Zod schemas in `~/schemas/`:
+
+| Store | Schema | Purpose |
+|---|---|---|
+| `authStore` | `auth.ts` | Login/register with JWT token management |
+| `bookmarkStore` | `bookmark.ts` | Quran verse bookmarks |
+| `duaStore` | `dua.ts` | Dua lists and entries |
+| `journalStore` | `journal.ts` | Spiritual journal CRUD |
+| `tasbihStore` | `tasbih.ts` | Dhikr counter presets |
+
+Pattern: stores use `safeParse()` from Zod before API calls. Validation errors from Zod are surfaced as store `error` state. Both are re-exported from `~/stores/index.ts` and `~/schemas/index.ts`.
+
+### API client
+
+`~/lib/api.ts` provides a centralized HTTP client:
+- `api.get/post/put/delete<T>(path, body?, options?)` — typed fetch wrapper
+- Auto-retry on 401 with token refresh (`tryRefresh()`)
+- Redirects to `/auth/login` on auth failure
+- Token management via `setTokens()`, `clearTokens()`, `loadTokens()`
+- `NEXT_PUBLIC_API_URL` env var (defaults to `http://localhost:3001`)
 
 ---
 
@@ -210,7 +238,7 @@ Four state categories used consistently: `loading` / `error` / `no data` / rende
 No form libraries (no react-hook-form, Formik, etc.):
 - **Server action forms**: `<form>` with `<Button formAction={serverAction}>` — inputs read via `formData.get("name")`
 - **Controlled forms**: `useState` + `onChange` for dialogs (e.g., bookmark creation)
-- **Validation**: HTML `required` attribute only — no Zod, yup, or custom validation
+- **Zod validation**: stores use `safeParse()` from Zod schemas before API calls — not raw HTML validation
 
 ### Class merging
 
@@ -261,3 +289,4 @@ The landing page (`/`) is a client component despite being static — could be r
 - **No CI/CD** — no `.github/` directory. Lint and unused-checks are local-only.
 - **Monorepo markers**: `.npmrc` hoists `@nextui-org/*` (legacy, not in deps). Root `components.json` points shadcn/ui to `~/components/ui`. No workspace config.
 - **`next.config.mjs`** still has `optimizePackageImports` and `transpilePackages` for Chakra/Emotion even though those packages are fully removed. Leftover config — clean it up.
+- **DaisyUI v5** is installed but `themes: false` in config — it only provides utility classes, not theme switching.
