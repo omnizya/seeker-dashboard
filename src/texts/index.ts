@@ -12,7 +12,7 @@ export const DefaultText = {
     },
   },
   JummalCard: {
-    cardTitle: "حساب الجُمَّل",
+    cardTitle: "حساب الجُمَّل",
     textAreaPlaceholder: "المرجو إدخال النص",
     dotlessToggle: "حساب بدون نقاط",
     outputTable: {
@@ -48,10 +48,6 @@ export const DefaultText = {
         c: {
           label: "الأسماء الحسنى",
           href: "/dashboard/holy-names",
-        },
-        d: {
-          label: "الأوفاق",
-          href: "/dashboard/squares",
         },
         e: {
           label: "أوقات الصلاة",

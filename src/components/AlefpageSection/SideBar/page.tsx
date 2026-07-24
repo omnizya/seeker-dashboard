@@ -45,7 +45,6 @@ const NAV_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   a: Calculator,
   b: BookOpen,
   c: Star,
-  d: Grid3x3,
   e: Clock,
   f: Globe,
   g: Dumbbell,

@@ -35,17 +35,17 @@ Arabic-first (RTL) Islamic/spiritual platform called **"الباحث"** (seeker)
 | **Dark mode** | `next-themes` with `class` strategy | DaisyUI themes are disabled; dark mode uses CSS variables |
 | **Icons** | `lucide-react` (primary), `react-icons` (secondary) | |
 | **Toast** | `sonner` | Via `~/components/ui/sonner.tsx` |
-| **Auth** | Supabase (`@supabase/ssr` + `@supabase/auth-helpers-nextjs`) | Mixed clients — see Auth section |
+| **Auth** | Token-based via backend API | Zustand `authStore` + `~/lib/api.ts` — NO Supabase client libs |
 | **State** | Zustand stores in `~/stores/` | `authStore`, `bookmarkStore`, `duaStore`, `journalStore`, `tasbihStore` |
 | **Validation** | Zod schemas in `~/schemas/` | `auth`, `bookmark`, `dua`, `journal`, `tasbih` — used by stores |
-| **Data fetching** | `useEffect` + `fetch()` + `AbortController` (page components) | **NOT** SWR (SWR is in deps but never imported) |
+| **Data fetching** | SWR (`useSWR` + `~/lib/fetcher`) | Used in 11 files for API data. Also `useEffect` + `fetch()` + `AbortController` in some pages |
 | **API client** | `~/lib/api.ts` — centralized HTTP with JWT refresh | Auto-retry on 401, token refresh, auto-redirect to `/auth/login` |
 | **i18n** | Manual `DefaultText` object from `~/texts` | **NOT** next-intl hooks (next-intl installed but unused in components) |
 | **Analytics** | Vercel Analytics + Speed Insights | See Providers section |
 
 ### CSS variable theme
 
-`src/app/globals.css` has the shadcn/ui HSL variable set (light + dark). `src/styles/globals.css` is an **orphaned legacy file** — it imports Google Fonts (Inter) and has a Uthman @font-face, but neither is actually used since the active setup is in `globals.css` + `fonts.tsx`. **Do not import `src/styles/globals.css`.**
+`src/app/globals.css` has the shadcn/ui HSL variable set (light + dark).
 
 ### Fonts
 
@@ -103,34 +103,28 @@ src/app/
     tasbih/page.tsx         # Dhikr counter with presets (auth req)
 ```
 
-**Missing routes**: No `loading.tsx`, no `not-found.tsx` anywhere. The sidebar links to 10 pages (see `DefaultText.dashboard.navbar.links`) but only `/dashboard` has content — `/squares` nav link is dead (no route exists).
+**Missing routes**: No `loading.tsx`, no `not-found.tsx` anywhere.
 
 ---
 
 ## Auth
 
-### Mixed client libraries (legacy)
-
-| File | Package | Pattern |
-|---|---|---|
-| `src/utils/supabase/client.ts` | `@supabase/ssr` | `createBrowserClient()` |
-| `src/utils/supabase/server.ts` | `@supabase/ssr` | `createServerClient()` with `cookies()` |
-| `src/utils/supabase/middleware.ts` | `@supabase/ssr` | `updateSession()` helper (NOT wired as middleware — see below) |
-| `src/components/HolyNames.tsx` | `@supabase/auth-helpers-nextjs` | `createClientComponentClient()` — the only file still using the old package |
-
-### NO functional middleware
-
-**There is no root `middleware.ts` or `src/middleware.ts`.** The file `proxy.ts` exists at root with `config.matcher` + `next-intl/middleware` but is **NOT named `middleware.ts`** so Next.js ignores it. This means:
-- Auth sessions are NOT refreshed on route transitions
-- No locale detection/redirect runs
-- The only auth guard is the server-side check in `dashboard/page.tsx`
-
 ### Auth flow
 
-1. Register → `signup()` server action → Supabase auth → redirect `/`
-2. Login → `login()` server action → Supabase auth → redirect `/dashboard`
-3. Email confirm → `/auth/confirm` handles `token_hash` from email link
-4. Auth-required API routes return 401 if `getUser()` fails
+Auth is token-based via a backend API (`NEXT_PUBLIC_API_URL`, defaults to `http://localhost:3001`). No Supabase client libraries are used in app code.
+
+1. Login → `authStore.login()` → `POST /api/auth/login` → stores tokens in localStorage
+2. Register → `authStore.register()` → `POST /api/auth/register`
+3. Session check → `authStore.initAuth()` → `GET /api/auth/me` with stored token
+4. API client auto-refreshes on 401 via `tryRefresh()`, redirects to `/auth/login` on failure
+
+### Token management
+
+`~/lib/api.ts` manages tokens via localStorage:
+- `setTokens(accessToken, refreshToken)` — stores after login
+- `loadTokens()` — loads from localStorage
+- `getAccessToken()` — returns current access token
+- `clearTokens()` — removes from localStorage (on logout or auth failure)
 
 **Env vars required** (all `NEXT_PUBLIC_`):
 ```
@@ -138,6 +132,8 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_API_URL=           # optional, defaults to http://localhost:3001
 ```
+
+See `.env.example` for a template.
 
 ---
 
@@ -217,21 +213,16 @@ Ports:
 
 ### Data fetching in client components
 
+SWR is the primary data-fetching pattern (used in 11 files):
+
 ```tsx
-// Standard pattern (NOT SWR — SWR is never used)
-const [data, setData] = useState<T | null>(null);
-const [error, setError] = useState<string | null>(null);
-useEffect(() => {
-  const controller = new AbortController();
-  fetch(`/api/...`, { signal: controller.signal })
-    .then(r => r.json())
-    .then(setData)
-    .catch(e => setError(e.message));
-  return () => controller.abort();
-}, [deps]);
+import useSWR from "swr";
+import { swrFetcher } from "~/lib/fetcher";
+
+const { data, error, isLoading } = useSWR<T>("/api/endpoint", swrFetcher);
 ```
 
-Four state categories used consistently: `loading` / `error` / `no data` / render.
+Some pages still use the manual `useEffect` + `fetch()` + `AbortController` pattern — prefer SWR for new code.
 
 ### Form handling
 
@@ -278,15 +269,9 @@ The landing page (`/`) is a client component despite being static — could be r
 
 - **Server actions** locked to `localhost:3000` only (`next.config.mjs`). Will fail in production or on other domains.
 - **`bun run build`** passes `--webpack` flag (overrides Turbopack). No custom webpack config found — verify this is intentional.
-- **Two nav systems coexist**: `SidebarWithHeader` (English hardcoded labels, active in layout) vs `Navbar.tsx` (Arabic from `DefaultText`, unused). The sidebar renders its own nav links, not the Navbar component.
-- **Two footers**: `Footer/index.tsx` (full, unused) vs `Footer/appFooter.tsx` (mini, used on landing).
-- **`next-intl`** is installed and `proxy.ts` configures its middleware, but no component actually imports from it. All i18n is the `DefaultText` pattern. If you add `useTranslations`, you'll need to create `messages/` directory and wire the loader.
+- **`next-intl`** is installed but no component imports from it. All i18n is the `DefaultText` pattern. If you add `useTranslations`, you'll need to create `messages/` directory and wire the loader.
 - **`.vscode/settings.json`** has Deno configured for `supabase/functions` but globally disabled. Edge functions directory doesn't exist yet.
-- **`.gitignore`** blocks `*.env.local` but NOT `.env` at root level. `supabase/.gitignore` correctly blocks `.env`.
 - **`eslint-config-next`** with `next/core-web-vitals` — keep clean.
 - **`next-unused`** (`check:unused`) will error on any unused file — remove dead code.
-- **No `.env.example`** exists. Both required vars are `NEXT_PUBLIC_SUPABASE_*`.
 - **No CI/CD** — no `.github/` directory. Lint and unused-checks are local-only.
-- **Monorepo markers**: `.npmrc` hoists `@nextui-org/*` (legacy, not in deps). Root `components.json` points shadcn/ui to `~/components/ui`. No workspace config.
-- **`next.config.mjs`** still has `optimizePackageImports` and `transpilePackages` for Chakra/Emotion even though those packages are fully removed. Leftover config — clean it up.
 - **DaisyUI v5** is installed but `themes: false` in config — it only provides utility classes, not theme switching.
