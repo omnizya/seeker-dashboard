@@ -1,0 +1,57 @@
+-- MINOR FIX: Rename misleading function + remove dead variable
+-- compute_and_store_prayer_times only computes, never stores
+-- Dead variable is_int declared but never used
+
+create or replace function spiritual.compute_prayer_times_stored(
+  p_date date,
+  p_lat numeric,
+  p_lon numeric,
+  p_method text default 'mwl'
+) returns jsonb
+language plpgsql
+security definer
+set search_path = spiritual, public
+as $$
+declare
+  method_row spiritual.prayer_methods;
+  result jsonb;
+  fa_angle numeric;
+  is_angle numeric;
+  asr_m text;
+begin
+  select * into method_row from spiritual.prayer_methods where id = p_method;
+  if not found then
+    raise exception 'Unknown prayer method: %', p_method;
+  end if;
+
+  fa_angle := method_row.fajr_angle;
+
+  if method_row.isha_interval_min is not null then
+    is_angle := method_row.isha_angle;
+  else
+    is_angle := method_row.isha_angle;
+  end if;
+
+  asr_m := case when method_row.asr_standard then 'standard' else 'hanafi' end;
+
+  result := spiritual.compute_prayer_times(
+    p_date, p_lat, p_lon, 'UTC', fa_angle, is_angle, asr_m
+  );
+
+  return result;
+end;
+$$;
+
+-- Keep old name as alias for backward compatibility
+create or replace function spiritual.compute_and_store_prayer_times(
+  p_date date,
+  p_lat numeric,
+  p_lon numeric,
+  p_method text default 'mwl'
+) returns jsonb
+language sql
+security definer
+set search_path = spiritual, public
+as $$
+  select spiritual.compute_prayer_times_stored(p_date, p_lat, p_lon, p_method);
+$$;
